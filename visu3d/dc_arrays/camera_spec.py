@@ -1,0 +1,390 @@
+# Copyright 2022 The visu3d Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Camera spec utils."""
+
+from __future__ import annotations
+
+import abc
+import dataclasses
+import functools
+import typing
+from typing import Optional
+
+import einops
+from etils import edc
+from etils import enp
+from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
+from visu3d import array_dataclass
+from visu3d import plotly
+from visu3d import vectorization
+from visu3d.dc_arrays import transformation
+from visu3d.typing import DcOrArray
+from visu3d.utils import np_utils
+from visu3d.utils import py_utils
+from visu3d.utils.lazy_imports import plotly_base
+
+del abc  # TODO(epot): Why pytype don't like abc ?
+
+
+assert_supports_protocol = functools.partial(
+    py_utils.assert_supports_protocol,
+    msg='Required to support camera transformations. See `v3d.Point3d` and '
+    '`v3d.Point2d` for example.',
+)
+
+
+@edc.dataclass(kw_only=True)
+@dataclasses.dataclass(frozen=True)
+class FigConfig:
+  """Figure configuration.
+
+  Attributes:
+    scale: The scale of the camera.
+  """
+  scale: float = 1.0
+
+  def replace(self, **kwargs) -> FigConfig:
+    return dataclasses.replace(self, **kwargs)
+
+
+@dataclasses.dataclass(frozen=True)
+class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
+  """Camera intrinsics specification.
+
+  Define the interface of camera model. See `PinholeCamera` for an example of
+  class implementation.
+
+  Support batching to allow to stack multiple cameras with the same resolution
+  in a single `CameraSpec`.
+
+  ```python
+  specs = v3d.stack([PinholeCamera(...) for _ in range(10)])
+
+  isinstance(specs, CameraSpec)
+  assert specs.shape == (10,)
+  assert specs.px_centers().shape == (10, h, w, 2)
+  ```
+
+  CameraSpec also allow to project from/to pixel coordinates.
+
+  ```python
+  px_coords = specs.px_from_cam @ cam_coords
+  ```
+
+  This works with:
+
+  * `xnp.array`: `(..., 3) -> (..., 2)`
+  * `v3d.Point3d` -> `v3d.Point2d`
+  * Your custom objects. To support this transformation, your dataclass should
+    implement the protocols:
+
+    * `apply_px_from_cam(self, camera_spec: v3d.CameraSpec)`:
+      to support: `spec.px_from_cam @ my_obj`
+    * `apply_cam_from_px(self, camera_spec: v3d.CameraSpec)`:
+      to support: `spec.cam_from_px @ my_obj`
+
+  Attributes:
+    resolution: Camera resolution (in px).
+    h: Camera height resolution (in px).
+    w: Camera width resolution (in px).
+    fig_config: Additional figure configuration.
+  """
+  resolution: tuple[int, int]
+  # Note: Because `FigConfig` is immutable, it is safe to use a shared instance
+  # to avoid unecessary copy.
+  fig_config: FigConfig = dataclasses.field(
+      default=FigConfig(),
+      repr=False,
+      init=False,
+  )
+
+  @property
+  def h(self) -> int:
+    return self.resolution[0]
+
+  @property
+  def w(self) -> int:
+    return self.resolution[1]
+
+  # @abc.abstractmethod
+  @property
+  def px_from_cam(self) -> transformation.TransformBase:
+    """Project camera 3d coordinates to px 2d coordinates.
+
+    Input can have arbitrary batch shape, including no batch shape for a
+    single point as input.
+
+    Returns:
+      The transformation 3d cam coordinates -> 2d pixel coordinates.
+    """
+    raise NotImplementedError
+
+  # @abc.abstractmethod
+  @property
+  def cam_from_px(self) -> transformation.TransformBase:
+    """Unproject 2d pixel coordinates in image space to camera space.
+
+    Note: Points returned by this function are not normalized. Points
+    are returned at z=1.
+
+    Input can have arbitrary batch shape, including no batch shape for a
+    single point as input.
+
+    Returns:
+      The transformation 2d pixel coordinates -> 3d cam coordinates.
+    """
+    raise NotImplementedError
+
+  # @abc.abstractmethod
+  def px_centers(self) -> FloatArray['*shape h w 2']:
+    """Returns 2D coordinates of centers of all pixels in the camera image.
+
+    The pixel centers of camera image are returned as a float32 tensor of shape
+    `(image_height, image_width, 2)`.
+
+    This camera model uses the convention that top left corner of the image is
+    `(0, 0)` and bottom right corner is `(image_width, image_height)`. So the
+    center of the top left corner pixel is `(0.5, 0.5)`.
+
+    Returns:
+      2D image coordinates of center of all pixels of the camer image in tensor
+      of shape `(image_height, image_width, 2)`.
+    """
+    raise NotImplementedError
+
+  def replace_fig_config(
+      self,
+      *,
+      scale: float = FigConfig.scale,
+  ) -> CameraSpec:
+    """Returns a copy of self with figure params overwritten."""
+    new_config = self.fig_config.replace(scale=scale)
+
+    # We cannot directly use `replace(fig_config=fig_config)` because fig_config
+    # is declared as `init=False`
+    # We cannot have `fig_config` to be `init=True` as this creates a types of
+    # conflicts:
+    # * Inheritance fails with non-default argument 'K' follows default argument
+    # * Pytype complains too
+    # TODO(py3.10): Cleanup using `dataclass(kw_only)`
+    new_self = self.replace()
+    assert new_self is not self
+    new_self._setattr('fig_config', new_config)  # pylint: disable=protected-access
+    return new_self
+
+  # Protocols & internals
+
+  def make_traces(self) -> list[plotly_base.BaseTraceType]:
+    # TODO(epot): Add arrow to indicates the orientation ?
+    start, end = self._get_camera_lines()
+    return plotly.make_lines_traces(start=start, end=end)
+
+  @vectorization.vectorize_method
+  def _get_camera_lines(self) -> FloatArray['*shape 4 3']:
+    corners_px = [  # Screen corners
+        [0, 0],
+        [self.h, 0],
+        [0, self.w],
+        [self.h, self.w],
+    ]
+    corners_world = self.cam_from_px @ self.xnp.array(corners_px)
+    start = enp.lazy.np.broadcast_to([0, 0, 0], corners_world.shape)
+    corners_world = corners_world * self.fig_config.scale
+    return start, corners_world
+
+
+@dataclasses.dataclass(frozen=True)
+class PinholeCamera(CameraSpec):
+  """Simple camera model.
+
+  Camera convensions:
+  In camera/pixel coordinates, follow numpy convensions:
+
+  * u == x == h (orientation: ↓)
+  * v == y == w (orientation: →)
+
+  In camera frame coordinates:
+
+  * `(0, 0, 1)` is at the center of the image
+  * z is pointing forward
+  * x, y are oriented like pixel coordinates (x: ↓, y: →)
+
+  Attributes:
+    K: Camera intrinsics parameters.
+    resolution: (h, w) resolution
+  """
+  K: FloatArray['*shape 3 3'] = array_dataclass.array_field(shape=(3, 3))  # pylint: disable=invalid-name
+
+  @classmethod
+  def from_focal(
+      cls,
+      *,
+      resolution: tuple[int, int],
+      focal_in_px: float,
+      xnp: Optional[enp.NpModule] = None,
+  ) -> PinholeCamera:
+    """Camera factory.
+
+    Args:
+      resolution: `(h, w)` resolution in pixel
+      focal_in_px: Focal length in pixel
+      xnp: `numpy`, `jax.numpy` or `tf.experimental.numpy`. Numpy module to use.
+        Default to `numpy`.
+
+    Returns:
+      A `PinholeCamera` instance with provided intrinsics.
+    """
+    if xnp is None:
+      xnp = enp.lazy.get_xnp(focal_in_px, strict=False)
+
+    # TODO(epot): Could provide more customizability
+    # * Support `focal_in_mm`
+    # * Support custom central point (cx, cy)
+    # * Support different focal for h, w (fx, fy)
+
+    # Central point in pixel (offset of the (0, 0) pixel)
+    # Because our pixel coordinates are (0, 1), we set the central point
+    # to the middle.
+    h, w = resolution
+    ch = h / 2
+    cw = w / 2
+
+    K = xnp.array([  # pylint: disable=invalid-name
+        [focal_in_px, 0, ch],
+        [0, focal_in_px, cw],
+        [0, 0, 1],
+    ])
+    return cls(
+        K=K,
+        resolution=resolution,
+    )
+
+  @property
+  @transformation.custom_transform
+  def px_from_cam(  # pylint: disable=bad-staticmethod-argument,property-with-parameters
+      self,
+      points3d: DcOrArray,
+  ) -> DcOrArray:
+    points3d = np_utils.asarray(points3d, xnp=self.xnp)
+    if isinstance(points3d, array_dataclass.DataclassArray):
+      assert_supports_protocol(points3d, 'apply_px_from_cam')
+      return points3d.apply_px_from_cam(self)
+    else:
+      return self._px_from_cam(points3d)
+
+  @typing.overload
+  def _px_from_cam(
+      self,
+      points3d: FloatArray['*d 3'],
+      *,
+      with_depth: bool = False,
+  ) -> FloatArray['*d 2']:
+    ...
+
+  @typing.overload
+  def _px_from_cam(
+      self,
+      points3d: FloatArray['*d 3'],
+      *,
+      with_depth: bool = True,
+  ) -> tuple[FloatArray['*d 2'], FloatArray['*d 1']]:
+    ...
+
+  def _px_from_cam(
+      self,
+      points3d,
+      *,
+      with_depth: bool = False,
+  ):
+    """Project camera 3d coordinates to px 2d coordinates (internal).
+
+    Args:
+      points3d: 3d points
+      with_depth: If `True`, also return the depth in a separated valiable
+
+    Returns:
+      `point2d`: If `with_depth=False`
+      `(point2d, depth)`: If `with_depth=True`
+    """
+    if points3d.shape[-1] != 3:
+      raise ValueError(f'Expected cam coords {points3d.shape} to be (..., 3)')
+
+    # K @ [X,Y,Z] -> s * [u, v, 1]
+    # (3, 3) @ (..., 3) -> (..., 3)
+    points2d = self.xnp.einsum('ij,...j->...i', self.K, points3d)
+    # Normalize: s * [u, v, 1] -> [u, v, 1]
+    # And only keep [u, v]
+    depth = points2d[..., 2:3]
+    points2d = (points2d[..., :2] / (depth + 1e-8))
+
+    if with_depth:
+      return points2d, depth
+    else:
+      return points2d
+
+  @property
+  @transformation.custom_transform
+  def cam_from_px(  # pylint: disable=bad-staticmethod-argument,property-with-parameters
+      self,
+      points2d: FloatArray['*d 2'],
+  ) -> FloatArray['*d 3']:
+    points2d = np_utils.asarray(points2d, xnp=self.xnp)
+    if isinstance(points2d, array_dataclass.DataclassArray):
+      assert_supports_protocol(points2d, 'apply_cam_from_px')
+      return points2d.apply_cam_from_px(self)
+    else:
+      return self._cam_from_px(points2d)
+
+  def _cam_from_px(  # pylint: disable=bad-staticmethod-argument,property-with-parameters
+      self,
+      points2d: FloatArray['*d 2'],
+  ) -> FloatArray['*d 3']:
+    assert not self.shape  # Should be vectorized
+    points2d = np_utils.asarray(points2d, xnp=self.xnp)
+    if points2d.shape[-1] != 2:
+      raise ValueError(f'Expected pixel coords {points2d.shape} to be (..., 2)')
+
+    # [u, v] -> [u, v, 1]
+    # Concatenate (..., 2) with (..., 1) -> (..., 3)
+    points2d = np_utils.append_row(points2d, 1., axis=-1)
+
+    # [X,Y,Z] / s = K-1 @ [u, v, 1]
+    # (3, 3) @ (..., 3) -> (..., 3)
+    k_inv = enp.compat.inv(self.K)
+    points3d = self.xnp.einsum('ij,...j->...i', k_inv, points2d)
+
+    # TODO(epot): Option to return normalized rays ?
+    # Set z to -1
+    # [X,Y,Z] -> [X, Y, Z=1]
+    points3d = points3d / self.xnp.expand_dims(points3d[..., 2], axis=-1)
+    return points3d
+
+  @vectorization.vectorize_method
+  def px_centers(self):
+    # TODO(epot): Move this in `np_utils.mgrid` or similar.
+    if self.xnp is enp.lazy.tnp:  # TF Compatibility
+      tf = enp.lazy.tf
+      points2d = tf.meshgrid(
+          tf.range(self.w),
+          tf.range(self.h),
+          indexing='xy',
+      )
+      points2d = tf.cast(tf.stack(points2d, axis=-1), dtype=tf.float32)
+    else:
+      points2d = self.xnp.mgrid[0:self.h, 0:self.w]
+      points2d = einops.rearrange(points2d, 'c h w -> h w c')
+    points2d = points2d + .5
+    assert points2d.shape == (self.h, self.w, 2)
+    return points2d

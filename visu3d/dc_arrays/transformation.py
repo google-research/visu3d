@@ -271,8 +271,8 @@ class Transform(TransformBase):
 
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
     rays = self.ray_basis
-    line_trace, cone_trace = rays.make_traces()
-    line_trace.mode = 'lines+text'
+    line_trace, = rays.make_traces()
+    line_trace.mode = 'lines+markers+text'
     # Add x, y, z text labels to the plot
     # Each point in the original line trace is:
     # [ray_origin, ray_end, None(=line break)]
@@ -284,7 +284,7 @@ class Transform(TransformBase):
         None, 'z', None,
     ] * rays.size
     # pyformat: on
-    return [line_trace, cone_trace]
+    return [line_trace]
 
 
 # TODO(epot): Have custom transform support `.inv`

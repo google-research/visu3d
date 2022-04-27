@@ -36,6 +36,17 @@ _PlotlyKwargs = Dict[str, Union[np.ndarray, _Primitive]]
 
 del abc  # TODO(epot): Why pytype doesn't like abc.ABC ?
 
+_MARKER_SYMBOLS = {
+    'circle',
+    'circle-open',
+    'cross',
+    'diamond',
+    'diamond-open',
+    'square',
+    'square-open',
+    'x',
+}
+
 # TODO(epot): More dynamic sub-sampling:
 # * controled in `v3d.make_fig`
 # * globally assigned (collect the global batch shape)
@@ -253,24 +264,33 @@ def _make_scatter_2d(
 
 
 def make_lines_traces(
-    start: FloatArray['... 3'],
-    end: FloatArray['... 3'],
+    start: FloatArray['*lines 3'],
+    end: FloatArray['*lines 3'],
     *,
     axis: int = -1,
     end_marker: Optional[str] = None,
 ) -> list[plotly_base.BaseTraceType]:
-  """Trace lines."""
+  """Trace independent lines.
+
+  Args:
+    start: (x, y, z) coordinates of the start points
+    end: (x, y, z) coordinates of the end points
+    axis: Axis on which the (x, y, z) coordinates are defined
+    end_marker: Marker at the end line. Can be any `go.Scatter3d.marker.symbol`
+      value, or `'cone'`.
+
+  Returns:
+    The list of plotly traces
+  """
   lines_xyz_kwargs = make_lines_kwargs(
       start=start,
       end=end,
       axis=axis,
+      end_marker=end_marker,
   )
-  lines_trace = go.Scatter3d(
-      **lines_xyz_kwargs,
-      mode='lines',
-  )
+  lines_trace = go.Scatter3d(**lines_xyz_kwargs)
   traces = [lines_trace]
-  if end_marker is None:
+  if end_marker is None or end_marker in _MARKER_SYMBOLS:
     pass
   elif end_marker == 'cone':
     cone_kwargs = make_cones_kwargs(
@@ -282,6 +302,8 @@ def make_lines_traces(
         **cone_kwargs,
         showlegend=False,
         showscale=False,
+        # TODO(plotly): Absolute size currently broken:
+        # https://github.com/plotly/plotly.js/issues/3613
         sizemode='absolute',  # Not sure what's the difference with `scaled`
         sizeref=.5,
         # TODO(epot): Add color
@@ -298,6 +320,7 @@ def make_lines_kwargs(
     end: FloatArray['... 3'],
     *,
     axis: int = -1,
+    end_marker: Optional[str] = None,
 ) -> _PlotlyKwargs:
   """Returns the kwargs to plot lines."""
   assert axis == -1
@@ -312,11 +335,27 @@ def make_lines_kwargs(
   # 2) Build the lines
   lines_xyz = [[], [], []]
   for s, e in zip(start, end):
-    for i in range(3):
+    for i in range(3):  # (x, y, z)
       lines_xyz[i].append(s[i])
       lines_xyz[i].append(e[i])
-      lines_xyz[i].append(None)
-  return to_xyz_dict(lines_xyz, axis=0)
+      lines_xyz[i].append(None)  # line break
+
+  # Add the marker kwargs
+  if end_marker in _MARKER_SYMBOLS:
+    marker_kwargs = dict(
+        mode='lines+markers',
+        marker=go.scatter3d.Marker(
+            size=[0, 6, 0] * len(start),
+            symbol=end_marker,
+        ),
+    )
+  else:
+    marker_kwargs = dict(mode='lines')
+
+  return dict(
+      **to_xyz_dict(lines_xyz, axis=0),
+      **marker_kwargs,
+  )
 
 
 def make_cones_kwargs(

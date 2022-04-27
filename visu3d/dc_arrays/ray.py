@@ -132,6 +132,6 @@ class Ray(array_dataclass.DataclassArray):
     return plotly.make_lines_traces(
         start=start,
         end=end,
-        end_marker='cone',
+        end_marker='diamond',
         axis=-1,
     )

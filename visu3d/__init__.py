@@ -39,6 +39,7 @@ from visu3d import plotly
 from visu3d.plotly import make_fig
 from visu3d.plotly import make_traces
 from visu3d.plotly import Visualizable
+from visu3d.plotly.auto_plot import auto_plot_figs
 from visu3d.plotly.fig_config_utils import fig_config
 
 # Arrays implementation

@@ -18,8 +18,9 @@ import typing
 
 from visu3d.utils import py_utils
 
-# Plotly is an optional (but strongly recommended on colab) dependency
 if typing.TYPE_CHECKING:
+  # Plotly is an optional (but strongly recommended on colab) dependency
+  import IPython  # pytype: disable=import-error
   from plotly import graph_objects as plotly_go
   from plotly import basedatatypes as plotly_base
   import scipy
@@ -27,6 +28,7 @@ else:
   # Hack: Use `globals` as a hack to avoid VS Code to infer go as
   # `go | LazyModule`
   globals().update(
+      IPython=py_utils.LazyModule('IPython'),
       plotly_go=py_utils.LazyModule('plotly.graph_objects'),
       plotly_base=py_utils.LazyModule('plotly.basedatatypes'),
       scipy=py_utils.LazyModule('scipy'),

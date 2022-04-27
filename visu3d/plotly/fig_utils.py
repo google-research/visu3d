@@ -63,9 +63,6 @@ class Visualizable:  # (abc.ABC):
     """Construct the figure of the given object."""
     return make_fig([self])
 
-  # TODO(epot): Could add a button to switch between repr <> plotly ?
-  # Using `_repr_html_` ?
-
 
 VisualizableItem = Union[Visualizable, Array[...]]
 VisualizableArg = Union[VisualizableItem, List[VisualizableItem]]

@@ -52,7 +52,7 @@ def test_point(
   _ = p.fig
 
 
-@enp.testing.parametrize_xnp(restrict=['np'])
+@enp.testing.parametrize_xnp()
 @pytest.mark.parametrize('shape', [(), (2,), (2, 3)])
 @pytest.mark.parametrize('with_color', [False, True])
 @pytest.mark.parametrize('with_depth', [False, True])

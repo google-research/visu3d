@@ -58,4 +58,6 @@ if pytest:  # < Ensure open source does not trigger import
   except ImportError:
     pass
 
+__version__ = '0.1.0'
+
 del sys, pytest

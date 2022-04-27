@@ -1,5 +1,8 @@
 # Visu3d
 
+[![Unittests](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml/badge.svg)](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml)
+[![PyPI version](https://badge.fury.io/py/visu3d.svg)](https://badge.fury.io/py/visu3d)
+
 `visu3d` is a Python library offering:
 
 * An API to make `@dataclass` behave like array.
@@ -90,7 +93,7 @@ rays = cam.rays()  # Rays in world coordinates
 px_coords = cam.px_from_world @ point_cloud
 ```
 
-See [the API](https://github.com/google-research/visu3d/tree/main/__init__.py;l=31){.external} for a full list of primitive.
+See [the API](https://github.com/google-research/visu3d/tree/main/visu3d/__init__.py;l=31)<!-- {.external} !--> for a full list of primitive.
 
 </section>
 <section class="zippy">

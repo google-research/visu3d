@@ -1,6 +1,5 @@
 [project]
 name = "visu3d"
-version = "0.0.1"
 description = "3d geometry made easy."
 readme = "README.md"
 requires-python = ">=3.7"
@@ -48,6 +47,7 @@ dev = [
     "tf-nightly",
     "tensorflow_datasets",
     "plotly",
+    "scipy",
 ]
 
 [build-system]

@@ -20,7 +20,6 @@ import visu3d as v3d
 
 
 def test_lazy():
-  assert 'plotly' not in sys.modules
   go = v3d.lazy_imports.plotly_go
   plotly_base = v3d.lazy_imports.plotly_base
   assert isinstance(go.Scatter3d(), plotly_base.BaseTraceType)

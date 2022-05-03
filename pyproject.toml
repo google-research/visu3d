@@ -25,7 +25,8 @@ keywords = [
 
 dependencies = [
     "einops",
-    "etils[array_types,edc,enp,epy,etree]",
+    "etils[array_types,edc,enp,epath,epy,etree]",
+    "lark",
     "numpy",
     "typing_extensions",
 ]
@@ -44,6 +45,7 @@ dev = [
     # Lazy deps
     "chex",
     "jax[cpu]",
+    "jupyter",
     "tf-nightly",
     "tensorflow_datasets",
     "plotly",

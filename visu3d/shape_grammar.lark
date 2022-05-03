@@ -1,0 +1,20 @@
+?start: shape
+
+shape: (dim (" " dim)*)?
+
+// TODO: Add expressions (+, /, *, -)
+?dim: UNKNOWN_DIM
+    | ELLIPSIS_DIM
+    | named_dim
+    | STATIC_DIM
+    | var_dim
+
+var_dim: "*" CNAME
+UNKNOWN_DIM: "_"
+ELLIPSIS_DIM: "..."
+named_dim: CNAME
+STATIC_DIM: INT
+
+// Defined in `lark/grammars/common.lark`
+%import common.CNAME
+%import common.INT

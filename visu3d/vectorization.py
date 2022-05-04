@@ -106,7 +106,7 @@ def vectorize_method(
   ```
   @dataclasses.dataclass(frozen=True)
   class Point3d(v3d.DataclassArray):
-    p: v3d.array_field(shape=(3,))
+    p: f32['*shape 3']
 
     @v3d.vectorize_method
     def first_value(self):

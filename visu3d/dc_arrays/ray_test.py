@@ -14,6 +14,8 @@
 
 """Tests for ray."""
 
+from __future__ import annotations
+
 from etils import enp
 from etils.array_types import Array
 import numpy as np

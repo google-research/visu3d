@@ -14,6 +14,8 @@
 
 """Tests for auto_plot."""
 
+from __future__ import annotations
+
 from unittest import mock
 
 import visu3d as v3d

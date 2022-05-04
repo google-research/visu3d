@@ -18,6 +18,8 @@ Import should work even if the lazy deps are not present.
 
 """
 
+from __future__ import annotations
+
 import sys
 
 import visu3d as v3d

@@ -14,6 +14,8 @@
 
 """Tests for type_parsing."""
 
+from __future__ import annotations
+
 from typing import Optional, List, Union
 
 from etils.array_types import f32, FloatArray  # pylint: disable=g-multiple-import

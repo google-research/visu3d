@@ -60,8 +60,8 @@ class Transform(TransformBase):
       z1], [x2, y2, z2]]`)
     t: Translation of the transformation (`tx, ty, tz`)
   """
-  R: FloatArray['*shape 3 3'] = array_dataclass.array_field(shape=(3, 3))  # pylint: disable=invalid-name
-  t: FloatArray['*shape 3'] = array_dataclass.array_field(shape=(3,))
+  R: FloatArray['*shape 3 3']  # pylint: disable=invalid-name
+  t: FloatArray['*shape 3']
 
   @classmethod
   def identity(cls) -> Transform:
@@ -398,16 +398,8 @@ class ComposedTransform(TransformBase):
   Note: Should not be created directly but only inside `CustomTransform`.
 
   """
-  # pytype: disable=annotation-type-mismatch
-  left_tr: TransformBase = array_dataclass.array_field(
-      shape=(),
-      dtype=TransformBase,
-  )
-  right_tr: TransformBase = array_dataclass.array_field(
-      shape=(),
-      dtype=TransformBase,
-  )
-  # pytype: enable=annotation-type-mismatch
+  left_tr: TransformBase
+  right_tr: TransformBase
 
   def _apply_to(self: ComposedTransform, other: _T) -> _T:
     """Apply composed method."""

@@ -14,6 +14,8 @@
 
 """Tests for transformation."""
 
+from __future__ import annotations
+
 import dataclasses
 
 from etils import enp

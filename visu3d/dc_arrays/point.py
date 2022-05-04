@@ -20,8 +20,7 @@ import dataclasses
 import typing
 from typing import Optional, Union
 
-from etils.array_types import FloatArray, IntArray  # pylint: disable=g-multiple-import
-import numpy as np
+from etils.array_types import FloatArray, ui8  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
@@ -44,12 +43,8 @@ class Point3d(array_dataclass.DataclassArray):
     p: 3d (x, y, z) coordinates
     rgb: uint8 color
   """
-  p: FloatArray['*shape 3'] = array_dataclass.array_field(shape=(3,))
-  rgb: Optional[IntArray['*shape 3']] = array_dataclass.array_field(
-      shape=(3,),
-      dtype=np.uint8,
-      default=None,
-  )
+  p: FloatArray['*shape 3']
+  rgb: Optional[ui8['*shape 3']] = None
 
   def __add__(self, translation: FloatArray['... 3']) -> Point3d:
     """Translate the position."""
@@ -95,16 +90,9 @@ class Point2d(array_dataclass.DataclassArray):
     rgb: uint8 color
     depth: The depth in camera coordinates.
   """
-  p: FloatArray['*shape 2'] = array_dataclass.array_field(shape=(2,))
-  depth: Optional[FloatArray['*shape 1']] = array_dataclass.array_field(
-      shape=(1,),
-      default=None,
-  )
-  rgb: Optional[IntArray['*shape 3']] = array_dataclass.array_field(
-      shape=(3,),
-      dtype=np.uint8,
-      default=None,
-  )
+  p: FloatArray['*shape 2']
+  depth: Optional[FloatArray['*shape 1']] = None
+  rgb: Optional[ui8['*shape 3']] = None
 
   def clip(
       self,

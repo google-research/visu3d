@@ -20,7 +20,7 @@ import abc
 import dataclasses
 import functools
 import typing
-from typing import Optional
+from typing import Optional, Tuple
 
 import einops
 from etils import edc
@@ -101,7 +101,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     w: Camera width resolution (in px).
     fig_config: Additional figure configuration.
   """
-  resolution: tuple[int, int]
+  resolution: Tuple[int, int]
   # Note: Because `FigConfig` is immutable, it is safe to use a shared instance
   # to avoid unecessary copy.
   fig_config: FigConfig = dataclasses.field(
@@ -225,7 +225,7 @@ class PinholeCamera(CameraSpec):
     K: Camera intrinsics parameters.
     resolution: (h, w) resolution
   """
-  K: FloatArray['*shape 3 3'] = array_dataclass.array_field(shape=(3, 3))  # pylint: disable=invalid-name
+  K: FloatArray['*shape 3 3']  # pylint: disable=invalid-name
 
   @classmethod
   def from_focal(

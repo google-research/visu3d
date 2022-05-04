@@ -14,6 +14,8 @@
 
 """Tests for py_utils."""
 
+from __future__ import annotations
+
 from visu3d.utils import py_utils
 
 

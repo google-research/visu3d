@@ -14,6 +14,8 @@
 
 """Tests for camera_spec."""
 
+from __future__ import annotations
+
 from etils import enp
 import numpy as np
 import pytest

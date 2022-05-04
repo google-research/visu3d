@@ -14,6 +14,8 @@
 
 """Auto plot utils."""
 
+from __future__ import annotations
+
 from visu3d.plotly import fig_utils
 from visu3d.utils.lazy_imports import IPython
 

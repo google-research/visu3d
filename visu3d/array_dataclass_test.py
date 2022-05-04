@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Callable
+from typing import Any, Callable
 
 from etils import enp
 from etils.array_types import IntArray, FloatArray  # pylint: disable=g-multiple-import
@@ -32,22 +32,22 @@ set_tnp = enp.testing.set_tnp
 
 @dataclasses.dataclass(frozen=True)
 class Point(v3d.DataclassArray):
-  x: FloatArray[''] = v3d.array_field(shape=())
-  y: FloatArray[''] = v3d.array_field(shape=())
+  x: FloatArray['*shape']
+  y: FloatArray['*shape']
 
 
 @dataclasses.dataclass(frozen=True)
 class Isometrie(v3d.DataclassArray):
-  r: FloatArray['3 3'] = v3d.array_field(shape=(3, 3))
-  t: IntArray['2'] = v3d.array_field(shape=(2,), dtype=int)
+  r: FloatArray['... 3 3']
+  t: IntArray[..., 2]
 
 
 @dataclasses.dataclass(frozen=True)
 class Nested(v3d.DataclassArray):
   # pytype: disable=annotation-type-mismatch
-  pt: Point = v3d.array_field(shape=(3,), dtype=Point)
-  iso: Isometrie = v3d.array_field(shape=(), dtype=Isometrie)
+  iso: Isometrie
   iso_batched: Isometrie = v3d.array_field(shape=(3, 7), dtype=Isometrie)
+  pt: Point = v3d.array_field(shape=(3,), dtype=Point)
   # pytype: enable=annotation-type-mismatch
 
 
@@ -55,8 +55,8 @@ class Nested(v3d.DataclassArray):
 class WithStatic(v3d.DataclassArray):
   """Mix of static and array fields."""
   static: str
-  x: FloatArray['3'] = v3d.array_field(shape=(3,))
-  y: FloatArray['2 2'] = v3d.array_field(shape=(2, 2))
+  x: FloatArray['... 3']
+  y: Any = v3d.array_field(shape=(2, 2))
 
 
 def _assert_point(p: Point, shape: Shape, xnp: enp.NpModule = None):

@@ -14,6 +14,8 @@
 
 """Tests for vectorization."""
 
+from __future__ import annotations
+
 from etils import enp
 import pytest
 import visu3d as v3d

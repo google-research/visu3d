@@ -14,6 +14,8 @@
 
 """Plotly API."""
 
+from __future__ import annotations
+
 from visu3d.plotly.fig_config_utils import FigConfig
 from visu3d.plotly.fig_utils import make_cones_kwargs
 from visu3d.plotly.fig_utils import make_fig

@@ -46,8 +46,8 @@ class Ray(array_dataclass.DataclassArray):
     pos: Position
     dir: Direction
   """
-  pos: FloatArray['*shape 3'] = array_dataclass.array_field(shape=(3,))
-  dir: FloatArray['*shape 3'] = array_dataclass.array_field(shape=(3,))
+  pos: FloatArray['*shape 3']
+  dir: FloatArray['*shape 3']
 
   @property
   def end(self) -> FloatArray['*shape 3']:

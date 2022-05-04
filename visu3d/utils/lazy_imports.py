@@ -14,6 +14,8 @@
 
 """Lazy imports."""
 
+from __future__ import annotations
+
 import typing
 
 from visu3d.utils import py_utils

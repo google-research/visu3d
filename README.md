@@ -103,13 +103,16 @@ Creating your own primitives is trivial.
 Converting any dataclass to dataclass array is trivial:
 
 * Inherit from `v3d.DataclassArray`
-* Use `v3d.array_field` instead of `dataclasses.field`
+* Use [`etils.array_types`](https://github.com/google/etils/blob/main/etils/array_types/README.md) to annotate the array fields (or exlicitly use `my_field: Any = v3d.array_field(shape=, dtype=)` instead of `dataclasses.field`)
 
 ```python
+from etils.array_types import FloatArray
+
+
 @dataclasses.dataclass(frozen=True)
 class MyRay(v3d.DataclassArray):
-  pos: FloatArray[..., 3] = v3d.array_field(shape=(3,))
-  dir: FloatArray[..., 3] = v3d.array_field(shape=(3,))
+  pos: FloatArray[..., 3]
+  dir: FloatArray[..., 3]
 
 
 rays = MyRay(pos=jnp.zeros((H, W, 3)), dir=jnp.ones((H, W, 3)))

@@ -21,12 +21,15 @@ import typing
 from typing import Any, Callable, Generic, Iterator, Optional, Tuple, Type, TypeVar, Union
 
 import einops
+from etils import array_types
 from etils import edc
 from etils import enp
 from etils import epy
 from etils.array_types import Array
 import numpy as np
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias  # pylint: disable=g-multiple-import
+from visu3d import shape_parsing
+from visu3d import type_parsing
 from visu3d.plotly import fig_utils
 from visu3d.typing import Axes, DcOrArray, DcOrArrayT, DTypeArg, Shape  # pylint: disable=g-multiple-import
 from visu3d.utils import np_utils
@@ -57,11 +60,16 @@ class DataclassArray(fig_utils.Visualizable):
   ```python
   @dataclasses.dataclass
   class Square(DataclassArray):
-    pos: Array['*shape 2'] = array_field(shape=(2,))
-    scale: Array['*shape'] = array_field(shape=())
+    pos: f32['*shape 2']
+    scale: f32['*shape']
+    name: str
 
-  # Create 2 square batched
-  p = Square(pos=[[x0, y0], [x1, y1], [x2, y2]], scale=[scale0, scale1, scale2])
+  # Create 3 squares batched
+  p = Square(
+      pos=[[x0, y0], [x1, y1], [x2, y2]],
+      scale=[scale0, scale1, scale2],
+      name='my_square',
+  )
   p.shape == (3,)
   p.pos.shape == (3, 2)
   p[0] == Square(pos=[x0, y0], scale=scale0)
@@ -69,7 +77,32 @@ class DataclassArray(fig_utils.Visualizable):
   p = p.reshape((3, 1))  # Reshape the inner-shape
   p.shape == (3, 1)
   p.pos.shape == (3, 1, 2)
+
+  p.name == 'my_square'
   ```
+
+  `DataclassArray` has 2 types of fields:
+
+  * Array fields: Fields batched like numpy arrays, with reshape, slicing,...
+    (`pos` and `scale` in the above example).
+  * Static fields: Other non-numpy field. Are not modified by reshaping,... (
+    `name` in the above example).
+    Static fields are also ignored in `jax.tree_map`.
+
+  `DataclassArray` detect array fields if either:
+
+  * The typing annotation is a `etils.array_types` annotation (in which
+    case shape/dtype are automatically infered from the typing annotation)
+    Example: `x: f32[..., 3]`
+  * The typing annotation is another `v3d.DataclassArray` (in which case
+    `my_dataclass.field.shape == my_dataclass.shape`)
+    Example: `x: MyDataclass`
+  * The field is explicitly defined in `v3d.array_field`, in which case
+    the typing annotation is ignored.
+    Example: `x: Any = v3d.field(shape=(), dtype=np.int64)`
+
+  Field which do not satisfy any of the above conditions are static (including
+  field annotated with `field: np.ndarray` or similar).
 
   """
   _shape: Shape
@@ -322,13 +355,21 @@ class DataclassArray(fig_utils.Visualizable):
   def _all_array_fields(self) -> dict[str, _ArrayField]:
     """All array fields, including `None` values."""
     # Validate and normalize array fields (e.g. list -> np.array,...)
-    return {  # pylint: disable=g-complex-comprehension
-        f.name: _ArrayField(  # pylint: disable=g-complex-comprehension
-            name=f.name,
-            host=self,
-            **f.metadata[_METADATA_KEY].to_dict(),
-        ) for f in dataclasses.fields(self) if _METADATA_KEY in f.metadata
-    }
+    # At this point, `ForwardRef` should have been resolved.
+    hints = typing.get_type_hints(type(self))
+    # TODO(py3.8):
+    # return {  # pylint: disable=g-complex-comprehension
+    #     f.name: array_field
+    #     for f in dataclasses.fields(self)
+    #     if (array_field := _make_array_field(self, f, hints)) is not None
+    # }
+    out = {}
+    for f in dataclasses.fields(self):
+      array_field_ = _make_array_field(self, f, hints)
+      if array_field_ is None:
+        continue
+      out[f.name] = array_field_
+    return out
 
   @epy.cached_property
   def _array_fields(self) -> list[_ArrayField]:
@@ -602,16 +643,7 @@ class _ArrayFieldMetadata:
 
     # Validate dtype
     if not self.is_dataclass:
-      dtype = self.dtype
-      if dtype is int:
-        dtype = np.int32
-      elif dtype is float:
-        dtype = np.float32
-
-      dtype = np.dtype(dtype)
-      if dtype.kind == 'O':
-        raise ValueError(f'Array field dtype={self.dtype} not supported.')
-      self.dtype = dtype
+      self.dtype = _validate_dtype(self.dtype)
 
   def to_dict(self) -> dict[str, Any]:
     """Returns the dict[field_name, field_value]."""
@@ -687,10 +719,9 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
       # In `jax/_src/api_util.py` for `flatten_axes`, jax set all values to a
       # dummy sentinel `object()` value.
       return True
-    elif (
-        isinstance(self.value, DataclassArray) and
-        not self.value._array_fields  # pylint: disable=protected-access
-    ):
+    elif (isinstance(self.value, DataclassArray) and
+          not self.value._array_fields  # pylint: disable=protected-access
+         ):
       # Nested dataclass case (if all attributes are `None`, so no active
       # array fields)
       return True
@@ -714,3 +745,60 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
       return self.value.broadcast_to(final_shape)
     else:
       return self.xnp.broadcast_to(self.value, final_shape)
+
+
+def _validate_dtype(dtype) -> np.dtype:
+  """Validate and normalize the dtype."""
+  if dtype is int:
+    dtype = np.int32
+  elif dtype is float:
+    dtype = np.float32
+
+  np_dtype = np.dtype(dtype)
+  if np_dtype.kind == 'O':
+    raise ValueError(f'Array field dtype={dtype} not supported.')
+  return np_dtype
+
+
+def _make_array_field(
+    array: DataclassArray,
+    field: dataclasses.Field[Any],
+    hints: dict[str, TypeAlias],
+) -> Optional[_ArrayField]:
+  """Make the array field class."""
+  # TODO(epot): One possible confusion is if user define
+  # `field: Ray = v3d.array_field(shape=(3,))`
+  # In which case field will be `float32` instead of `Ray`. Should we raise
+  # a warning / error ?
+  if _METADATA_KEY in field.metadata:  # Field defined as `= v3d.array_field`:
+    field_metadata = field.metadata[_METADATA_KEY]
+  # TODO(py3.8):
+  # elif field_metadata := _type_to_field_metadata(hints[field.name]):
+  else:
+    field_metadata = _type_to_field_metadata(hints[field.name])
+    if not field_metadata:  # Not an array field
+      return None
+
+  return _ArrayField(
+      name=field.name,
+      host=array,
+      **field_metadata.to_dict(),  # pylint: disable=not-a-mapping
+  )
+
+
+def _type_to_field_metadata(hint: TypeAlias) -> Optional[_ArrayFieldMetadata]:
+  """Converts type hint to extract `inner_shape`, `dtype`."""
+  array_type = type_parsing.get_array_type(hint)
+  if isinstance(array_type, type) and issubclass(array_type, DataclassArray):
+    # TODO(epot): Should support `ray: Ray[..., 3]` ?
+    return _ArrayFieldMetadata(inner_shape=(), dtype=array_type)
+  elif isinstance(array_type, array_types.ArrayAliasMeta):
+    try:
+      return _ArrayFieldMetadata(
+          inner_shape=shape_parsing.get_inner_shape(array_type.shape),
+          dtype=_validate_dtype(array_type.dtype),
+      )
+    except Exception as e:  # pylint: disable=broad-except
+      epy.reraise(e, prefix=f'Invalid shape annotation {hint}.')
+  else:  # Not a supported type: Static field
+    return None

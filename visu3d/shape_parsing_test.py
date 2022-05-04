@@ -14,6 +14,8 @@
 
 """Tests for shape_parsing."""
 
+from __future__ import annotations
+
 from etils.array_types import f32
 import pytest
 from visu3d import shape_parsing

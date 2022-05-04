@@ -14,6 +14,8 @@
 
 """Tests for tree_utils."""
 
+from __future__ import annotations
+
 import chex
 from visu3d.utils import tree_utils
 

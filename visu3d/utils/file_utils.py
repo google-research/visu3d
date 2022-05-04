@@ -14,6 +14,8 @@
 
 """File utils."""
 
+from __future__ import annotations
+
 from etils import epath
 
 

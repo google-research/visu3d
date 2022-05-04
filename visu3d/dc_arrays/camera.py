@@ -38,16 +38,8 @@ class Camera(array_dataclass.DataclassArray):
     spec: Camera intrinsics parameters
     world_from_cam: Camera pose (`v3d.Transformation`)
   """
-  # pytype: disable=annotation-type-mismatch
-  spec: camera_spec.CameraSpec = array_dataclass.array_field(
-      shape=(),
-      dtype=camera_spec.CameraSpec,
-  )
-  world_from_cam: transformation.Transform = array_dataclass.array_field(
-      shape=(),
-      dtype=transformation.Transform,
-  )
-  # pytype: enable=annotation-type-mismatch
+  spec: camera_spec.CameraSpec
+  world_from_cam: transformation.Transform
 
   @classmethod
   def from_look_at(

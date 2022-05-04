@@ -60,8 +60,12 @@ class Transform(TransformBase):
       z1], [x2, y2, z2]]`)
     t: Translation of the transformation (`tx, ty, tz`)
   """
-  R: FloatArray['*shape 3 3']  # pylint: disable=invalid-name
-  t: FloatArray['*shape 3']
+  R: FloatArray['*shape 3 3'] = (  # pylint: disable=invalid-name
+      (1, 0, 0),
+      (0, 1, 0),
+      (0, 0, 1),
+  )
+  t: FloatArray['*shape 3'] = (0, 0, 0)
 
   @classmethod
   def identity(cls) -> Transform:

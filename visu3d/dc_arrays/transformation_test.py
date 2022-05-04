@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import Optional
 
 from etils import enp
 from etils.array_types import FloatArray
@@ -31,10 +32,6 @@ set_tnp = enp.testing.set_tnp
 @dataclasses.dataclass
 class TransformExpectedValue:
   """Tests values."""
-  # Transformation params
-  R: FloatArray[3, 3]  # pylint: disable=invalid-name
-  t: FloatArray[3]
-
   # Expected rays values after transformation
   expected_pos: FloatArray[..., 3]
   expected_dir: FloatArray[..., 3]
@@ -42,6 +39,10 @@ class TransformExpectedValue:
   # Expected transformation values after composition with other tr
   expected_r: FloatArray[..., 3, 3]
   expected_t: FloatArray[..., 3]
+
+  # Transformation params
+  R: Optional[FloatArray[3, 3]] = None  # pylint: disable=invalid-name
+  t: Optional[FloatArray[3]] = None
 
 
 # Transformation values
@@ -55,6 +56,14 @@ _TR_R = np.array([
 _TR_T = np.array([4, 3, 7])
 
 _TR_EXPECTED_VALUES = {
+    # Test identity
+    'default_args': TransformExpectedValue(
+        # Identity should be a no-op
+        expected_pos=_RAY_POS,
+        expected_dir=_RAY_DIR,
+        expected_r=_TR_R,
+        expected_t=_TR_T,
+    ),
     # Test identity
     'identity': TransformExpectedValue(
         R=np.eye(3),
@@ -75,6 +84,15 @@ _TR_EXPECTED_VALUES = {
         expected_r=_TR_R,
         expected_t=_TR_T + [3, -1, 2],
     ),
+    # Test translation only
+    'trans_only_default_arg': TransformExpectedValue(
+        t=[3, -1, 2],
+        # Only position translated
+        expected_pos=_RAY_POS + [3, -1, 2],
+        expected_dir=_RAY_DIR,
+        expected_r=_TR_R,
+        expected_t=_TR_T + [3, -1, 2],
+    ),
     # Test rotation only
     'rot_only': TransformExpectedValue(
         R=[
@@ -83,6 +101,25 @@ _TR_EXPECTED_VALUES = {
             [0, 1, 0],
         ],
         t=[0, 0, 0],
+        # Rotation invert axis `(1, 2, 3)` -> `(3, 1, 2)`
+        expected_pos=[5, 1, 3],
+        expected_dir=[4, 2, 1],
+        # Rotation invert axis `(1, 2, 3)` -> `(2, 1, 3)`
+        # Rotation invert axis `(1, 2, 3)` -> `(3, 1, 2)`
+        expected_r=[
+            [0, 0, 1],
+            [0, 1, 0],
+            [1, 0, 0],
+        ],
+        expected_t=[7, 4, 3],
+    ),
+    # Test rotation only
+    'rot_only_default_arg': TransformExpectedValue(
+        R=[
+            [0, 0, 1],
+            [1, 0, 0],
+            [0, 1, 0],
+        ],
         # Rotation invert axis `(1, 2, 3)` -> `(3, 1, 2)`
         expected_pos=[5, 1, 3],
         expected_dir=[4, 2, 1],
@@ -142,7 +179,15 @@ def test_transformation(
     expected_shape: v3d.typing.Shape,
     test_values: TransformExpectedValue,
 ):
-  tr = v3d.Transform(R=xnp.array(test_values.R), t=xnp.array(test_values.t))
+  init_kwargs = {}
+  if test_values.R is not None:
+    init_kwargs['R'] = xnp.array(test_values.R)
+  if test_values.t is not None:
+    init_kwargs['t'] = xnp.array(test_values.t)
+  tr = v3d.Transform(**init_kwargs)
+
+  if test_values.R is None and test_values.t is None:
+    tr = tr.as_xnp(xnp)
   tr = tr.broadcast_to(tr_shape)
 
   if tr_shape and xnp is enp.lazy.tnp:

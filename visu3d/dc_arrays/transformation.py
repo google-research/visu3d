@@ -29,6 +29,7 @@ from visu3d.dc_arrays import ray as ray_lib
 from visu3d.typing import DcT
 from visu3d.utils import np_utils
 from visu3d.utils import py_utils
+from visu3d.utils import rotation_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 _T = TypeVar('_T')
@@ -76,6 +77,51 @@ class Transform(TransformBase):
   def from_matrix(cls, matrix: FloatArray['*shape 3 3']) -> Transform:
     """Constructs from a 4x4 transform matrix."""
     return cls(R=matrix[..., :3, :3], t=matrix[..., :3, 3])
+
+  @classmethod
+  def from_angle(cls, *, x=None, y=None, z=None) -> Transform:
+    """Returns a transformation rotation around an axis (in radians).
+
+    Example:
+
+    ```python
+    tr = v3d.Transform.from_angle(x=1/4 * enp.tau)  # Rotate 90° around x
+    ```
+
+    Rotations are applied following the Tait-Bryan chained rotations (z, y, x):
+
+    ```python
+    R = Rz @ Ry @ Rx
+    ```
+
+    See:
+    https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Euler_angles_(z-y%E2%80%B2-x%E2%80%B3_intrinsic)_%E2%86%92_rotation_matrix
+
+    Args:
+      x: Rotation around x (in radians): roll == ϕ == phi == x
+      y: Rotation around y (in radians): pitch == θ == theta == y
+      z: Rotation around z (in radians): yaw == ψ == psi == z
+
+    Returns:
+      tr: The transformation.
+    """
+
+    def _accumulate_rot(r0, r1):
+      return r1 if r0 is None else r0 @ r1
+
+    r_final = None
+    if z is not None:
+      r = rotation_utils.rot_z(z)
+      r_final = _accumulate_rot(r_final, r)
+    if y is not None:
+      r = rotation_utils.rot_y(y)
+      r_final = _accumulate_rot(r_final, r)
+    if x is not None:
+      r = rotation_utils.rot_x(x)
+      r_final = _accumulate_rot(r_final, r)
+    if r_final is None:  # All x, y, z undefined => Identity
+      r_final = enp.lazy.np.eye(3)
+    return cls(R=r_final)
 
   @classmethod
   def from_look_at(

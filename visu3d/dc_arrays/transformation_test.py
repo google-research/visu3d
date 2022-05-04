@@ -384,3 +384,55 @@ def _assert_camera_transformed(
   expected_cam = expected_cam.broadcast_to(expected_shape)
 
   v3d.testing.assert_array_equal(tr @ cam, expected_cam)
+
+
+@enp.testing.parametrize_xnp()
+def test_transformation_from_angle_multiple(xnp: enp.NpModule):
+  # TODO(epot): Supports vectorization
+  z = enp.tau / 4
+  y = -enp.tau / 8
+  x = xnp.asarray(enp.tau / 16)
+
+  rz = v3d.utils.rotation_utils.rot_z(z)
+  ry = v3d.utils.rotation_utils.rot_y(y)
+  rx = v3d.utils.rotation_utils.rot_x(x)
+
+  tr = v3d.Transform.from_angle(x=x, y=y, z=z)
+
+  assert tr.xnp is xnp
+
+  v3d.testing.assert_array_equal(tr.R, rz @ ry @ rx)
+
+  v3d.testing.assert_array_equal(
+      v3d.Transform.from_angle(),
+      v3d.Transform.identity(),
+  )
+
+
+@enp.testing.parametrize_xnp()
+def test_transformation_from_angle(xnp: enp.NpModule):
+  # TODO(epot): Supports vectorization
+  z = xnp.asarray(enp.tau / 4)
+  y = xnp.asarray(-enp.tau / 8)
+  x = xnp.asarray(enp.tau / 16)
+
+  rz = v3d.utils.rotation_utils.rot_z(z)
+  ry = v3d.utils.rotation_utils.rot_y(y)
+  rx = v3d.utils.rotation_utils.rot_x(x)
+
+  tr_x = v3d.Transform.from_angle(x=x)
+  tr_y = v3d.Transform.from_angle(y=y)
+  tr_z = v3d.Transform.from_angle(z=z)
+  assert tr_x.xnp is xnp
+  assert tr_y.xnp is xnp
+  assert tr_z.xnp is xnp
+
+  v3d.testing.assert_array_equal(tr_x.R, rx)
+  v3d.testing.assert_array_equal(tr_y.R, ry)
+  v3d.testing.assert_array_equal(tr_z.R, rz)
+
+  # Identity
+  v3d.testing.assert_array_equal(
+      v3d.Transform.from_angle(),
+      v3d.Transform.identity(),
+  )

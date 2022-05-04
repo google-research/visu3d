@@ -186,7 +186,7 @@ class Transform(TransformBase):
   def inv(self) -> Transform:
     """Returns the inverse camera transform."""
     # Might be a more optimized way than stacking/unstacking matrix
-    return type(self).from_matrix(enp.compat.inv(self.matrix4x4))
+    return type(self).from_matrix(enp.linalg.inv(self.matrix4x4))
 
   def __add__(self, translation: FloatArray['... 3']) -> Transform:
     """Translate the position."""

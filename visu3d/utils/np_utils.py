@@ -183,7 +183,7 @@ def _einops_dim_name(i: int) -> str:
 
 def normalize(x: FloatArray['*d'], axis: int = -1) -> FloatArray['*d']:
   """Normalize the vector to the unit norm."""
-  return x / enp.compat.norm(x, axis=axis, keepdims=True)
+  return x / enp.linalg.norm(x, axis=axis, keepdims=True)
 
 
 def append_row(

@@ -41,6 +41,8 @@ from visu3d.plotly import make_traces
 from visu3d.plotly import Visualizable
 from visu3d.plotly.auto_plot import auto_plot_figs
 from visu3d.plotly.fig_config_utils import fig_config
+from visu3d.utils.rotation_utils import DEG2RAD
+from visu3d.utils.rotation_utils import RAD2DEG
 
 # Arrays implementation
 from visu3d.dc_arrays.camera import Camera

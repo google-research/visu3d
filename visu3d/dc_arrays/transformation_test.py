@@ -241,7 +241,7 @@ def _assert_tr_common(tr: v3d.Transform, tr_shape: v3d.typing.Shape):
   assert identity_tr.t.shape == tr_shape + (3,)
 
   # Inverting the matrix is equivalent to the matrix of the invert transform
-  v3d.testing.assert_array_equal(tr.inv.matrix4x4, enp.compat.inv(tr.matrix4x4))
+  v3d.testing.assert_array_equal(tr.inv.matrix4x4, enp.linalg.inv(tr.matrix4x4))
 
   # Inverting twice the transformation should be a no-op
   v3d.testing.assert_array_equal(tr.inv.inv, tr)

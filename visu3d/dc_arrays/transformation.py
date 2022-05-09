@@ -215,6 +215,92 @@ class Transform(TransformBase):
 
   @property
   @vectorization.vectorize_method
+  def scale_xyz(self) -> FloatArray['*shape 3']:
+    """Returns the `(sx, sy, sz)` scale of the transform along each axis."""
+    return enp.linalg.norm(self.R, axis=0)
+
+  @property
+  @vectorization.vectorize_method
+  def scale(self):
+    """Returns the global scale (if `x, y, z` share the same scale).
+
+    Returns:
+      The global scale shared by all axis.
+
+    Raises:
+      ValueError: If the `x, y, z` scales are different between axis.
+    """
+
+    def _err_msg():
+      return ('Cannot get `Transform.scale` when x, y, z scale are '
+              f'different: {self.scale_xyz}')
+    xnp = self.xnp
+    scale_xyz = xnp.round(self.scale_xyz, decimals=7)
+    # TODO(epot): Move into `enp.linalg.unique`
+    if xnp is enp.lazy.np:
+      global_scales = xnp.unique(scale_xyz)
+      raise_error = len(global_scales) != 1
+    elif xnp is enp.lazy.jnp:
+      # print('Warning: Due to Jax not')
+      global_scales, global_count = xnp.unique(
+          scale_xyz,
+          size=1,
+          return_counts=True,
+      )
+
+      # Unfortunately, Jax don't have an easy API to conditionally
+      # raise error within a `jax.jit` function
+      # This won't have any effect when the function is traced.
+      from jax.experimental import checkify  # pytype: disable=import-error  # pylint: disable=g-import-not-at-top
+
+      try:
+        checkify.check(global_count[0] == 3, msg=_err_msg())
+      except NotImplementedError:  # checkify + vmap not supported
+        # Could print a warning but probably to noisy for this small edge case.
+        pass
+
+      raise_error = False
+    elif xnp is enp.lazy.tnp:
+      global_scales, _ = enp.lazy.tf.unique(scale_xyz)
+      raise_error = len(global_scales) != 1
+    else:
+      raise AssertionError(f'Unknown numpy module {xnp}')
+    if raise_error:
+      raise ValueError(_err_msg())
+    else:
+      global_scale, = global_scales
+    return global_scale
+
+  def mul_scale(self, factor: FloatArray['*shape 3?']) -> Transform:
+    """Scale the transformation `(sx, sy, sz)` by the given factor.
+
+    This is similar to `v3d.Ray.scale_dir`, applied on each individual axis.
+
+    Args:
+      factor: The factor by which scale each axis. If scalar, broadcast all axis
+        by the same value.
+
+    Returns:
+      The new transform with scaled.
+    """
+    xnp = self.xnp
+    factor = xnp.asarray(factor)
+    if factor.shape == ():  # pylint: disable=g-explicit-bool-comparison
+      new_r = self.R * factor
+    elif factor.shape == (3,):
+      new_r = self.R @ xnp.diag(factor)
+    else:
+      raise ValueError(f'Unsupported factor shape {factor.shape}')
+    return self.replace(R=new_r)
+
+  @vectorization.vectorize_method
+  def normalize(self) -> Transform:
+    """Normalize the scale x, y, z to be `(1, 1, 1)`."""
+    xnp = self.xnp
+    return self.replace(R=self.R @ xnp.diag(1 / self.scale_xyz))
+
+  @property
+  @vectorization.vectorize_method
   def matrix4x4(self) -> FloatArray['*shape 4 4']:
     """Returns the 4x4 transformation matrix.
 

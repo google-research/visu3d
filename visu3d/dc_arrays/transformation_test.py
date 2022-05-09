@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 from typing import Optional
 
 from etils import enp
@@ -384,6 +385,107 @@ def _assert_camera_transformed(
   expected_cam = expected_cam.broadcast_to(expected_shape)
 
   v3d.testing.assert_array_equal(tr @ cam, expected_cam)
+
+
+def _assert_scale(
+    tr: v3d.Transform,
+    *,
+    xnp: enp.NpModule,
+    tr_shape: v3d.typing.Shape,
+    expected_r: FloatArray[3, 3],
+    expected_scale_xyz: FloatArray[3],
+    expected_scale: Optional[FloatArray['']],
+):
+  assert tr.xnp is xnp
+  assert tr.shape == tr_shape
+  expected_r = xnp.asarray(expected_r)
+  expected_scale_xyz = xnp.asarray(expected_scale_xyz)
+  np.testing.assert_allclose(
+      tr.R,
+      xnp.broadcast_to(expected_r, tr_shape + (3, 3)),
+      atol=1e-6,
+  )
+  np.testing.assert_allclose(
+      tr.scale_xyz,
+      xnp.broadcast_to(expected_scale_xyz, tr_shape + (3,)),
+  )
+  if expected_scale is None:
+    with pytest.raises(ValueError, match='Cannot get `Transform.scale`'):
+      _ = tr.scale
+  else:
+    expected_scale = xnp.asarray(expected_scale)
+    np.testing.assert_allclose(
+        tr.scale,
+        xnp.broadcast_to(expected_scale, tr_shape),
+    )
+
+
+@enp.testing.parametrize_xnp()
+@pytest.mark.parametrize(
+    'tr_shape',
+    [
+        (),
+        (5,),
+    ],
+)
+def test_transformation_scale(
+    xnp: enp.NpModule,
+    tr_shape: v3d.typing.Shape,
+):
+  tr = v3d.Transform.from_angle(x=xnp.asarray(enp.tau / 4))
+  tr = tr.broadcast_to(tr_shape)
+
+  if tr_shape and xnp is enp.lazy.tnp:
+    pytest.skip('Vectorization not supported yet with TF')
+
+  assert_scale = functools.partial(_assert_scale, xnp=xnp, tr_shape=tr_shape)
+
+  assert_scale(
+      tr,
+      expected_r=[
+          [1, 0, 0],
+          [0, 0, -1],
+          [0, 1, 0],
+      ],
+      expected_scale_xyz=[1, 1, 1],
+      expected_scale=1,
+  )
+  assert_scale(
+      tr.mul_scale(3.),
+      expected_r=[
+          [3, 0, 0],
+          [0, 0, -3],
+          [0, 3, 0],
+      ],
+      expected_scale_xyz=[3, 3, 3],
+      expected_scale=3,
+  )
+  assert_scale(
+      tr.mul_scale(3.).normalize(),
+      expected_r=[
+          [1, 0, 0],
+          [0, 0, -1],
+          [0, 1, 0],
+      ],
+      expected_scale_xyz=[1, 1, 1],
+      expected_scale=1,
+  )
+  if xnp == enp.lazy.jnp and tr_shape:
+    # Jax don't support error checking + vectorization, so will return smallest
+    expected_scale = 1.5
+  else:
+    expected_scale = None
+  assert_scale(
+      tr.mul_scale([2, -3, 1.5]),
+      expected_r=[
+          [2, 0, 0],
+          [0, 0, -1.5],
+          [0, -3, 0],
+      ],
+      # TODO(epot): Detect scale sign
+      expected_scale_xyz=[2, 3, 1.5],
+      expected_scale=expected_scale,
+  )
 
 
 @enp.testing.parametrize_xnp()

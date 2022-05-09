@@ -22,7 +22,6 @@ import functools
 import typing
 from typing import Optional, Tuple
 
-import einops
 from etils import edc
 from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
@@ -118,6 +117,16 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
   def w(self) -> int:
     return self.resolution[1]
 
+  @property
+  def hw(self) -> tuple[int, int]:
+    """`(Height, Width)` in pixel (for usage in `(i, j)` coordinates)."""
+    return (self.h, self.w)
+
+  @property
+  def wh(self) -> tuple[int, int]:
+    """`(Width, Height)` in pixel (for usage in `(u, v)` coordinates)."""
+    return (self.w, self.h)
+
   # @abc.abstractmethod
   @property
   def px_from_cam(self) -> transformation.TransformBase:
@@ -151,16 +160,14 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
   def px_centers(self) -> FloatArray['*shape h w 2']:
     """Returns 2D coordinates of centers of all pixels in the camera image.
 
-    The pixel centers of camera image are returned as a float32 tensor of shape
-    `(image_height, image_width, 2)`.
+    This camera model uses the conventions:
 
-    This camera model uses the convention that top left corner of the image is
-    `(0, 0)` and bottom right corner is `(image_width, image_height)`. So the
-    center of the top left corner pixel is `(0.5, 0.5)`.
+     * Top-left corner of the image is `(0, 0)`
+     * Bottom-right corner is `(w, h)` (NOT `(h, w)`)
+     * Pixels are centered, so `px_centers()[0, 0] == 0.5`
 
     Returns:
-      2D image coordinates of center of all pixels of the camer image in tensor
-      of shape `(image_height, image_width, 2)`.
+      2D image coordinates of center of all pixels of shape `(h, w, 2)`.
     """
     raise NotImplementedError
 
@@ -193,11 +200,11 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
 
   @vectorization.vectorize_method
   def _get_camera_lines(self) -> FloatArray['*shape 4 3']:
-    corners_px = [  # Screen corners
+    corners_px = [  # Screen corners, in (u, v) coordinates
         [0, 0],
-        [self.h, 0],
-        [0, self.w],
-        [self.h, self.w],
+        [0, self.h],
+        [self.w, 0],
+        [self.w, self.h],
     ]
     corners_world = self.cam_from_px @ self.xnp.array(corners_px)
     start = enp.lazy.np.broadcast_to([0, 0, 0], corners_world.shape)
@@ -209,17 +216,18 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
 class PinholeCamera(CameraSpec):
   """Simple camera model.
 
-  Camera convensions:
-  In camera/pixel coordinates, follow numpy convensions:
+  Camera conventions:
+  In camera/pixel coordinates:
 
-  * u == x == h (orientation: ↓)
-  * v == y == w (orientation: →)
+  * u == x == j == w (orientation: →)
+  * v == y == i == h (orientation: ↓)
 
   In camera frame coordinates:
 
   * `(0, 0, 1)` is at the center of the image
+  * x: →
+  * y: ↓
   * z is pointing forward
-  * x, y are oriented like pixel coordinates (x: ↓, y: →)
 
   Attributes:
     K: Camera intrinsics parameters.
@@ -250,20 +258,22 @@ class PinholeCamera(CameraSpec):
       xnp = enp.lazy.get_xnp(focal_in_px, strict=False)
 
     # TODO(epot): Could provide more customizability
-    # * Support `focal_in_mm`
+    # * Support `focal_in_mm` / `sensor_width`
     # * Support custom central point (cx, cy)
-    # * Support different focal for h, w (fx, fy)
+    # * Support different focal for w, h (fx, fy)
+    # Warning: Which API when convensions are inconsistents ?
+    # resolution == (h, w) but (fx, fy) == (fw, fh)
 
     # Central point in pixel (offset of the (0, 0) pixel)
     # Because our pixel coordinates are (0, 1), we set the central point
     # to the middle.
     h, w = resolution
-    ch = h / 2
-    cw = w / 2
+    ch = h / 2  # h == y
+    cw = w / 2  # w == x
 
     K = xnp.array([  # pylint: disable=invalid-name
-        [focal_in_px, 0, ch],
-        [0, focal_in_px, cw],
+        [focal_in_px, 0, cw],  # cx
+        [0, focal_in_px, ch],  # cy
         [0, 0, 1],
     ])
     return cls(
@@ -373,18 +383,13 @@ class PinholeCamera(CameraSpec):
 
   @vectorization.vectorize_method
   def px_centers(self):
-    # TODO(epot): Move this in `np_utils.mgrid` or similar.
-    if self.xnp is enp.lazy.tnp:  # TF Compatibility
-      tf = enp.lazy.tf
-      points2d = tf.meshgrid(
-          tf.range(self.w),
-          tf.range(self.h),
-          indexing='xy',
-      )
-      points2d = tf.cast(tf.stack(points2d, axis=-1), dtype=tf.float32)
-    else:
-      points2d = self.xnp.mgrid[0:self.h, 0:self.w]
-      points2d = einops.rearrange(points2d, 'c h w -> h w c')
+    xnp = self.xnp
+    coord_w, coord_h = xnp.meshgrid(
+        xnp.arange(self.w),  # w
+        xnp.arange(self.h),  # h
+        indexing='xy',
+    )
+    points2d = xnp.stack([coord_w, coord_h], axis=-1)
     points2d = points2d + .5
     assert points2d.shape == (self.h, self.w, 2)
     return points2d

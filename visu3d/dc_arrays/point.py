@@ -86,7 +86,7 @@ class Point2d(array_dataclass.DataclassArray):
   """2d point cloud.
 
   Attributes:
-    p: 2d (x, y) coordinates
+    p: 2d (x, y) == (u, v) == (w, h) coordinates
     rgb: uint8 color
     depth: The depth in camera coordinates.
   """

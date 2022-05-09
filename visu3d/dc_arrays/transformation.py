@@ -134,7 +134,7 @@ class Transform(TransformBase):
 
     Used to convert camera to world coordinates.
 
-    This transformation assume the following convensions:
+    This transformation assume the following conventions:
 
     * World coordinates: Floor is (x, y), z pointing upward
     * Camera coordinates: See `v3d.CameraSpec` docstring.
@@ -236,7 +236,7 @@ class Transform(TransformBase):
               f'different: {self.scale_xyz}')
     xnp = self.xnp
     scale_xyz = xnp.round(self.scale_xyz, decimals=7)
-    # TODO(epot): Move into `enp.linalg.unique`
+    # TODO(epot): Move into `enp.ops.unique`
     if xnp is enp.lazy.np:
       global_scales = xnp.unique(scale_xyz)
       raise_error = len(global_scales) != 1
@@ -548,7 +548,7 @@ def _get_r_look_at_(
     target: FloatArray['*shape 3'],
 ) -> FloatArray['*shape 3 3']:
   """Compute the `R` (3, 3) matrix."""
-  # TODO(epot): Support more convensions
+  # TODO(epot): Support more conventions
   # * `up='z'`
   # * `mode='camera'` (x==h pointing ↓, y==w pointing →) or right hand rule.
 
@@ -567,7 +567,7 @@ def _get_r_look_at_(
   # Similarly, the height is pointing downward.
   cam_h = xnp.cross(cam_forward, cam_w)
 
-  R = xnp.stack([cam_h, cam_w, cam_forward], axis=-1)  # pylint: disable=invalid-name
+  R = xnp.stack([cam_w, cam_h, cam_forward], axis=-1)  # pylint: disable=invalid-name
   return R
 
 

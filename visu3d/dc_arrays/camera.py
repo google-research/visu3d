@@ -80,6 +80,16 @@ class Camera(array_dataclass.DataclassArray):
     return self.spec.resolution
 
   @property
+  def hw(self) -> tuple[int, int]:
+    """`(Height, Width)` in pixel (for usage in `(i, j)` coordinates)."""
+    return self.spec.hw
+
+  @property
+  def wh(self) -> tuple[int, int]:
+    """`(Width, Height)` in pixel (for usage in `(u, v)` coordinates)."""
+    return self.spec.wh
+
+  @property
   def h(self) -> int:
     """Height in pixel."""
     return self.spec.h
@@ -153,8 +163,8 @@ class Camera(array_dataclass.DataclassArray):
     rgb = points2d.rgb
 
     # Compute the valid coordinates
-    h_coords = px_coords[..., 0]
-    w_coords = px_coords[..., 1]
+    w_coords = px_coords[..., 0]
+    h_coords = px_coords[..., 1]
     # pyformat: disable
     valid_coords_mask = (
         (0 <= h_coords)
@@ -171,7 +181,8 @@ class Camera(array_dataclass.DataclassArray):
     # TODO(epot): Should we create a `xnp.array` ?
     # TODO(epot): The dtype should be cloned from point.rgb !
     img = np.zeros((*self.resolution, 3), dtype=np.uint8)
-    img[px_coords[..., 0], px_coords[..., 1]] = rgb
+    # px_coords is (h, w)
+    img[px_coords[..., 1], px_coords[..., 0]] = rgb
     return img
 
   def replace_fig_config(

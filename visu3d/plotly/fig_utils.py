@@ -250,9 +250,9 @@ def _make_scatter_2d(
 ) -> go.Scattergl:
   """Returns 2d scatter plots."""
   # TODO(epot): Correct axis (x, y) to match numpy !!
-  # Currently plotly use the `(y, x)` convension. I could not find a way to
+  # Currently plotly use the `(y, x)` convention. I could not find a way to
   # invert
-  points_xy_kwargs = to_xyz_dict(coords, names='yx')
+  points_xy_kwargs = to_xyz_dict(coords, names='xy')
   return go.Scattergl(
       **points_xy_kwargs,
       mode='markers',

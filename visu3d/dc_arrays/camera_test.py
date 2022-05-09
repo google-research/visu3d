@@ -56,6 +56,8 @@ def test_camera_properties(xnp: enp.NpModule, shape: v3d.typing.Shape):
   assert cam.resolution == (H, W)
   assert cam.h == H
   assert cam.w == W
+  assert cam.wh == (W, H)
+  assert cam.hw == (H, W)
 
 
 @enp.testing.parametrize_xnp()

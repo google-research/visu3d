@@ -54,6 +54,8 @@ def test_camera_spec_init(
   assert spec.resolution == (H, W)
   assert spec.h == H
   assert spec.w == W
+  assert spec.wh == (W, H)
+  assert spec.hw == (H, W)
   assert spec.shape == spec_shape
   assert spec.K.shape == spec_shape + (3, 3)
 
@@ -97,7 +99,7 @@ def test_camera_spec_central_point(
   assert central_point_px.shape == spec_shape + point_shape + (2,)
   np.testing.assert_allclose(
       central_point_px,
-      np.broadcast_to([H / 2, W / 2], spec_shape + point_shape + (2,)),
+      np.broadcast_to([W / 2, H / 2], spec_shape + point_shape + (2,)),
   )
 
   # Round trip conversion

@@ -40,6 +40,7 @@ def _make_cam(
       pos=[0, 4, 0],  # Camera on the `y` axis
       target=[0, 0, 0],
   )
+  np.testing.assert_allclose(cam.world_from_cam.scale_xyz, [1, 1, 1])
   cam = cam.broadcast_to(shape)
   return cam
 

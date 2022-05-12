@@ -563,6 +563,7 @@ def _get_r_look_at_(
   # The width of the cam is parallel to the ground (prependicular to z), so
   # use cross-product.
   cam_w = xnp.cross(cam_forward, world_up)
+  cam_w = np_utils.normalize(cam_w)
 
   # Similarly, the height is pointing downward.
   cam_h = xnp.cross(cam_forward, cam_w)

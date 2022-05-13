@@ -195,11 +195,11 @@ def append_row(
   """Like `np.append`, but broadcast the value to `x` shape."""
   xnp = enp.get_np_module(x)
   value = xnp.asarray(value)
-  if value.ndim == 0:
+  if len(value.shape) == 0:  # pylint: disable=g-explicit-length-test
     shape = list(x.shape)
     shape[axis] = 1
     value = xnp.broadcast_to(value, shape)
-  elif value.ndim == 1:
+  elif len(value.shape) == 1:
     # TODO(epot): support actual row: append_row(x, [0, 0, 0, 1]). Might require
     # adding a `broadcast_to` which support arbitrary array.
     assert x.shape[axis] == len(value)

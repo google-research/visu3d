@@ -390,6 +390,6 @@ class PinholeCamera(CameraSpec):
         indexing='xy',
     )
     points2d = xnp.stack([coord_w, coord_h], axis=-1)
-    points2d = points2d + .5
+    points2d = xnp.asarray(points2d, dtype=xnp.float32) + .5
     assert points2d.shape == (self.h, self.w, 2)
     return points2d

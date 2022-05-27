@@ -1,19 +1,48 @@
-# Visu3d
+# v3d
 
 [![Unittests](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml/badge.svg)](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml)
 [![PyPI version](https://badge.fury.io/py/visu3d.svg)](https://badge.fury.io/py/visu3d)
 
-`visu3d` is a Python library offering:
+### Is v3d for you ?
 
-* An API to make `@dataclass` behave like array.
-* Standard primitives for 3d geometry (`Ray`, `Camera`, `Transform`,...).
+Yes!
+
+Despite the name, `visu3d` is not limited at all to visualization, nor 3d, but
+it can be used in all ML programs (and beyond).
+
+The library provides an abstraction layer on top of TF/Jax/Numpy (same code works
+everywhere) at various levels:
+
+*   **For all ML programs:** v3d introduces the `DataclassArray` abstraction which
+    significantly reduces boilerplate/verbosity when manipulating datastructures
+    by adding numpy-like indexing and vectorization to `dataclasses`. (Future
+    plans will move this to an independent module.)
+
+On top of `DataclassArray`, v3d introduces:
+
+*   **For all 3d programs (Nerf, robotics, ...):** standard primitives (camera,
+    rays, transformation, ...) that users can use and extend. While those
+    primitives can be used as-is in production code, they should also serve as a
+    show-off/inspiration of what can be achieved with `DataclassArray`.
+
+Everything in `v3d` is extensible:
+
+*   Your codebase can gradually opt in to specific features you need (e.g.
+    trivially migrate your `dataclass` to `v3d.DataclassArray` without any other
+    changes).
+*   Combine native v3d primitives with your custom ones (see doc below).
+
+On top of the `v3d` primitives:
+
+*   **Best Colab experience:** Everything is trivially visualizable with zero
+    boilerplate. Inspect & debug camera poses, trajectories,....
 
 ### Core features
 
 <section class="zippy">
 
-Everything is a `v3d.DataclassArray`: **dataclass behave like `np.array`** (with indexing, slicing, shape manipulation, vectorization,...).
-
+Everything is a `v3d.DataclassArray`: **dataclass behave like `np.array`** (with
+indexing, slicing, shape manipulation, vectorization,...).
 
 ```python
 # Single ray
@@ -49,10 +78,19 @@ Display multiple objects together:
 v3d.make_fig([cam, rays, point_cloud])
 ```
 
+Auto-plot figures with Colab magic:
+
+```python
+v3d.auto_plot_figs()  # Once at the start of the Colab
+
+cam, rays, point_cloud  # Tuple auto-displayed without `v3d.make_fig` call
+```
+
 </section>
 <section class="zippy">
 
-Same code seamlessly **works across Jax, TensorFlow, Numpy**.
+Same code seamlessly **works across Jax, TensorFlow, Numpy** (please help us for
+[torch support](https://github.com/google-research/visu3d/issues/12)).
 
 ```python
 rays = rays.as_jax()  # .as_tf(), as_np(), .as_jax()
@@ -93,7 +131,8 @@ rays = cam.rays()  # Rays in world coordinates
 px_coords = cam.px_from_world @ point_cloud
 ```
 
-See [the API](https://github.com/google-research/visu3d/tree/main/visu3d/__init__.py;l=31)<!-- {.external} !--> for a full list of primitive.
+See [the API](https://github.com/google-research/visu3d/tree/main/visu3d/__init__.py;l=31)<!-- {.external} !-->
+for a full list of primitive.
 
 </section>
 <section class="zippy">
@@ -102,8 +141,11 @@ Creating your own primitives is trivial.
 
 Converting any dataclass to dataclass array is trivial:
 
-* Inherit from `v3d.DataclassArray`
-* Use [`etils.array_types`](https://github.com/google/etils/blob/main/etils/array_types/README.md) to annotate the array fields (or exlicitly use `my_field: Any = v3d.array_field(shape=, dtype=)` instead of `dataclasses.field`)
+*   Inherit from `v3d.DataclassArray`
+*   Use
+    [`etils.array_types`](https://github.com/google/etils/blob/main/etils/array_types/README.md)
+    to annotate the array fields (or exlicitly use `my_field: Any =
+    v3d.array_field(shape=, dtype=)` instead of `dataclasses.field`)
 
 ```python
 from etils.array_types import FloatArray
@@ -125,6 +167,30 @@ corresponding protocol.
 <!-- See [the tutorial]() for more info. -->
 
 </section>
+
+### Documentation
+
+The best way to get started is to try the Colab tutorials (in the
+[docs/](https://github.com/google-research/visu3d/tree/main/docs/)):
+
+*   [Intro (Colab)](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/intro.ipynb)
+    <!-- {.external} !-->
+*   [Transform (Colab)](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/transform.ipynb)
+    <!-- {.external} !-->
+*   [Create your primitives (Colab)](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/dataclass.ipynb)
+    <!-- {.external} !-->
+
+Installation:
+
+```sh
+pip install visu3d
+```
+
+Usage:
+
+```python
+import visu3d as v3d
+```
 
 ## Installation
 

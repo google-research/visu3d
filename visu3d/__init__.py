@@ -30,6 +30,7 @@ if pytest:
 from visu3d import typing
 from visu3d.array_dataclass import array_field
 from visu3d.array_dataclass import DataclassArray
+from visu3d.array_dataclass import DataclassParams
 from visu3d.ops import stack
 from visu3d.utils import lazy_imports
 from visu3d.vectorization import vectorize_method

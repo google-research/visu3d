@@ -25,7 +25,7 @@ import visu3d as v3d
 # Activate the fixture
 set_tnp = enp.testing.set_tnp
 
-assert not v3d.Ray._v3d_tree_map_registered
+assert not v3d.Ray._dca_tree_map_registered
 
 
 @enp.testing.parametrize_xnp()

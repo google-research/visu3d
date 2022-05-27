@@ -281,12 +281,12 @@ def test_complex_shape(
   assert_dc_array_fn(p[0, ..., 0], (2, 1), xnp=xnp)
   # Indexing through np.array also supported
   assert_dc_array_fn(
-      p.flatten()[np.ones(p.size, dtype=np.bool)],
+      p.flatten()[np.ones(p.size, dtype=np.bool_)],
       (p.size,),
       xnp=xnp,
   )
   assert_dc_array_fn(
-      p.flatten()[xnp.ones(p.size, dtype=np.bool)],
+      p.flatten()[xnp.ones(p.size, dtype=np.bool_)],
       (p.size,),
       xnp=xnp,
   )

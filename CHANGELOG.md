@@ -1,6 +1,16 @@
 # Changelog
 
+<!--
+
+Changelog follow https://keepachangelog.com/ format.
+
+-->
+
 ## [Unreleased]
+
+### Changed
+
+* Camera are now displayed with a complete frame.
 
 ## [1.1.0] - 2022-05-13
 

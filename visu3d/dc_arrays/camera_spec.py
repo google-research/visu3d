@@ -36,7 +36,6 @@ from visu3d.utils.lazy_imports import plotly_base
 
 del abc  # TODO(epot): Why pytype don't like abc ?
 
-
 assert_supports_protocol = functools.partial(
     py_utils.assert_supports_protocol,
     msg='Required to support camera transformations. See `v3d.Point3d` and '
@@ -207,9 +206,33 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
         [self.w, self.h],
     ]
     corners_world = self.cam_from_px @ self.xnp.array(corners_px)
-    start = enp.lazy.np.broadcast_to([0, 0, 0], corners_world.shape)
     corners_world = corners_world * self.fig_config.scale
-    return start, corners_world
+
+    start = [
+        # 4 lines from center -> corners
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        [0, 0, 0],
+        # 4 lines for the frame
+        corners_world[0],
+        corners_world[1],
+        corners_world[2],
+        corners_world[3],
+    ]
+    end = [
+        # 4 lines from center -> corners
+        corners_world[0],
+        corners_world[1],
+        corners_world[2],
+        corners_world[3],
+        # 4 lines for the frame
+        corners_world[1],
+        corners_world[3],
+        corners_world[0],
+        corners_world[2],
+    ]
+    return self.xnp.asarray(start), self.xnp.asarray(end)
 
 
 @dataclasses.dataclass(frozen=True)

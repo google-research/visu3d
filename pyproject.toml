@@ -42,6 +42,7 @@ repository = "https://github.com/google-research/visu3d"
 dev = [
     "pytest>=3.4",
     "pytest-xdist",
+    # Development deps (linting, formating,...)
     "pylint>=2.6.0",
     "yapf",
     # Lazy deps

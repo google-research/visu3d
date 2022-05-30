@@ -61,6 +61,8 @@ if pytest:  # < Ensure open source does not trigger import
   except ImportError:
     pass
 
-__version__ = '1.1.0'
+# Updating this will auto-trigger a release on PyPI and GitHub
+# Note: Make sure to also update the `CHANGELOG.md` before this.
+__version__ = '1.2.0'
 
 del sys, pytest

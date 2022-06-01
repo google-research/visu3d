@@ -65,7 +65,7 @@ def _map_mapping(fn, *dicts):
 
 def _map_sequence(fn, *lists):
   list_cls = type(lists[0])
-  # TODO(py3.10): Use strict=True
+  # TODO(py310): Use strict=True
   return list_cls(tree_map(fn, *vals) for vals in zip(*lists))
 
 

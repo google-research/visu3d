@@ -184,7 +184,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     # conflicts:
     # * Inheritance fails with non-default argument 'K' follows default argument
     # * Pytype complains too
-    # TODO(py3.10): Cleanup using `dataclass(kw_only)`
+    # TODO(py310): Cleanup using `dataclass(kw_only)`
     new_self = self.replace()
     assert new_self is not self
     new_self._setattr('fig_config', new_config)  # pylint: disable=protected-access

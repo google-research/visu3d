@@ -356,8 +356,14 @@ class DataclassArray(fig_utils.Visualizable):
     """All array fields, including `None` values."""
     # Validate and normalize array fields (e.g. list -> np.array,...)
     # At this point, `ForwardRef` should have been resolved.
-    hints = typing.get_type_hints(type(self))
-    # TODO(py3.8):
+    try:
+      hints = typing.get_type_hints(type(self))
+    except Exception as e:  # pylint: disable=broad-except
+      epy.reraise(
+          e,
+          prefix=f'Could not infer typing annotation of {type(self).__name__} '
+          f'defined in {type(self).__module__}')
+    # TODO(py38):
     # return {  # pylint: disable=g-complex-comprehension
     #     f.name: array_field
     #     for f in dataclasses.fields(self)
@@ -526,7 +532,7 @@ class DataclassArray(fig_utils.Visualizable):
       if set(non_init_fields) != {'fig_config'}:
         raise ValueError(
             '`v3d.DataclassArray` with init=False field not supported yet.')
-      # TODO(py3.10): Delete once dataclass supports `kw_only=True`
+      # TODO(py310): Delete once dataclass supports `kw_only=True`
       self._setattr('fig_config', non_init_fields['fig_config'])  # pylint: disable=protected-access
     return self
 
@@ -772,7 +778,7 @@ def _make_array_field(
   # a warning / error ?
   if _METADATA_KEY in field.metadata:  # Field defined as `= v3d.array_field`:
     field_metadata = field.metadata[_METADATA_KEY]
-  # TODO(py3.8):
+  # TODO(py38):
   # elif field_metadata := _type_to_field_metadata(hints[field.name]):
   else:
     field_metadata = _type_to_field_metadata(hints[field.name])

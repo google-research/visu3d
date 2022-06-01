@@ -22,10 +22,10 @@ import typing
 from typing import Any, Callable, Optional
 
 from etils import array_types as array_types_lib
-import typing_extensions  # TODO(py3.8): Remove
+import typing_extensions  # TODO(py38): Remove
 from visu3d import array_dataclass
 
-TypeAlias = Any  # TODO(py3.9): Use real alias once 3.7 is dropped.
+TypeAlias = Any  # TODO(py39): Use real alias once 3.7 is dropped.
 _LeafFn = Callable[[TypeAlias], None]
 
 _NoneType = type(None)

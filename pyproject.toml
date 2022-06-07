@@ -25,6 +25,7 @@ keywords = [
 
 dependencies = [
     "einops",
+    # If modifying this, also modify `pytest_and_autopublish.yml`
     "etils[array_types,edc,enp,epath,epy,etree]",
     "lark",
     "numpy",

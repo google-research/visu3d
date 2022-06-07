@@ -62,7 +62,9 @@ if pytest:  # < Ensure open source does not trigger import
     pass
 
 # Updating this will auto-trigger a release on PyPI and GitHub
-# Note: Make sure to also update the `CHANGELOG.md` before this.
+# Note:
+# * Make sure to also update the `CHANGELOG.md` before this.
+# * Make sure to also trigger an `etils` release
 __version__ = '1.2.0'
 
 del sys, pytest

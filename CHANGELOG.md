@@ -12,11 +12,11 @@ Changelog follow https://keepachangelog.com/ format.
 
 ### Changed
 
-* Camera are now displayed with a complete frame.
+*   Camera are now displayed with a complete frame.
 
 ## [1.1.0] - 2022-05-13
 
-* Normalize `look_at` by default
+*   Normalize `look_at` by default
 
 [Unreleased]: https://github.com/google-research/visu3d/compare/v1.2.0...HEAD
 [1.2.0]: https://github.com/google-research/visu3d/compare/v1.1.0...v1.2.0

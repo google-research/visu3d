@@ -16,20 +16,15 @@
 
 from __future__ import annotations
 
-import collections
 import dataclasses
 import importlib
 import types
-from typing import Any, Callable, Iterable, Optional, Type, TypeVar, Union
+from typing import Any, Optional, Type, TypeVar, Union
 
 # If these are reused, we could move them to `epy`.
 
 _T = TypeVar('_T')
 _SelfOrCls = Union[Any, Type[Any]]
-
-_K = TypeVar('_K')
-_Tin = TypeVar('_Tin')
-_Tout = TypeVar('_Tout')
 
 
 def supports_protocol(
@@ -75,55 +70,6 @@ class LazyModule:
     if self.module is None:  # Load on first call
       self.module = importlib.import_module(self.module_name)
     return getattr(self.module, name)
-
-
-def identity(x: _Tin) -> _Tin:
-  """Pass through function."""
-  return x
-
-
-def groupby(
-    iterable: Iterable[_Tin],
-    *,
-    key: Callable[[_Tin], _K],
-    value: Callable[[_Tin], _Tout] = identity,
-) -> dict[_K, list[_Tout]]:
-  """Similar to `itertools.groupby` but return result as a `dict()`.
-
-  Example:
-
-  ```python
-  out = py_utils.groupby(
-      ['555', '4', '11', '11', '333'],
-      key=len,
-      value=int,
-  )
-  # Order is consistent with above
-  assert out == {
-      3: [555, 333],
-      1: [4],
-      2: [11, 11],
-  }
-  ```
-
-  Other difference with `itertools.groupby`:
-
-   * Iterable do not need to be sorted. Order of the original iterator is
-     preserved in the group.
-   * Transformation can be applied to the value too
-
-  Args:
-    iterable: The iterable to group
-    key: Mapping applied to group the values (should return a hashable)
-    value: Mapping applied to the values
-
-  Returns:
-    The dict
-  """
-  groups = collections.defaultdict(list)
-  for v in iterable:
-    groups[key(v)].append(value(v))
-  return dict(groups)
 
 
 class _Ellipsis:

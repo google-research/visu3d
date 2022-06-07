@@ -18,10 +18,10 @@ from __future__ import annotations
 
 from typing import Iterable  # pylint: disable=g-multiple-import
 
+from etils import epy
 from visu3d import array_dataclass
 from visu3d.typing import DcT
 from visu3d.utils import np_utils
-from visu3d.utils import py_utils
 
 
 def stack(
@@ -38,7 +38,7 @@ def stack(
                     f'{type(first_arr)}')
 
   # This might have some edge cases if user try to stack subclasses
-  types = py_utils.groupby(
+  types = epy.groupby(
       arrays,
       key=type,
       value=lambda x: type(x).__name__,

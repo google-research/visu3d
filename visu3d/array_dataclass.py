@@ -390,7 +390,7 @@ class DataclassArray(fig_utils.Visualizable):
     if not self._array_fields:  # No fields have been defined.
       return None
 
-    xnps = py_utils.groupby(
+    xnps = epy.groupby(
         self._array_fields,
         key=lambda f: f.xnp,
         value=lambda f: f.name,
@@ -416,7 +416,7 @@ class DataclassArray(fig_utils.Visualizable):
       return None
 
     # First collect all shapes and compute the final shape.
-    shape_to_names = py_utils.groupby(
+    shape_to_names = epy.groupby(
         self._array_fields,
         key=lambda f: f.host_shape,
         value=lambda f: f.name,

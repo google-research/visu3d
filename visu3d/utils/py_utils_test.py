@@ -16,30 +16,7 @@
 
 from __future__ import annotations
 
-from visu3d.utils import py_utils
 
-
-def test_group_by():
-  out = py_utils.groupby(
-      [0, 30, 2, 4, 2, 20, 3],
-      key=lambda x: x < 10,
-  )
-  # Order is consistent with above
-  assert out == {
-      True: [0, 2, 4, 2, 3],
-      False: [30, 20],
-  }
-
-
-def test_group_by_value():
-  out = py_utils.groupby(
-      ['111', '1', '11', '11', '4', '555'],
-      key=len,
-      value=int,
-  )
-  # Order is consistent with above
-  assert out == {
-      1: [1, 4],
-      2: [11, 11],
-      3: [111, 555],
-  }
+# Pytest raises error if no tests is detected
+def test_empty():
+  pass

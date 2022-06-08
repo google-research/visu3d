@@ -130,23 +130,26 @@ class DataclassArray(fig_utils.Visualizable):
       enp.lazy.jax.tree_util.register_pytree_node_class(cls)
       cls._v3d_tree_map_registered = True  # pylint: disable=protected-access
 
-    # Note: Calling the `_all_array_fields` property during `__init__` will
-    # normalize the arrays (`list` -> `np.ndarray`). This is done in the
-    # `_ArrayField` contructor
     if not self._all_array_fields:
       raise ValueError(
           f'{self.__class__.__qualname__} should have at least one '
           '`v3d.array_field`')
 
-    # Validate the array type is consistent and cast np -> xnp
-    xnp = self._cast_dtype_inplace()
+    # Validate and normalize array fields
+    # * Maybe cast (list, np) -> xnp
+    # * Maybe cast dtype
+    # * Maybe broadcast shapes
+    # Because this is only done inside `__init__`, it is ok to mutate self.
+
+    # Cast and validate the array xnp are consistent
+    xnp = self._cast_xnp_dtype_inplace()
 
     # Validate the batch shape is consistent
-    # Because this is only done inside `__init__`, it should be ok to
-    # mutate self.
     # However, we need to be careful that `_ArrayField` never uses
     # `@epy.cached_property`
     shape = self._broadcast_shape_inplace()
+
+    # TODO(epot): When to validate (`field.validate()`)
 
     if xnp is None:  # No values
       # Inside `jax.tree_utils`, tree-def can be created with `None` values.
@@ -354,7 +357,6 @@ class DataclassArray(fig_utils.Visualizable):
   @epy.cached_property
   def _all_array_fields(self) -> dict[str, _ArrayField]:
     """All array fields, including `None` values."""
-    # Validate and normalize array fields (e.g. list -> np.array,...)
     # At this point, `ForwardRef` should have been resolved.
     try:
       hints = typing.get_type_hints(type(self))
@@ -385,14 +387,21 @@ class DataclassArray(fig_utils.Visualizable):
         f for f in self._all_array_fields.values() if not f.is_value_missing
     ]
 
-  def _cast_dtype_inplace(self) -> Optional[enp.NpModule]:
+  def _cast_xnp_dtype_inplace(self) -> Optional[enp.NpModule]:
     """Validate `xnp` are consistent and cast `np` -> `xnp` in-place."""
     if not self._array_fields:  # No fields have been defined.
       return None
 
+    # Validate the dtype
+    def _get_xnp(f: _ArrayField) -> enp.NpModule:
+      try:
+        return np_utils.get_xnp(f.value, strict=False)
+      except Exception as e:  # pylint: disable=broad-except
+        epy.reraise(e, prefix=f'Invalid {f.qualname}: ')
+
     xnps = epy.groupby(
         self._array_fields,
-        key=lambda f: f.xnp,
+        key=_get_xnp,
         value=lambda f: f.name,
     )
     if not xnps:
@@ -400,9 +409,12 @@ class DataclassArray(fig_utils.Visualizable):
     xnp = _infer_xnp(xnps)
 
     def _cast_field(f: _ArrayField) -> None:
-      if f.xnp is xnp:
-        return
-      self._setattr(f.name, np_utils.asarray(f.value, xnp=xnp))
+      try:
+        self._setattr(f.name, np_utils.asarray(f.value, xnp=xnp, dtype=f.dtype))
+        # After the field has been set, we validate the shape
+        f.assert_shape()
+      except Exception as e:  # pylint: disable=broad-except
+        epy.reraise(e, prefix=f'Invalid {f.qualname}: ')
 
     self._map_field(
         array_fn=_cast_field,
@@ -627,6 +639,11 @@ def array_field(
   return dataclasses.field(**field_kwargs, metadata={_METADATA_KEY: v3d_field})
 
 
+# TODO(epot): Should refactor `_ArrayField` in `_DataclassArrayField` and
+# `_ArrayField` depending on whether dtype is `DataclassArray` or not.
+# Alternativelly, maybe should create a `DcArrayDType` dtype instead.
+
+
 @edc.dataclass
 @dataclasses.dataclass
 class _ArrayFieldMetadata:
@@ -634,11 +651,11 @@ class _ArrayFieldMetadata:
 
   Attributes:
     inner_shape: Inner shape
-    dtype: Type of the array. Can be `int`, `float`, `np.dtype` or
+    dtype: Type of the array. Can be `array_types.dtypes.DType` or
       `v3d.DataclassArray` for nested arrays.
   """
   inner_shape: Shape
-  dtype: DTypeArg
+  dtype: Union[array_types.dtypes.DType, type[DataclassArray]]
 
   def __post_init__(self):
     """Normalizing/validating the shape/dtype."""
@@ -647,9 +664,10 @@ class _ArrayFieldMetadata:
     if None in self.inner_shape:
       raise ValueError(f'Shape should be defined. Got: {self.inner_shape}')
 
-    # Validate dtype
+    # Validate/normalize the dtype
     if not self.is_dataclass:
-      self.dtype = _validate_dtype(self.dtype)
+      self.dtype = array_types.dtypes.DType.from_value(self.dtype)
+      # TODO(epot): Filter invalid dtypes, like `str` ?
 
   def to_dict(self) -> dict[str, Any]:
     """Returns the dict[field_name, field_value]."""
@@ -658,9 +676,7 @@ class _ArrayFieldMetadata:
   @property
   def is_dataclass(self) -> bool:
     """Returns `True` if the field is a dataclass."""
-    # Need to check `type` first as `issubclass` fails for `np.dtype('int32')`
-    dtype = self.dtype
-    return isinstance(dtype, type) and issubclass(dtype, DataclassArray)
+    return epy.issubclass(self.dtype, DataclassArray)
 
 
 @edc.dataclass
@@ -675,40 +691,15 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
   name: str
   host: DataclassArray
 
-  def __post_init__(self):
-    if self.is_value_missing:  # No validation when there is no value
-      return
-    if self.is_dataclass:
-      self._init_dataclass()
-    else:
-      self._init_array()
-
-    # Common assertions to all fields types
-    if self.host_shape + self.inner_shape != self.value.shape:
-      raise ValueError(
-          f'Expected {type(self.host).__name__}.{self.name} shape to be '
-          f'{(py_utils.Ellipsis, *self.inner_shape)}. Got: {self.value.shape}')
+  @property
+  def qualname(self) -> str:
+    """Returns the `'MyClass.attr_name'`."""
+    return f'{type(self.host).__name__}.{self.name}'
 
   @property
   def xnp(self) -> enp.NpModule:
     """Numpy module of the field."""
     return np_utils.get_xnp(self.value)
-
-  def _init_array(self) -> None:
-    """Initialize when the field is an array."""
-    if isinstance(self.value, DataclassArray):
-      raise TypeError(
-          f'{self.name} should be {self.dtype}. Got: {type(self.value)}')
-    # Convert and normalize the array
-    xnp = lazy.get_xnp(self.value, strict=False)
-    value = xnp.asarray(self.value, dtype=self.dtype)
-    self.host._setattr(self.name, value)  # pylint: disable=protected-access
-
-  def _init_dataclass(self) -> None:
-    """Initialize when the field is a nested dataclass array."""
-    if not isinstance(self.value, self.dtype):
-      raise TypeError(
-          f'{self.name} should be {self.dtype}. Got: {type(self.value)}')
 
   @property
   def value(self) -> DcOrArrayT:
@@ -744,6 +735,12 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
     # empty shapes to True `bool(shape) == True` when `shape=()`
     return tuple(shape)
 
+  def assert_shape(self) -> None:
+    if self.host_shape + self.inner_shape != self.value.shape:
+      raise ValueError(
+          f'Shape should be '
+          f'{(py_utils.Ellipsis, *self.inner_shape)}. Got: {self.value.shape}')
+
   def broadcast_to(self, shape: Shape) -> DcOrArrayT:
     """Broadcast the host_shape."""
     final_shape = shape + self.inner_shape
@@ -751,19 +748,6 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
       return self.value.broadcast_to(final_shape)
     else:
       return self.xnp.broadcast_to(self.value, final_shape)
-
-
-def _validate_dtype(dtype) -> np.dtype:
-  """Validate and normalize the dtype."""
-  if dtype is int:
-    dtype = np.int32
-  elif dtype is float:
-    dtype = np.float32
-
-  np_dtype = np.dtype(dtype)
-  if np_dtype.kind == 'O':
-    raise ValueError(f'Array field dtype={dtype} not supported.')
-  return np_dtype
 
 
 def _make_array_field(
@@ -802,7 +786,7 @@ def _type_to_field_metadata(hint: TypeAlias) -> Optional[_ArrayFieldMetadata]:
     try:
       return _ArrayFieldMetadata(
           inner_shape=shape_parsing.get_inner_shape(array_type.shape),
-          dtype=_validate_dtype(array_type.dtype),
+          dtype=array_type.dtype,
       )
     except Exception as e:  # pylint: disable=broad-except
       epy.reraise(e, prefix=f'Invalid shape annotation {hint}.')

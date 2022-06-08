@@ -30,10 +30,19 @@ from visu3d.typing import Shape  # pylint: disable=g-multiple-import
 set_tnp = enp.testing.set_tnp
 
 
+# TODO(epot): Test dtype `complex`, `str`
+
+
 @dataclasses.dataclass(frozen=True)
 class Point(v3d.DataclassArray):
   x: FloatArray['*shape']
   y: FloatArray['*shape']
+
+
+@dataclasses.dataclass(frozen=True)
+class PointWrapper(v3d.DataclassArray):
+  pts: Point
+  rgb: FloatArray['*shape 3']
 
 
 @dataclasses.dataclass(frozen=True)
@@ -317,7 +326,37 @@ def test_einops_reshape(
   )
 
 
+def test_wrong_input_type():
+  pts = Point(x=1, y=1)
+
+  # str instead of ndarray
+  with pytest.raises(
+      TypeError, match='Could not infer numpy module'):
+    _ = Point(
+        x=1,
+        y='a',
+    )
+
+  # DataclassArray instead of ndarray
+  with pytest.raises(TypeError, match='Invalid Point.y: Expected .*f32'):
+    _ = Point(
+        x=1,
+        y=pts,
+    )
+
+  # ndarray instead of DataclassArray
+  with pytest.raises(TypeError, match='Invalid PointWrapper.pts:'):
+    _ = PointWrapper(
+        pts=enp.lazy.np.array(.1),
+        rgb=pts,
+    )
+
+  # TODO(epot): Test invalid casting (float -> int)
+  # TODO(epot): Test non-matching shape
+
+
 def test_isometrie_wrong_input():
+
   # Incompatible types
   with pytest.raises(ValueError, match='Conflicting numpy types'):
     _ = Isometrie(
@@ -326,7 +365,7 @@ def test_isometrie_wrong_input():
     )
 
   # Bad inner shape
-  with pytest.raises(ValueError, match='Expected Isometrie.r shape to be'):
+  with pytest.raises(ValueError, match='Invalid Isometrie.r: Shape should be'):
     _ = Isometrie(
         r=np.zeros((3, 2)),
         t=np.zeros((2,)),

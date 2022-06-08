@@ -8,6 +8,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*   Support more complex `DType`.
+
 ## [1.2.0] - 2022-05-27
 
 ### Changed

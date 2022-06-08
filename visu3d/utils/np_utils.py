@@ -22,6 +22,7 @@ from __future__ import annotations
 from typing import Any, Union, Optional
 
 import einops
+from etils import array_types
 from etils import enp
 from etils.array_types import Array, ArrayLike, FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
@@ -41,12 +42,12 @@ def size_of(shape: Shape) -> int:
   return size
 
 
-def get_xnp(x: Any) -> enp.NpModule:
+def get_xnp(x: Any, *, strict: bool = True) -> enp.NpModule:
   """Returns the np module associated with the given array or DataclassArray."""
   if isinstance(x, array_dataclass.DataclassArray):
     xnp = x.xnp
-  elif enp.lazy.is_array(x):
-    xnp = enp.lazy.get_xnp(x)
+  elif enp.lazy.is_array(x, strict=strict):
+    xnp = enp.lazy.get_xnp(x, strict=strict)
   else:
     raise TypeError(
         f'Unexpected array type: {type(x)}. Could not infer numpy module.')
@@ -101,24 +102,34 @@ def asarray(
   Returns:
     True if `x` is `xnp.ndarray` or `v3d.DataclassArray`
   """
+  # Potentially forward `None`, if optional is accepted
   if x is None:
     if optional:
       return x
     else:
       raise ValueError('Expected array, got `None`')
-  if isinstance(x, (int, float, list, tuple)):
-    x = xnp.asarray(x, dtype=dtype)
 
-  detected_xnp = get_xnp(x)
+  _assert_valid_xnp_cast(from_=get_xnp(x, strict=False), to=xnp)
 
-  # Only `np` -> `xnp` conversion is accepted
-  if detected_xnp is not enp.lazy.np and detected_xnp is not xnp:
-    raise TypeError(f'Expected {xnp.__name__} got {detected_xnp.__name__}')
+  # TODO(epot): Could have a DataclassDtype to unify the two cases ?
 
+  # Handle DataclassArray
   if isinstance(x, array_dataclass.DataclassArray):
+    # If dtype is given, validate this match
+    if dtype is not None and (not isinstance(dtype, type) or
+                              not isinstance(x, dtype)):
+      raise TypeError(f'Expected {dtype}. Got: {type(x)}')
     return x.as_xnp(xnp)
-  else:
-    return xnp.asarray(x, dtype=dtype)
+
+  # Handle ndarray
+  dtype = array_types.dtypes.DType.from_value(dtype)
+  return dtype.asarray(x, xnp=xnp)
+
+
+def _assert_valid_xnp_cast(from_: enp.NpModule, to: enp.NpModule) -> None:
+  """Only `np` -> `xnp` conversion is accepted."""
+  if from_ is not enp.lazy.np and from_ is not to:
+    raise TypeError(f'Expected {to.__name__} got {from_.__name__}')
 
 
 def to_absolute_axis(axis: Axes, *, ndim: int) -> Axes:

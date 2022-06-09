@@ -20,7 +20,7 @@ import dataclasses
 from typing import Any, Callable
 
 from etils import enp
-from etils.array_types import IntArray, FloatArray  # pylint: disable=g-multiple-import
+from etils.array_types import f32, i32  # pylint: disable=g-multiple-import
 import numpy as np
 import pytest
 import visu3d as v3d
@@ -35,20 +35,20 @@ set_tnp = enp.testing.set_tnp
 
 @dataclasses.dataclass(frozen=True)
 class Point(v3d.DataclassArray):
-  x: FloatArray['*shape']
-  y: FloatArray['*shape']
+  x: f32['*shape']
+  y: f32['*shape']
 
 
 @dataclasses.dataclass(frozen=True)
 class PointWrapper(v3d.DataclassArray):
   pts: Point
-  rgb: FloatArray['*shape 3']
+  rgb: f32['*shape 3']
 
 
 @dataclasses.dataclass(frozen=True)
 class Isometrie(v3d.DataclassArray):
-  r: FloatArray['... 3 3']
-  t: IntArray[..., 2]
+  r: f32['... 3 3']
+  t: i32[..., 2]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -64,8 +64,8 @@ class Nested(v3d.DataclassArray):
 class WithStatic(v3d.DataclassArray):
   """Mix of static and array fields."""
   static: str
-  x: FloatArray['... 3']
-  y: Any = v3d.array_field(shape=(2, 2))
+  x: f32['... 3']
+  y: Any = v3d.array_field(shape=(2, 2), dtype=np.float32)
 
 
 def _assert_point(p: Point, shape: Shape, xnp: enp.NpModule = None):
@@ -338,7 +338,7 @@ def test_wrong_input_type():
     )
 
   # DataclassArray instead of ndarray
-  with pytest.raises(TypeError, match='Invalid Point.y: Expected .*f32'):
+  with pytest.raises(TypeError, match='Invalid Point.y: Expected .*float32'):
     _ = Point(
         x=1,
         y=pts,

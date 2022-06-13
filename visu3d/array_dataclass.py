@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import dataclasses
 import typing
-from typing import Any, Callable, Generic, Iterator, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, ClassVar, Generic, Iterator, Optional, Tuple, Type, TypeVar, Union
 
 import einops
 from etils import array_types
@@ -50,6 +50,22 @@ _Indices = Tuple[_IndiceItem]  # Normalized slicing
 _IndicesArg = Union[_IndiceItem, _Indices]
 
 _METADATA_KEY = 'v3d_field'
+
+
+@dataclasses.dataclass(frozen=True)
+class DataclassParams:
+  """Params controlling the DataclassArray behavior.
+
+  Saved in `cls.__dca_params__`.
+
+  Attributes:
+    broadcast: If `False`, disable input broadcasting
+    cast_dtype: If `False`, do not auto-cast inputs `dtype`
+    cast_list: If `False`, do not auto-cast lists to `xnp.ndarray`
+  """
+  broadcast: bool = True
+  cast_dtype: bool = True
+  cast_list: bool = True
 
 
 class DataclassArray(fig_utils.Visualizable):
@@ -105,6 +121,10 @@ class DataclassArray(fig_utils.Visualizable):
   field annotated with `field: np.ndarray` or similar).
 
   """
+  # Child class inherit the default params by default, but can also
+  # overwrite them.
+  __dca_params__: ClassVar[DataclassParams] = DataclassParams()
+
   _shape: Shape
   _xnp: enp.NpModule
 
@@ -113,7 +133,7 @@ class DataclassArray(fig_utils.Visualizable):
     # TODO(epot): Could have smart __repr__ which display types if array have
     # too many values.
     edc.dataclass(kw_only=True, repr=True)(cls)
-    cls._v3d_tree_map_registered = False
+    cls._dca_tree_map_registered = False
 
   def __post_init__(self) -> None:
     """Validate and normalize inputs."""
@@ -126,9 +146,9 @@ class DataclassArray(fig_utils.Visualizable):
 
     # Register the tree_map here instead of `__init_subclass__` as `jax` may
     # not have been registered yet during import
-    if enp.lazy.has_jax and not cls._v3d_tree_map_registered:  # pylint: disable=protected-access
+    if enp.lazy.has_jax and not cls._dca_tree_map_registered:  # pylint: disable=protected-access
       enp.lazy.jax.tree_util.register_pytree_node_class(cls)
-      cls._v3d_tree_map_registered = True  # pylint: disable=protected-access
+      cls._dca_tree_map_registered = True  # pylint: disable=protected-access
 
     if not self._all_array_fields:
       raise ValueError(
@@ -395,7 +415,10 @@ class DataclassArray(fig_utils.Visualizable):
     # Validate the dtype
     def _get_xnp(f: _ArrayField) -> enp.NpModule:
       try:
-        return np_utils.get_xnp(f.value, strict=False)
+        return np_utils.get_xnp(
+            f.value,
+            strict=not self.__dca_params__.cast_list,
+        )
       except Exception as e:  # pylint: disable=broad-except
         epy.reraise(e, prefix=f'Invalid {f.qualname}: ')
 
@@ -410,7 +433,13 @@ class DataclassArray(fig_utils.Visualizable):
 
     def _cast_field(f: _ArrayField) -> None:
       try:
-        self._setattr(f.name, np_utils.asarray(f.value, xnp=xnp, dtype=f.dtype))
+        new_value = np_utils.asarray(
+            f.value,
+            xnp=xnp,
+            dtype=f.dtype,
+            cast_dtype=self.__dca_params__.cast_dtype,
+        )
+        self._setattr(f.name, new_value)
         # After the field has been set, we validate the shape
         f.assert_shape()
       except Exception as e:  # pylint: disable=broad-except
@@ -460,6 +489,10 @@ class DataclassArray(fig_utils.Visualizable):
     def _broadcast_field(f: _ArrayField) -> None:
       if f.host_shape == final_shape:  # Already broadcasted
         return
+      elif not self.__dca_params__.broadcast:  # Broadcasing disabled
+        raise ValueError(
+            f'{type(self).__qualname__} has `broadcast=False`. Cannot '
+            f'broadcast {f.name} from {f.value.shape} to {final_shape}')
       self._setattr(f.name, f.broadcast_to(final_shape))
 
     self._map_field(

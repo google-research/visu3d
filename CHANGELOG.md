@@ -8,7 +8,10 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
-*   Support more complex `DType`.
+*   Support more complex `DType` (`FloatArray`,... accept `bfloat16`,
+    `float64`,...).
+*   Added: `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams`
+    to configure the dataclass options.
 
 ## [1.2.0] - 2022-05-27
 

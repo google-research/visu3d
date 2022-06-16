@@ -85,6 +85,7 @@ def asarray(
     xnp: enp.NpModule = None,
     dtype: Optional[DTypeArg] = None,
     optional: bool = False,
+    cast_dtype: bool = True,
 ) -> DcOrArrayT:
   """Convert `list` to arrays.
 
@@ -98,6 +99,7 @@ def asarray(
       strict
     dtype: If given, cast the array to the dtype
     optional: If True, `x` can be None
+    cast_dtype: If False, do not cast the x dtype
 
   Returns:
     True if `x` is `xnp.ndarray` or `v3d.DataclassArray`
@@ -123,7 +125,7 @@ def asarray(
 
   # Handle ndarray
   dtype = array_types.dtypes.DType.from_value(dtype)
-  return dtype.asarray(x, xnp=xnp)
+  return dtype.asarray(x, xnp=xnp, casting='all' if cast_dtype else 'none')
 
 
 def _assert_valid_xnp_cast(from_: enp.NpModule, to: enp.NpModule) -> None:

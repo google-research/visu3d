@@ -20,7 +20,7 @@ import dataclasses
 from typing import Any, Callable
 
 from etils import enp
-from etils.array_types import f32, i32  # pylint: disable=g-multiple-import
+from etils.array_types import FloatArray, IntArray, f32, i32  # pylint: disable=g-multiple-import
 import numpy as np
 import pytest
 import visu3d as v3d
@@ -533,3 +533,62 @@ def test_jax_vmap():
   # pos was updated
   np.testing.assert_allclose(y.x, np.ones((batch_shape, 3)))
   np.testing.assert_allclose(y.y, np.zeros((batch_shape, 2, 2)))
+
+
+@enp.testing.parametrize_xnp()
+def test_dataclass_params_no_cast(xnp: enp.NpModule):
+
+  @dataclasses.dataclass(frozen=True)
+  class PointNoCast(v3d.DataclassArray):
+    __dca_params__ = v3d.DataclassParams(cast_dtype=False)
+
+    x: FloatArray['*shape']
+    y: IntArray['*shape']
+
+  with pytest.raises(ValueError, match='Cannot cast float16'):
+    PointNoCast(
+        x=xnp.array([1, 2, 3], dtype=np.float16),
+        y=xnp.array([1, 2, 3], dtype=np.float16),
+    )
+
+  p = PointNoCast(
+      x=xnp.array([1, 2, 3], dtype=np.float16),
+      y=xnp.array([1, 2, 3], dtype=np.uint8),
+  )
+  assert p.shape == (3,)
+  assert p.x.dtype == np.float16
+  assert p.y.dtype == np.uint8
+
+
+@enp.testing.parametrize_xnp()
+def test_dataclass_params_no_list(xnp: enp.NpModule):
+
+  @dataclasses.dataclass(frozen=True)
+  class PointNoList(v3d.DataclassArray):
+    __dca_params__ = v3d.DataclassParams(cast_list=False)
+
+    x: FloatArray['*shape']
+    y: IntArray['*shape']
+
+  with pytest.raises(TypeError, match='Could not infer numpy module'):
+    PointNoList(
+        x=xnp.array(1, dtype=np.float16),
+        y=[1, 2, 3],
+    )
+
+
+@enp.testing.parametrize_xnp()
+def test_dataclass_params_no_broadcast(xnp: enp.NpModule):
+
+  @dataclasses.dataclass(frozen=True)
+  class PointNoBroadcast(v3d.DataclassArray):
+    __dca_params__ = v3d.DataclassParams(broadcast=False)
+
+    x: FloatArray['*shape']
+    y: IntArray['*shape']
+
+  with pytest.raises(ValueError, match='Cannot broadcast'):
+    PointNoBroadcast(
+        x=xnp.array(1, dtype=np.float16),
+        y=xnp.array([1, 2, 3], dtype=np.float16),
+    )

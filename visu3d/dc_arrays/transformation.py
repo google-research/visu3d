@@ -556,14 +556,14 @@ def _get_r_look_at_(
   _assert_shape(pos, 'pos')
   _assert_shape(target, 'target')
 
-  cam_forward = np_utils.normalize(target - pos)
+  cam_forward = enp.linalg.normalize(target - pos)
 
   # In world coordinates, `z` is pointing up
   world_up = xnp.array([0, 0, 1])
   # The width of the cam is parallel to the ground (prependicular to z), so
   # use cross-product.
   cam_w = xnp.cross(cam_forward, world_up)
-  cam_w = np_utils.normalize(cam_w)
+  cam_w = enp.linalg.normalize(cam_w)
 
   # Similarly, the height is pointing downward.
   cam_h = xnp.cross(cam_forward, cam_w)

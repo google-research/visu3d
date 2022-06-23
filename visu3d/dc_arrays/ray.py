@@ -103,7 +103,7 @@ class Ray(array_dataclass.DataclassArray):
 
   def normalize(self) -> Ray:
     """Normalize the directions."""
-    return self.replace(dir=np_utils.normalize(self.dir))
+    return self.replace(dir=enp.linalg.normalize(self.dir))
 
   def mean(self, *, axis: Axes = None) -> Ray:
     """Returns the average ray."""

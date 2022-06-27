@@ -470,11 +470,6 @@ def test_transformation_scale(
       expected_scale_xyz=[1, 1, 1],
       expected_scale=1,
   )
-  if xnp == enp.lazy.jnp and tr_shape:
-    # Jax don't support error checking + vectorization, so will return smallest
-    expected_scale = 1.5
-  else:
-    expected_scale = None
   assert_scale(
       tr.mul_scale([2, -3, 1.5]),
       expected_r=[
@@ -484,7 +479,7 @@ def test_transformation_scale(
       ],
       # TODO(epot): Detect scale sign
       expected_scale_xyz=[2, 3, 1.5],
-      expected_scale=expected_scale,
+      expected_scale=None,
   )
 
 

@@ -253,11 +253,7 @@ class Transform(TransformBase):
       # This won't have any effect when the function is traced.
       from jax.experimental import checkify  # pytype: disable=import-error  # pylint: disable=g-import-not-at-top
 
-      try:
-        checkify.check(global_count[0] == 3, msg=_err_msg())
-      except NotImplementedError:  # checkify + vmap not supported
-        # Could print a warning but probably to noisy for this small edge case.
-        pass
+      checkify.check(global_count[0] == 3, msg=_err_msg())
 
       raise_error = False
     elif xnp is enp.lazy.tnp:

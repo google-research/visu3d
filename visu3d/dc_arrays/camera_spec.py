@@ -107,6 +107,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
       repr=False,
       init=False,
   )
+  focal_length: Tuple[float, float]
 
   @property
   def h(self) -> int:
@@ -118,13 +119,59 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
 
   @property
   def hw(self) -> tuple[int, int]:
-    """`(Height, Width)` in pixel (for usage in `(i, j)` coordinates)."""
+    """`(Height, Width)` in pixel (for usage in `(u, v)` coordinates)."""
     return (self.h, self.w)
 
   @property
   def wh(self) -> tuple[int, int]:
-    """`(Width, Height)` in pixel (for usage in `(u, v)` coordinates)."""
+    """`(Width, Height)` in pixel (for usage in `(i, j)` coordinates)."""
     return (self.w, self.h)
+
+  @property
+  def fw(self) -> float:
+    """Focal length (along x-axis) in pixels (for usage in `(i, j)` coordinates)."""
+    return self.focal_length[0]
+
+  @property
+  def fh(self) -> float:
+    """Focal length (along y-axis) in pixels (for usage in `(i, j)` coordinates)."""
+    return self.focal_length[1]
+
+  @property
+  def focal_px_wh(self) -> tuple[float, float]:
+    """Focal length in pixel (`(fw, fh)`)."""
+    return (self.fw, self.fh)
+
+  @property
+  def focal_px(self) -> float:
+    """Unique Focal length in pixels (when fw == fh)."""
+
+    def _err_msg():
+      return (
+          'Cannot get `CameraSpec.focal_px` when fw and fh are '
+          f'different: {self.focal_px_wh}'
+      )
+
+    if self.fw != self.fh:
+      raise ValueError(_err_msg())
+
+    return self.fw
+
+  @property
+  def fov_w(self) -> float:
+    """Field of view (horizontal) in radians (for usage in `(i, j)` coordinates)."""
+    return 2 * self.xnp.arctan(self.w / (2 * self.fw))
+
+  @property
+  def fov_h(self) -> float:
+    """Field of view (vertical) in radians (for usage in `(i, j)` coordinates)."""
+    return 2 * self.xnp.arctan(self.h / (2 * self.fh))
+
+  @property
+  def fov(self) -> float:
+    """Field of view in radians (`(fov_w, fov_h)`)."""
+
+    return (self.fov_w, self.fov_h)
 
   # @abc.abstractmethod
   @property
@@ -300,8 +347,7 @@ class PinholeCamera(CameraSpec):
         [0, 0, 1],
     ])
     return cls(
-        K=K,
-        resolution=resolution,
+        K=K, resolution=resolution, focal_length=(focal_in_px, focal_in_px)
     )
 
   @property

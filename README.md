@@ -3,18 +3,18 @@
 [![Unittests](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml/badge.svg)](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml)
 [![PyPI version](https://badge.fury.io/py/visu3d.svg)](https://badge.fury.io/py/visu3d)
 
-### Is v3d for you ?
+### Is v3d for you?
 
 Yes!
 
 Despite the name, `visu3d` is not limited at all to visualization, nor 3d, but
 it can be used in all ML programs (and beyond).
 
-The library provides an abstraction layer on top of TF/Jax/Numpy (same code works
+The library provides an abstraction layer on top of TF/Jax/Numpy (the same code works
 everywhere) at various levels:
 
 *   **For all ML programs:** v3d introduces the `DataclassArray` abstraction which
-    significantly reduces boilerplate/verbosity when manipulating datastructures
+    significantly reduces boilerplate/verbosity when manipulating data structures
     by adding numpy-like indexing and vectorization to `dataclasses`. (Future
     plans will move this to an independent module.)
 
@@ -27,7 +27,7 @@ On top of `DataclassArray`, v3d introduces:
 
 Everything in `v3d` is extensible:
 
-*   Your codebase can gradually opt in to specific features you need (e.g.
+*   Your codebase can gradually opt into specific features you need (e.g.
     trivially migrate your `dataclass` to `v3d.DataclassArray` without any other
     changes).
 *   Combine native v3d primitives with your custom ones (see doc below).
@@ -35,7 +35,7 @@ Everything in `v3d` is extensible:
 On top of the `v3d` primitives:
 
 *   **Best Colab experience:** Everything is trivially visualizable with zero
-    boilerplate. Inspect & debug camera poses, trajectories,....
+    boilerplate. Inspect & debug camera poses, and trajectories,...
 
 ### Core features
 
@@ -110,7 +110,7 @@ With native support for auto-diff, `jax.vmap`, `jax.tree_utils`,...
 
 <section class="zippy">
 
-Common primitives (`Ray`, `Camera`, `Transform`,...), so user can express
+Common primitives (`Ray`, `Camera`, `Transform`,...), so the user can express
 intent, instead of math.
 
 ```python
@@ -139,7 +139,7 @@ for a full list of primitive.
 
 Creating your own primitives is trivial.
 
-Converting any dataclass to dataclass array is trivial:
+Converting any dataclass to a dataclass array is trivial:
 
 *   Inherit from `v3d.DataclassArray`
 *   Use

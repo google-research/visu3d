@@ -85,10 +85,17 @@ def rot_z(angle: FloatArray['']) -> FloatArray['3 3']:
   return R
 
 
-def euler_to_rot(x=None, y=None, z=None) -> FloatArray['3 3']:
+def euler_to_rot(
+    x=None,
+    y=None,
+    z=None,
+    *,
+    order: str = 'zyx',
+) -> FloatArray['3 3']:
   """Creates a 3x3 matrix from the euler radian angles.
 
-  Rotations are applied following the Tait-Bryan chained rotations (z, y, x):
+  By default, rotations are applied following the Tait-Bryan chained rotations
+  (z, y, x):
 
   ```python
   R = Rz @ Ry @ Rx
@@ -101,24 +108,35 @@ def euler_to_rot(x=None, y=None, z=None) -> FloatArray['3 3']:
     x: Rotation around x (in radians): roll == ϕ == phi == x
     y: Rotation around y (in radians): pitch == θ == theta == y
     z: Rotation around z (in radians): yaw == ψ == psi == z
+    order: Axis order convention used (e.g. `'xyz'`, `'zyx'`,...)
 
   Returns:
     tr: The transformation.
   """
+  order = tuple(order)
+
+  if set(order) != set('xyz') or len(order) != 3:
+    raise ValueError(
+        f'Order should contain x, y, z exactly once. Got {order!r}')
 
   def _accumulate_rot(r0, r1):
     return r1 if r0 is None else r0 @ r1
 
+  axis_to_val = {'x': x, 'y': y, 'z': z}
+  axis_to_rot_fn = {
+      'x': rot_x,
+      'y': rot_y,
+      'z': rot_z,
+  }
+
   r_final = None
-  if z is not None:
-    r = rot_z(z)
+  for axis in order:
+    angle = axis_to_val[axis]
+    if angle is None:
+      continue
+    r = axis_to_rot_fn[axis](angle)
     r_final = _accumulate_rot(r_final, r)
-  if y is not None:
-    r = rot_y(y)
-    r_final = _accumulate_rot(r_final, r)
-  if x is not None:
-    r = rot_x(x)
-    r_final = _accumulate_rot(r_final, r)
+
   if r_final is None:  # All x, y, z undefined => Identity
     r_final = enp.lazy.np.eye(3)
   return r_final

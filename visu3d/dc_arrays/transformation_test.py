@@ -490,9 +490,9 @@ def test_transformation_from_angle_multiple(xnp: enp.NpModule):
   y = -enp.tau / 8
   x = xnp.asarray(enp.tau / 16)
 
-  rz = v3d.utils.rotation_utils.rot_z(z)
-  ry = v3d.utils.rotation_utils.rot_y(y)
-  rx = v3d.utils.rotation_utils.rot_x(x)
+  rz = v3d.math.rot_z(z)
+  ry = v3d.math.rot_y(y)
+  rx = v3d.math.rot_x(x)
 
   tr = v3d.Transform.from_angle(x=x, y=y, z=z)
 
@@ -513,9 +513,9 @@ def test_transformation_from_angle(xnp: enp.NpModule):
   y = xnp.asarray(-enp.tau / 8)
   x = xnp.asarray(enp.tau / 16)
 
-  rz = v3d.utils.rotation_utils.rot_z(z)
-  ry = v3d.utils.rotation_utils.rot_y(y)
-  rx = v3d.utils.rotation_utils.rot_x(x)
+  rz = v3d.math.rot_z(z)
+  ry = v3d.math.rot_y(y)
+  rx = v3d.math.rot_x(x)
 
   tr_x = v3d.Transform.from_angle(x=x)
   tr_y = v3d.Transform.from_angle(y=y)

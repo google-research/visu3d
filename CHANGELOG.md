@@ -8,10 +8,16 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
-*   Support more complex `DType` (`FloatArray`,... accept `bfloat16`,
-    `float64`,...).
+### Added
+
+*   `v3d.math` expose rotation utils (convert from/to rotation matrix)
 *   Added: `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams`
     to configure the dataclass options.
+
+### Changed
+
+*   Support more complex `DType` (`FloatArray`,... accept `bfloat16`,
+    `float64`,...).
 
 ## [1.2.0] - 2022-05-27
 

@@ -24,12 +24,12 @@ import einops
 from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
+from visu3d import math
 from visu3d import vectorization
 from visu3d.dc_arrays import ray as ray_lib
 from visu3d.typing import DcT
 from visu3d.utils import np_utils
 from visu3d.utils import py_utils
-from visu3d.utils import rotation_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 _T = TypeVar('_T')
@@ -105,23 +105,7 @@ class Transform(TransformBase):
     Returns:
       tr: The transformation.
     """
-
-    def _accumulate_rot(r0, r1):
-      return r1 if r0 is None else r0 @ r1
-
-    r_final = None
-    if z is not None:
-      r = rotation_utils.rot_z(z)
-      r_final = _accumulate_rot(r_final, r)
-    if y is not None:
-      r = rotation_utils.rot_y(y)
-      r_final = _accumulate_rot(r_final, r)
-    if x is not None:
-      r = rotation_utils.rot_x(x)
-      r_final = _accumulate_rot(r_final, r)
-    if r_final is None:  # All x, y, z undefined => Identity
-      r_final = enp.lazy.np.eye(3)
-    return cls(R=r_final)
+    return cls(R=math.euler_to_rot(x=x, y=y, z=z))
 
   @classmethod
   def from_look_at(

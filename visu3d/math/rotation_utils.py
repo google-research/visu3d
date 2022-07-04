@@ -19,6 +19,8 @@ Attributes:
   RAD2DEG: Constant to convert radians to degrees.
 """
 
+from __future__ import annotations
+
 from etils import enp
 from etils.array_types import FloatArray
 
@@ -81,6 +83,92 @@ def rot_z(angle: FloatArray['']) -> FloatArray['3 3']:
       [0, 0, 1],
   ])
   return R
+
+
+def euler_to_rot(x=None, y=None, z=None) -> FloatArray['3 3']:
+  """Creates a 3x3 matrix from the euler radian angles.
+
+  Rotations are applied following the Tait-Bryan chained rotations (z, y, x):
+
+  ```python
+  R = Rz @ Ry @ Rx
+  ```
+
+  See:
+  https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Euler_angles_(z-y%E2%80%B2-x%E2%80%B3_intrinsic)_%E2%86%92_rotation_matrix
+
+  Args:
+    x: Rotation around x (in radians): roll == ϕ == phi == x
+    y: Rotation around y (in radians): pitch == θ == theta == y
+    z: Rotation around z (in radians): yaw == ψ == psi == z
+
+  Returns:
+    tr: The transformation.
+  """
+
+  def _accumulate_rot(r0, r1):
+    return r1 if r0 is None else r0 @ r1
+
+  r_final = None
+  if z is not None:
+    r = rot_z(z)
+    r_final = _accumulate_rot(r_final, r)
+  if y is not None:
+    r = rot_y(y)
+    r_final = _accumulate_rot(r_final, r)
+  if x is not None:
+    r = rot_x(x)
+    r_final = _accumulate_rot(r_final, r)
+  if r_final is None:  # All x, y, z undefined => Identity
+    r_final = enp.lazy.np.eye(3)
+  return r_final
+
+
+def rot_to_euler(
+    rot: FloatArray['3 3'],
+    *,
+    eps: float = 1e-6,
+) -> tuple[FloatArray[''], FloatArray[''], FloatArray['']]:
+  """Extract euler angles from a 3x3 rotation matrix.
+
+  Like `euler_to_rot`, it follow the z, y, x convension, BUT returns x, y, z.
+
+  From: https://www.geometrictools.com/Documentation/EulerAngles.pdf
+
+  Args:
+    rot: Rotation matrix
+    eps: Precision threshold to detect 90 degree angles.
+
+  Returns:
+    The x, y, z euler angle (in radian)
+  """
+  xnp = enp.lazy.get_xnp(rot)
+
+  r00 = rot[0, 0]
+  # r01 = rot[0, 1]
+  r02 = rot[0, 2]
+  r10 = rot[1, 0]
+  r11 = rot[1, 1]
+  r12 = rot[1, 2]
+  r20 = rot[2, 0]
+  r21 = rot[2, 1]
+  r22 = rot[2, 2]
+
+  if xnp.abs(r20) < 1. - eps:  # Should allow to tune the precision ?
+    theta_y = xnp.arcsin(-r20)
+    theta_z = xnp.arctan2(r10, r00)
+    theta_x = xnp.arctan2(r21, r22)
+  else:  # r20 == +1 / -1
+    sign = +1 if r02 > 0 else -1
+
+    theta_y = sign * enp.tau / 4
+    theta_z = -sign * xnp.arctan2(-r12, r11)
+    theta_x = 0
+
+  theta_x = xnp.asarray(theta_x)
+  theta_y = xnp.asarray(theta_y)
+  theta_z = xnp.asarray(theta_z)
+  return theta_x, theta_y, theta_z
 
 
 def is_orth(rot: FloatArray['3 3'], *, atol: float = 1e-6) -> bool:

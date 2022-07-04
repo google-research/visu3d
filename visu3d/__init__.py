@@ -35,6 +35,10 @@ from visu3d.ops import stack
 from visu3d.utils import lazy_imports
 from visu3d.vectorization import vectorize_method
 
+from visu3d import math
+from visu3d.math import DEG2RAD
+from visu3d.math import RAD2DEG
+
 # Visualization
 from visu3d import plotly
 from visu3d.plotly import make_fig
@@ -42,8 +46,6 @@ from visu3d.plotly import make_traces
 from visu3d.plotly import Visualizable
 from visu3d.plotly.auto_plot import auto_plot_figs
 from visu3d.plotly.fig_config_utils import fig_config
-from visu3d.utils.rotation_utils import DEG2RAD
-from visu3d.utils.rotation_utils import RAD2DEG
 
 # Arrays implementation
 from visu3d.dc_arrays.camera import Camera

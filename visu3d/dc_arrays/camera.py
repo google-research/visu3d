@@ -168,9 +168,9 @@ class Camera(array_dataclass.DataclassArray):
     # pyformat: disable
     valid_coords_mask = (
         (0 <= h_coords)
-        & (h_coords < self.h)
+        & (h_coords < self.h - 1)
         & (0 <= w_coords)
-        & (w_coords < self.w)
+        & (w_coords < self.w - 1)
         & (points2d.depth[..., 0] > 0)  # Filter points behind the camera
     )    # pyformat: enable
     rgb = rgb[valid_coords_mask]

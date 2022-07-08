@@ -134,6 +134,11 @@ class DataclassArray(fig_utils.Visualizable):
     # too many values.
     edc.dataclass(kw_only=True, repr=True)(cls)
     cls._dca_tree_map_registered = False
+    # Typing annotations have to be lazily evaluated (to support
+    # `from __future__ import annotations` and forward reference)
+    # To avoid costly `typing.get_type_hints` which perform `eval` and `str`
+    # convertions, we cache the type annotations here.
+    cls._dca_fields_metadata: Optional[dict[str, _ArrayFieldMetadata]] = None
 
   def __post_init__(self) -> None:
     """Validate and normalize inputs."""
@@ -377,27 +382,34 @@ class DataclassArray(fig_utils.Visualizable):
   @epy.cached_property
   def _all_array_fields(self) -> dict[str, _ArrayField]:
     """All array fields, including `None` values."""
-    # At this point, `ForwardRef` should have been resolved.
-    try:
-      hints = typing.get_type_hints(type(self))
-    except Exception as e:  # pylint: disable=broad-except
-      epy.reraise(
-          e,
-          prefix=f'Could not infer typing annotation of {type(self).__name__} '
-          f'defined in {type(self).__module__}')
-    # TODO(py38):
-    # return {  # pylint: disable=g-complex-comprehension
-    #     f.name: array_field
-    #     for f in dataclasses.fields(self)
-    #     if (array_field := _make_array_field(self, f, hints)) is not None
-    # }
-    out = {}
-    for f in dataclasses.fields(self):
-      array_field_ = _make_array_field(self, f, hints)
-      if array_field_ is None:
-        continue
-      out[f.name] = array_field_
-    return out
+    cls = type(self)
+
+    # The first time, compute typing annotations & metadata
+    if cls._dca_fields_metadata is None:  # pylint: disable=protected-access
+      # At this point, `ForwardRef` should have been resolved.
+      try:
+        hints = typing.get_type_hints(cls)
+      except Exception as e:  # pylint: disable=broad-except
+        epy.reraise(
+            e,
+            prefix=f'Could not infer typing annotation of {cls.__name__} '
+            f'defined in {cls.__module__}')
+
+      dca_fields_metadata = {
+          f.name: _make_field_metadata(f, hints)
+          for f in dataclasses.fields(self)
+      }
+      cls._dca_fields_metadata = {  # Filter `None` values  # pylint: disable=protected-access
+          k: v for k, v in dca_fields_metadata.items() if v is not None
+      }
+
+    return {  # pylint: disable=g-complex-comprehension
+        name: _ArrayField(
+            name=name,
+            host=self,
+            **field_metadata.to_dict(),  # pylint: disable=not-a-mapping
+        ) for name, field_metadata in cls._dca_fields_metadata.items()  # pylint: disable=protected-access
+    }
 
   @epy.cached_property
   def _array_fields(self) -> list[_ArrayField]:
@@ -448,6 +460,7 @@ class DataclassArray(fig_utils.Visualizable):
     self._map_field(
         array_fn=_cast_field,
         dc_fn=_cast_field,  # pytype: disable=wrong-arg-types
+        _inplace=True,
     )
     return xnp
 
@@ -498,6 +511,7 @@ class DataclassArray(fig_utils.Visualizable):
     self._map_field(
         array_fn=_broadcast_field,
         dc_fn=_broadcast_field,  # pytype: disable=wrong-arg-types
+        _inplace=True,
     )
     return final_shape
 
@@ -516,12 +530,15 @@ class DataclassArray(fig_utils.Visualizable):
       *,
       array_fn: Callable[[_ArrayField[Array['*din']]], Array['*dout']],
       dc_fn: Optional[Callable[[_ArrayField[_DcT]], _DcT]],
+      _inplace: bool = False,
   ) -> _DcT:
     """Apply a transformation on all array fields structure.
 
     Args:
       array_fn: Function applied on the `xnp.ndarray` fields
       dc_fn: Function applied on the `v3d.DataclassArray` fields (to recurse)
+      _inplace: If True, assume the function mutate the object in-place. Should
+        only be used inside `__init__` for performances.
 
     Returns:
       The transformed dataclass array.
@@ -534,7 +551,11 @@ class DataclassArray(fig_utils.Visualizable):
         return array_fn(f)
 
     new_values = {f.name: _apply_field_dn(f) for f in self._array_fields}  # pylint: disable=not-an-iterable
-    return self.replace(**new_values)
+    # For performance, do not call replace to save the constructor call
+    if not _inplace:
+      return self.replace(**new_values)
+    else:
+      return self
 
   def tree_flatten(self) -> tuple[list[DcOrArray], _TreeMetadata]:
     """`jax.tree_utils` support."""
@@ -783,11 +804,10 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
       return self.xnp.broadcast_to(self.value, final_shape)
 
 
-def _make_array_field(
-    array: DataclassArray,
+def _make_field_metadata(
     field: dataclasses.Field[Any],
     hints: dict[str, TypeAlias],
-) -> Optional[_ArrayField]:
+) -> Optional[_ArrayFieldMetadata]:
   """Make the array field class."""
   # TODO(epot): One possible confusion is if user define
   # `field: Ray = v3d.array_field(shape=(3,))`
@@ -802,11 +822,7 @@ def _make_array_field(
     if not field_metadata:  # Not an array field
       return None
 
-  return _ArrayField(
-      name=field.name,
-      host=array,
-      **field_metadata.to_dict(),  # pylint: disable=not-a-mapping
-  )
+  return field_metadata
 
 
 def _type_to_field_metadata(hint: TypeAlias) -> Optional[_ArrayFieldMetadata]:

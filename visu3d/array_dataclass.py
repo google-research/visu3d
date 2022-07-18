@@ -858,6 +858,7 @@ def _type_to_field_metadata(hint: TypeAlias) -> Optional[_ArrayFieldMetadata]:
     # TODO(epot): Should support `ray: Ray[..., 3]` ?
     return _ArrayFieldMetadata(inner_shape_non_static=(), dtype=array_type)
   elif isinstance(array_type, array_types.ArrayAliasMeta):
+    assert array_type is not None
     try:
       return _ArrayFieldMetadata(
           inner_shape_non_static=shape_parsing.get_inner_shape(

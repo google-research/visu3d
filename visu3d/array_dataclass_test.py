@@ -23,6 +23,7 @@ from etils import enp
 from etils.array_types import FloatArray, IntArray, f32, i32  # pylint: disable=g-multiple-import
 import numpy as np
 import pytest
+import tensorflow as tf
 import visu3d as v3d
 from visu3d.typing import Shape  # pylint: disable=g-multiple-import
 
@@ -365,7 +366,7 @@ def test_isometrie_wrong_input():
     )
 
   # Bad inner shape
-  with pytest.raises(ValueError, match='Invalid Isometrie.r: Shape should be'):
+  with pytest.raises(ValueError, match='Invalid Isometrie.r: Shape do not'):
     _ = Isometrie(
         r=np.zeros((3, 2)),
         t=np.zeros((2,)),
@@ -591,4 +592,56 @@ def test_dataclass_params_no_broadcast(xnp: enp.NpModule):
     PointNoBroadcast(
         x=xnp.array(1, dtype=np.float16),
         y=xnp.array([1, 2, 3], dtype=np.float16),
+    )
+
+
+@enp.testing.parametrize_xnp()
+@pytest.mark.parametrize('batch_shape', [(), (1, 3)])
+def test_dataclass_none_shape(xnp: enp.NpModule, batch_shape: Shape):
+
+  @dataclasses.dataclass(frozen=True)
+  class PointDynamicShape(v3d.DataclassArray):
+    x: FloatArray[..., None, None]
+    y: IntArray['... 3 _']
+
+  p = PointDynamicShape(
+      x=xnp.zeros(batch_shape + (2, 3), dtype=np.float32),
+      y=xnp.zeros(batch_shape + (3, 1), dtype=np.int32),
+  )
+  assert p.shape == batch_shape
+  assert p.x.shape == batch_shape + (2, 3)
+  assert p.y.shape == batch_shape + (3, 1)
+
+  p2 = PointDynamicShape(
+      x=xnp.zeros(batch_shape + (3, 2), dtype=np.float32),
+      y=xnp.zeros(batch_shape + (3, 1), dtype=np.int32),
+  )
+  assert p2.shape == batch_shape
+  assert p2.x.shape == batch_shape + (3, 2)
+  assert p2.y.shape == batch_shape + (3, 1)
+
+  # We can stack when the shape is compatible
+  assert v3d.stack([p, p]).shape == (2,) + batch_shape
+
+  # Incompatible shape will raise an error
+  with pytest.raises((ValueError, tf.errors.InvalidArgumentError)):
+    v3d.stack([p, p2])
+
+  if batch_shape:
+    err_msg = 'Conflicting batch shapes'
+  else:
+    err_msg = 'Shape do not match.'
+  with pytest.raises(ValueError, match=err_msg):
+    PointDynamicShape(
+        x=xnp.zeros(batch_shape + (3,), dtype=np.float32),  # len() != 2
+        y=xnp.zeros(batch_shape + (3, 1), dtype=np.int32),
+    )
+
+  with pytest.raises(
+      ValueError,
+      match='Shape do not match.',
+  ):
+    PointDynamicShape(
+        x=xnp.zeros(batch_shape + (2, 3), dtype=np.float32),
+        y=xnp.zeros(batch_shape + (2, 1), dtype=np.int32),  # < 2 != 3
     )

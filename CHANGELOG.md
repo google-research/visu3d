@@ -11,6 +11,8 @@ Changelog follow https://keepachangelog.com/ format.
 ### Added
 
 *   `v3d.math` expose rotation utils (convert from/to rotation matrix)
+*   Changed: `DataclassArray` now support dynamic shape fields (shape with
+    `None`), like `Array[..., None, None]`.
 *   Added: `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams`
     to configure the dataclass options.
 

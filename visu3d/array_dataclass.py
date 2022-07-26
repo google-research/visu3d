@@ -505,7 +505,7 @@ class DataclassArray(fig_utils.Visualizable):
       elif not self.__dca_params__.broadcast:  # Broadcasing disabled
         raise ValueError(
             f'{type(self).__qualname__} has `broadcast=False`. Cannot '
-            f'broadcast {f.name} from {f.value.shape} to {final_shape}')
+            f'broadcast {f.name} from {f.full_shape} to {final_shape}')
       self._setattr(f.name, f.broadcast_to(final_shape))
 
     self._map_field(
@@ -687,7 +687,7 @@ def array_field(
   """
   # TODO(epot): Validate shape, dtype
   v3d_field = _ArrayFieldMetadata(
-      inner_shape=shape,
+      inner_shape_non_static=shape,
       dtype=dtype,
   )
   return dataclasses.field(**field_kwargs, metadata={_METADATA_KEY: v3d_field})
@@ -704,19 +704,18 @@ class _ArrayFieldMetadata:
   """Metadata of the array field (shared across all instances).
 
   Attributes:
-    inner_shape: Inner shape
+    inner_shape_non_static: Inner shape. Can contain non-static dims (e.g.
+      `(None, 3)`)
     dtype: Type of the array. Can be `array_types.dtypes.DType` or
       `v3d.DataclassArray` for nested arrays.
   """
-  inner_shape: Shape
+  inner_shape_non_static: Shape
   dtype: Union[array_types.dtypes.DType, type[DataclassArray]]
 
   def __post_init__(self):
     """Normalizing/validating the shape/dtype."""
     # Validate shape
-    self.inner_shape = tuple(self.inner_shape)
-    if None in self.inner_shape:
-      raise ValueError(f'Shape should be defined. Got: {self.inner_shape}')
+    self.inner_shape_non_static = tuple(self.inner_shape_non_static)
 
     # Validate/normalize the dtype
     if not self.is_dataclass:
@@ -761,6 +760,35 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
     return getattr(self.host, self.name)
 
   @property
+  def full_shape(self) -> DcOrArrayT:
+    """Access the `host.<field-name>.shape`."""
+    # TODO(b/198633198): We need to convert to tuple because TF evaluate
+    # empty shapes to True `bool(shape) == True` when `shape=()`
+    return tuple(self.value.shape)
+
+  @epy.cached_property
+  def inner_shape(self) -> Shape:
+    """Returns the the static shape resolved for the current value."""
+    if not self.inner_shape_non_static:
+      return ()
+    static_shape = self.full_shape[-len(self.inner_shape_non_static):]
+
+    def err_msg() -> ValueError:
+      return ValueError(
+          f'Shape do not match. Expected: {self.inner_shape_non_static}. '
+          f'Got {static_shape}')
+
+    if len(static_shape) != len(self.inner_shape_non_static):
+      raise err_msg()
+    for static_dim, non_static_dim in zip(  # Validate all dims
+        static_shape,
+        self.inner_shape_non_static,
+    ):
+      if non_static_dim is not None and non_static_dim != static_dim:
+        raise err_msg()
+    return static_shape
+
+  @property
   def is_value_missing(self) -> bool:
     """Returns `True` if the value wasn't set."""
     if self.value is None:
@@ -781,19 +809,17 @@ class _ArrayField(_ArrayFieldMetadata, Generic[DcOrArrayT]):
   @property
   def host_shape(self) -> Shape:
     """Host shape (batch shape shared by all fields)."""
-    if not self.inner_shape:
-      shape = self.value.shape
+    if not self.inner_shape_non_static:
+      shape = self.full_shape
     else:
-      shape = self.value.shape[:-len(self.inner_shape)]
-    # TODO(b/198633198): We need to convert to tuple because TF evaluate
-    # empty shapes to True `bool(shape) == True` when `shape=()`
-    return tuple(shape)
+      shape = self.full_shape[:-len(self.inner_shape_non_static)]
+    return shape
 
   def assert_shape(self) -> None:
-    if self.host_shape + self.inner_shape != self.value.shape:
+    if self.host_shape + self.inner_shape != self.full_shape:
       raise ValueError(
           f'Shape should be '
-          f'{(py_utils.Ellipsis, *self.inner_shape)}. Got: {self.value.shape}')
+          f'{(py_utils.Ellipsis, *self.inner_shape)}. Got: {self.full_shape}')
 
   def broadcast_to(self, shape: Shape) -> DcOrArrayT:
     """Broadcast the host_shape."""
@@ -830,11 +856,12 @@ def _type_to_field_metadata(hint: TypeAlias) -> Optional[_ArrayFieldMetadata]:
   array_type = type_parsing.get_array_type(hint)
   if isinstance(array_type, type) and issubclass(array_type, DataclassArray):
     # TODO(epot): Should support `ray: Ray[..., 3]` ?
-    return _ArrayFieldMetadata(inner_shape=(), dtype=array_type)
+    return _ArrayFieldMetadata(inner_shape_non_static=(), dtype=array_type)
   elif isinstance(array_type, array_types.ArrayAliasMeta):
     try:
       return _ArrayFieldMetadata(
-          inner_shape=shape_parsing.get_inner_shape(array_type.shape),
+          inner_shape_non_static=shape_parsing.get_inner_shape(
+              array_type.shape),
           dtype=array_type.dtype,
       )
     except Exception as e:  # pylint: disable=broad-except

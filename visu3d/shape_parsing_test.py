@@ -62,10 +62,13 @@ def test_parse_shape_types():
     'shape_str, shape_tuple',
     [
         ('...', ()),
+        ('... _', (None,)),
         ('... 3', (3,)),
         ('... 3 5', (3, 5)),
         ('... 3 5 7', (3, 5, 7)),
+        ('... 3 _ _ 7', (3, None, None, 7)),
         ('*shape', ()),
+        ('*shape _', (None,)),
         ('*shape 3', (3,)),
         ('*shape 3 5', (3, 5)),
         ('*shape 3 5 7', (3, 5, 7)),
@@ -91,12 +94,10 @@ def test_get_inner_shape_failure_first_dim(shape_str: str):
     'shape_str',
     [
         '... ...',
-        '... _',
         '... 3 d 1',
-        '*shape _',
         '*shape 3 d 1',
     ],
 )
 def test_get_inner_shape_failure_dynamic(shape_str: str):
-  with pytest.raises(ValueError, match='Only static dimension'):
+  with pytest.raises(ValueError, match='Only static or None dimension'):
     shape_parsing.get_inner_shape(shape_str)

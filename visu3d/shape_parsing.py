@@ -94,7 +94,7 @@ def get_inner_shape(shape_str: str) -> _Shape:
         'Shape should start by `...` or `*shape` (e.g. `f32[\'*shape 3\']`)')
 
   inner_shape = shape[1:]
-  if not all(isinstance(dim, int) for dim in inner_shape):
-    raise ValueError('Only static dimensions supported.')
+  if not all(isinstance(dim, (int, type(None))) for dim in inner_shape):
+    raise ValueError('Only static or None dimensions supported.')
 
   return inner_shape  # pytype: disable=bad-return-type

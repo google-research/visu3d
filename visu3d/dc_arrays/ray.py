@@ -55,6 +55,7 @@ class Ray(array_dataclass.DataclassArray):
     return self.pos + self.dir
 
   @classmethod
+  @enp.check_and_normalize_arrays(strict=False)
   def from_look_at(
       cls,
       *,
@@ -72,10 +73,6 @@ class Ray(array_dataclass.DataclassArray):
     Returns:
       The Ray.
     """
-    # Normalize list -> array
-    xnp = enp.lazy.get_xnp(pos, strict=False)
-    pos = np_utils.asarray(pos, xnp=xnp)
-    target = np_utils.asarray(target, xnp=xnp)
     return cls(
         pos=pos,
         dir=target - pos,

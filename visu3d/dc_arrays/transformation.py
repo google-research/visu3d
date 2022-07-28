@@ -108,6 +108,7 @@ class Transform(TransformBase):
     return cls(R=math.euler_to_rot(x=x, y=y, z=z))
 
   @classmethod
+  @enp.check_and_normalize_arrays(strict=False)
   def from_look_at(
       cls,
       *,
@@ -133,9 +134,6 @@ class Transform(TransformBase):
     Returns:
       The Transform.
     """
-    xnp = enp.lazy.get_xnp(pos, strict=False)
-    pos = np_utils.asarray(pos, xnp=xnp, dtype=enp.lazy.np.float32)
-    target = np_utils.asarray(target, xnp=xnp, dtype=enp.lazy.np.float32)
     return cls(
         t=pos,
         R=_get_r_look_at_(pos=pos, target=target),

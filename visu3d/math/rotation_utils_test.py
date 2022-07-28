@@ -111,9 +111,6 @@ def test_euler_roundtrip(xnp: enp.NpModule, rx: float, ry: float, rz: float):
   ax, ay, az = v3d.math.rot_to_euler(rot)
   rot_v2 = v3d.math.euler_to_rot(x=ax, y=ay, z=az)
 
-  print(rx, ry, rz)
-  print(ax, ay, az)
-
   assert enp.lazy.get_xnp(rot) is xnp
   assert enp.lazy.get_xnp(rot_v2) is xnp
   np.testing.assert_allclose(rot, rot_v2, atol=1e-6, rtol=1e-7)

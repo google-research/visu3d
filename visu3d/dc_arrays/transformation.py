@@ -223,7 +223,6 @@ class Transform(TransformBase):
       global_scales = xnp.unique(scale_xyz)
       raise_error = len(global_scales) != 1
     elif xnp is enp.lazy.jnp:
-      # print('Warning: Due to Jax not')
       global_scales, global_count = xnp.unique(
           scale_xyz,
           size=1,

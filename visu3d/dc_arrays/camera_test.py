@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import dataclass_array as dca
 from etils import enp
 import numpy as np
 import pytest
@@ -31,7 +32,7 @@ H, W = 64, 128
 def _make_cam(
     *,
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
 ) -> v3d.Camera:
   """Create a camera at (0, 4, 0) looking at the center."""
   spec = v3d.PinholeCamera.from_focal(resolution=(H, W), focal_in_px=34.)
@@ -47,7 +48,7 @@ def _make_cam(
 
 @enp.testing.parametrize_xnp()
 @pytest.mark.parametrize('shape', [(), (3,)])
-def test_camera_properties(xnp: enp.NpModule, shape: v3d.typing.Shape):
+def test_camera_properties(xnp: enp.NpModule, shape: dca.typing.Shape):
   cam = _make_cam(xnp=xnp, shape=shape)
 
   # Properties
@@ -66,7 +67,7 @@ def test_camera_properties(xnp: enp.NpModule, shape: v3d.typing.Shape):
 @pytest.mark.parametrize('normalize', [False, True])
 def test_camera_rays(
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
     normalize: bool,
 ):
   if shape and xnp is enp.lazy.tnp:
@@ -95,8 +96,8 @@ def test_camera_rays(
     # Ray destinations are aligned with the y=3 plane
     np.testing.assert_allclose(rays.end[..., 1], np.full(shape + (H, W), 3.))
 
-  v3d.testing.assert_array_equal(cam + [0, 0, 0], cam)
-  v3d.testing.assert_array_equal(cam + xnp.array([0, 0, 0]), cam)
+  dca.testing.assert_array_equal(cam + [0, 0, 0], cam)
+  dca.testing.assert_array_equal(cam + xnp.array([0, 0, 0]), cam)
 
   _ = cam.fig
 
@@ -108,7 +109,7 @@ def test_camera_rays(
 @pytest.mark.parametrize('shape', [(), (3,), (2, 2)])
 def test_camera_transform(
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
 ):
   """Test low-level camera transforms."""
 
@@ -142,8 +143,8 @@ def test_camera_transform(
 @pytest.mark.parametrize('point_shape', [(), (3,), (1, 1)])
 def test_camera_render(
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
-    point_shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
+    point_shape: dca.typing.Shape,
 ):
   if shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')

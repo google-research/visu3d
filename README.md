@@ -145,7 +145,7 @@ Converting any dataclass to dataclass array is trivial:
 *   Use
     [`etils.array_types`](https://github.com/google/etils/blob/main/etils/array_types/README.md)
     to annotate the array fields (or exlicitly use `my_field: Any =
-    v3d.array_field(shape=, dtype=)` instead of `dataclasses.field`)
+    dca.field(shape=, dtype=)` instead of `dataclasses.field`)
 
 ```python
 from etils.array_types import FloatArray

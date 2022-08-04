@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import dataclass_array as dca
 from etils import enp
 from etils.array_types import Array
 import numpy as np
@@ -32,7 +33,7 @@ assert not v3d.Ray._dca_tree_map_registered
 @pytest.mark.parametrize('shape', [(), (2,), (2, 3)])
 def test_ray(
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
 ):
 
   def _broadcast(x: Array['*d'], shape=shape) -> Array['*d 3']:
@@ -51,7 +52,7 @@ def test_ray(
   def _assert_ray_match(p, t, d, shape=shape):
     assert p.xnp is xnp
     assert p.shape == shape
-    v3d.testing.assert_allclose(p, _ray_broadcast(t=t, d=d, shape=shape))
+    dca.testing.assert_allclose(p, _ray_broadcast(t=t, d=d, shape=shape))
 
   t = xnp.array([1, 0, 0])
   d = xnp.array([0, 2, 2])
@@ -60,7 +61,7 @@ def test_ray(
   p = _ray_broadcast(t=t, d=d)
 
   p_brodcast = v3d.Ray(pos=t, dir=d).map_field(_broadcast)
-  v3d.testing.assert_allclose(p, p_brodcast)
+  dca.testing.assert_allclose(p, p_brodcast)
 
   _assert_ray_match(p.mean(), t=t, d=d, shape=())
   _assert_ray_match(p + [3, 2, -1], t=[4, 2, -1], d=d)

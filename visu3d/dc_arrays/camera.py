@@ -18,11 +18,11 @@ from __future__ import annotations
 
 import dataclasses
 
+import dataclass_array as dca
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 import numpy as np
 from visu3d import array_dataclass
 from visu3d import plotly
-from visu3d import vectorization
 from visu3d.dc_arrays import camera_spec
 from visu3d.dc_arrays import point as point_lib
 from visu3d.dc_arrays import ray as ray_lib
@@ -68,7 +68,7 @@ class Camera(array_dataclass.DataclassArray):
     )
     return cls(spec=spec, world_from_cam=world_from_cam)
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def look_at(self, target: FloatArray['*shape 3']) -> Camera:
     """Returns a new camera looking at the target."""
     world_from_cam = self.world_from_cam.look_at(target)
@@ -103,7 +103,7 @@ class Camera(array_dataclass.DataclassArray):
     """Translate the position."""
     return self.replace(world_from_cam=self.world_from_cam + translation)
 
-  @vectorization.vectorize_method(static_args={'normalize'})
+  @dca.vectorize_method(static_args={'normalize'})
   def rays(self, normalize: bool = True) -> ray_lib.Ray:
     """Creates the rays.
 
@@ -139,7 +139,7 @@ class Camera(array_dataclass.DataclassArray):
     """Transfomration from 2d pixel coordinates to 3d world coordinates."""
     return self.world_from_cam @ self.spec.cam_from_px
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def render(self, points: point_lib.Point3d) -> FloatArray['*shape h w 3']:
     """Project 3d points to the camera screen.
 

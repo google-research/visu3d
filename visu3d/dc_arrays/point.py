@@ -20,11 +20,11 @@ import dataclasses
 import typing
 from typing import Optional, Union
 
+import dataclass_array as dca
 from etils.array_types import FloatArray, ui8  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
-from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 if typing.TYPE_CHECKING:
@@ -57,8 +57,8 @@ class Point3d(array_dataclass.DataclassArray):
       max: Optional[Union[FloatArray['3'], float]] = None,  # pylint: disable=redefined-builtin
   ) -> Point3d:
     """Clip the position coordinates to the (min, max) boundaries."""
-    min = np_utils.asarray(min, xnp=self.xnp, optional=True)
-    max = np_utils.asarray(max, xnp=self.xnp, optional=True)
+    min = dca.utils.np_utils.asarray(min, xnp=self.xnp, optional=True)
+    max = dca.utils.np_utils.asarray(max, xnp=self.xnp, optional=True)
     return self.replace(p=self.p.clip(min, max))
 
   # Protocols (inherited)
@@ -100,8 +100,8 @@ class Point2d(array_dataclass.DataclassArray):
       max: Optional[Union[FloatArray['2'], float]] = None,  # pylint: disable=redefined-builtin
   ) -> Point3d:
     """Clip the position coordinates to the (min, max) boundaries."""
-    min = np_utils.asarray(min, xnp=self.xnp, optional=True)
-    max = np_utils.asarray(max, xnp=self.xnp, optional=True)
+    min = dca.utils.np_utils.asarray(min, xnp=self.xnp, optional=True)
+    max = dca.utils.np_utils.asarray(max, xnp=self.xnp, optional=True)
     return self.replace(p=self.p.clip(min, max))
 
   # Protocols

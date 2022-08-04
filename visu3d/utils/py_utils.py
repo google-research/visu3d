@@ -70,13 +70,3 @@ class LazyModule:
     if self.module is None:  # Load on first call
       self.module = importlib.import_module(self.module_name)
     return getattr(self.module, name)
-
-
-class _Ellipsis:
-  """Ellipsis with repr as `...`. Used for better debug message."""
-
-  def __repr__(self) -> str:
-    return '...'
-
-
-Ellipsis = _Ellipsis()  # pylint: disable=redefined-builtin

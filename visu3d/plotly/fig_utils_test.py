@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import chex
+import dataclass_array as dca
 from etils import enp
 import numpy as np
 import pytest
@@ -90,7 +91,7 @@ def test_make_fig():
 
 
 @pytest.mark.parametrize('shape', [(), (4, 3), (700,), (3, 100, 4)])
-def test_subsample(shape: v3d.typing.Shape):
+def test_subsample(shape: dca.typing.Shape):
   r = v3d.Ray(pos=np.ones(shape + (3,)), dir=np.ones(shape + (3,)))
   _ = r.fig
 

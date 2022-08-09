@@ -1,41 +1,20 @@
-# v3d
+# visu3d - 3D geometry made easy
 
 [![Unittests](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml/badge.svg)](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml)
 [![PyPI version](https://badge.fury.io/py/visu3d.svg)](https://badge.fury.io/py/visu3d)
 
-### Is v3d for you ?
+`visu3d` is an abstraction layer between TF/Jax/Numpy and your program. It
+provides:
 
-Yes!
-
-Despite the name, `visu3d` is not limited at all to visualization, nor 3d, but
-it can be used in all ML programs (and beyond).
-
-The library provides an abstraction layer on top of TF/Jax/Numpy (same code works
-everywhere) at various levels:
-
-*   **For all ML programs:** v3d introduces the `DataclassArray` abstraction which
-    significantly reduces boilerplate/verbosity when manipulating datastructures
-    by adding numpy-like indexing and vectorization to `dataclasses`. (Future
-    plans will move this to an independent module.)
-
-On top of `DataclassArray`, v3d introduces:
-
-*   **For all 3d programs (Nerf, robotics, ...):** standard primitives (camera,
-    rays, transformation, ...) that users can use and extend. While those
-    primitives can be used as-is in production code, they should also serve as a
-    show-off/inspiration of what can be achieved with `DataclassArray`.
-
-Everything in `v3d` is extensible:
-
-*   Your codebase can gradually opt in to specific features you need (e.g.
-    trivially migrate your `dataclass` to `v3d.DataclassArray` without any other
-    changes).
-*   Combine native v3d primitives with your custom ones (see doc below).
-
-On top of the `v3d` primitives:
-
-*   **Best Colab experience:** Everything is trivially visualizable with zero
-    boilerplate. Inspect & debug camera poses, trajectories,....
+*   Standard primitives for 3d geometry (`Ray`, `Camera`, `Transform`,...).
+    You can combine those standard primitives with your custom ones.
+*   Everything is trivially visualizable with zero boilerplate. Inspect & debug
+    camera poses, trajectories,...
+*   All primitives are
+    [`dataclass_array`](https://github.com/google-research/dataclass_array),
+    dataclasses which can be reshaped, sliced,... as if they were numpy arrays.
+*   Everything is extensible, you can gradually opt-in only for the features you
+    need, and replace any standard primitive by your custom ones.
 
 ### Core features
 

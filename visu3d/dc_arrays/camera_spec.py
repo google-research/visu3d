@@ -22,14 +22,14 @@ import functools
 import typing
 from typing import Optional, Tuple
 
+import dataclass_array as dca
+from dataclass_array.typing import DcOrArray
 from etils import edc
 from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import plotly
-from visu3d import vectorization
 from visu3d.dc_arrays import transformation
-from visu3d.typing import DcOrArray
 from visu3d.utils import np_utils
 from visu3d.utils import py_utils
 from visu3d.utils.lazy_imports import plotly_base
@@ -68,7 +68,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
   in a single `CameraSpec`.
 
   ```python
-  specs = v3d.stack([PinholeCamera(...) for _ in range(10)])
+  specs = dca.stack([PinholeCamera(...) for _ in range(10)])
 
   isinstance(specs, CameraSpec)
   assert specs.shape == (10,)
@@ -197,7 +197,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     start, end = self._get_camera_lines()
     return plotly.make_lines_traces(start=start, end=end)
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def _get_camera_lines(self) -> FloatArray['*shape 4 3']:
     corners_px = [  # Screen corners, in (u, v) coordinates
         [0, 0],
@@ -310,8 +310,8 @@ class PinholeCamera(CameraSpec):
       self,
       points3d: DcOrArray,
   ) -> DcOrArray:
-    points3d = np_utils.asarray(points3d, xnp=self.xnp)
-    if isinstance(points3d, array_dataclass.DataclassArray):
+    points3d = dca.utils.np_utils.asarray(points3d, xnp=self.xnp)
+    if isinstance(points3d, dca.DataclassArray):
       assert_supports_protocol(points3d, 'apply_px_from_cam')
       return points3d.apply_px_from_cam(self)
     else:
@@ -373,8 +373,8 @@ class PinholeCamera(CameraSpec):
       self,
       points2d: FloatArray['*d 2'],
   ) -> FloatArray['*d 3']:
-    points2d = np_utils.asarray(points2d, xnp=self.xnp)
-    if isinstance(points2d, array_dataclass.DataclassArray):
+    points2d = dca.utils.np_utils.asarray(points2d, xnp=self.xnp)
+    if isinstance(points2d, dca.DataclassArray):
       assert_supports_protocol(points2d, 'apply_cam_from_px')
       return points2d.apply_cam_from_px(self)
     else:
@@ -385,7 +385,7 @@ class PinholeCamera(CameraSpec):
       points2d: FloatArray['*d 2'],
   ) -> FloatArray['*d 3']:
     assert not self.shape  # Should be vectorized
-    points2d = np_utils.asarray(points2d, xnp=self.xnp)
+    points2d = dca.utils.np_utils.asarray(points2d, xnp=self.xnp)
     if points2d.shape[-1] != 2:
       raise ValueError(f'Expected pixel coords {points2d.shape} to be (..., 2)')
 
@@ -404,7 +404,7 @@ class PinholeCamera(CameraSpec):
     points3d = points3d / self.xnp.expand_dims(points3d[..., 2], axis=-1)
     return points3d
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def px_centers(self):
     xnp = self.xnp
     coord_w, coord_h = xnp.meshgrid(

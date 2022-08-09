@@ -20,15 +20,14 @@ import dataclasses
 import functools
 from typing import Callable, Generic, TypeVar
 
+import dataclass_array as dca
+from dataclass_array.typing import DcT
 import einops
 from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import math
-from visu3d import vectorization
 from visu3d.dc_arrays import ray as ray_lib
-from visu3d.typing import DcT
-from visu3d.utils import np_utils
 from visu3d.utils import py_utils
 from visu3d.utils.lazy_imports import plotly_base
 
@@ -139,52 +138,56 @@ class Transform(TransformBase):
         R=_get_r_look_at_(pos=pos, target=target),
     )
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def look_at(self, target: FloatArray['*shape 3']) -> Transform:
     """Returns a new transform looking at the target."""
-    target = np_utils.asarray(target, xnp=self.xnp, dtype=enp.lazy.np.float32)
+    target = dca.utils.np_utils.asarray(
+        target,
+        xnp=self.xnp,
+        dtype=enp.lazy.np.float32,
+    )
     # TODO(epot): Rather than overwriting R, should only apply the rotation
     # to the existing R.
     return self.replace(R=_get_r_look_at_(pos=self.t, target=target))
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def x_dir(self) -> FloatArray['*shape 3']:
     """`x` axis of the transformation (`[x0, x1, x2]`)."""
     return self.R[:, 0]
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def y_dir(self) -> FloatArray['*shape 3']:
     """`y` axis of the transformation (`[y0, y1, y2]`)."""
     return self.R[:, 1]
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def z_dir(self) -> FloatArray['*shape 3']:
     """`z` axis of the transformation (`[z0, z1, z2]`)."""
     return self.R[:, 2]
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def x_ray(self) -> ray_lib.Ray:
     """Array pointing to `z`."""
     return ray_lib.Ray(pos=self.t, dir=self.x_dir)
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def y_ray(self) -> ray_lib.Ray:
     """Array pointing to `z`."""
     return ray_lib.Ray(pos=self.t, dir=self.y_dir)
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def z_ray(self) -> ray_lib.Ray:
     """Array pointing to `z`."""
     return ray_lib.Ray(pos=self.t, dir=self.z_dir)
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def ray_basis(self) -> ray_lib.Ray:
     """The `(x, y, z)` basis of the transformation, as ray."""
     return ray_lib.Ray(
@@ -196,13 +199,13 @@ class Transform(TransformBase):
     )
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def scale_xyz(self) -> FloatArray['*shape 3']:
     """Returns the `(sx, sy, sz)` scale of the transform along each axis."""
     return enp.linalg.norm(self.R, axis=0)
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def scale(self):
     """Returns the global scale (if `x, y, z` share the same scale).
 
@@ -270,14 +273,14 @@ class Transform(TransformBase):
       raise ValueError(f'Unsupported factor shape {factor.shape}')
     return self.replace(R=new_r)
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def normalize(self) -> Transform:
     """Normalize the scale x, y, z to be `(1, 1, 1)`."""
     xnp = self.xnp
     return self.replace(R=self.R @ xnp.diag(1 / self.scale_xyz))
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def matrix4x4(self) -> FloatArray['*shape 4 4']:
     """Returns the 4x4 transformation matrix.
 
@@ -291,7 +294,7 @@ class Transform(TransformBase):
     return self.xnp.concatenate([matrix3x4, last_row], axis=-2)
 
   @property
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def inv(self) -> Transform:
     """Returns the inverse camera transform."""
     # Might be a more optimized way than stacking/unstacking matrix
@@ -302,7 +305,7 @@ class Transform(TransformBase):
     translation = self.xnp.asarray(translation)
     return self.replace(t=self.t + translation)
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def __matmul__(self, other: _T) -> _T:
     """Apply the transformation the array or dataclass array.
 
@@ -310,7 +313,7 @@ class Transform(TransformBase):
     applied on individual elements (vectorized, NOT broadcasted):
 
     For example, for `tr @ other`, the shape are vectorized using the
-    `v3d.vectorize_method` rules:
+    `dca.vectorize_method` rules:
 
     ```python
     () @ (*x,) -> (*x,)
@@ -338,7 +341,7 @@ class Transform(TransformBase):
     self.assert_same_xnp(other)
     if enp.lazy.is_array(other):
       return self.apply_to_pos(other)
-    elif isinstance(other, array_dataclass.DataclassArray):
+    elif isinstance(other, dca.DataclassArray):
       py_utils.assert_supports_protocol(
           other,
           'apply_transform',
@@ -350,7 +353,7 @@ class Transform(TransformBase):
 
   # TODO(epot): Also add a `tr.apply_to` method which supports broadcasting
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def apply_to_pos(self, point: FloatArray['*d 3']) -> FloatArray['*d 3']:
     """Apply the transformation on the point cloud."""
     self.assert_same_xnp(point)
@@ -359,7 +362,7 @@ class Transform(TransformBase):
       raise ValueError(f'point shape should be `(..., 3)`. Got {point.shape}')
     return self.apply_to_dir(point) + self.t
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def apply_to_dir(
       self,
       direction: FloatArray['*d 3'],
@@ -372,7 +375,7 @@ class Transform(TransformBase):
   # Protocols (inherited)
 
   # Apply transform is the protocol implementation but is NOT part of the public
-  # API, so don't have `@vectorization.vectorize_method`
+  # API, so don't have `@dca.vectorize_method`
   def apply_transform(
       self,
       tr: Transform,
@@ -434,7 +437,7 @@ def custom_transform(
   ```
 
   Note: The decorated method is automatically vectorized. See
-  `v3d.vectorize_method`.
+  `dca.vectorize_method`.
 
   Args:
     fn: Method to decorate
@@ -459,9 +462,9 @@ class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=inval
     method: Transform method (decorated by `@v3d.custom_transform`). Calling
       `custom_tr @ x` is equivalent of calling `self.method(x)`
   """
-  self_: DcT = array_dataclass.array_field(
+  self_: DcT = dca.field(  # pytype: disable=annotation-type-mismatch
       shape=(),
-      dtype=array_dataclass.DataclassArray,
+      dtype=dca.DataclassArray,
   )
   # It is important that:
   # * method should NOT be a lambda (to avoid accidental closure side effects
@@ -469,7 +472,7 @@ class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=inval
   # TODO(epot): Add `__post_init__` check for this.
   method: Callable[[DcT, _T], _T]
 
-  @vectorization.vectorize_method
+  @dca.vectorize_method
   def __matmul__(self, other: _T) -> _T:
     if isinstance(other, TransformBase):
       # If other is another transform: create a composed transform

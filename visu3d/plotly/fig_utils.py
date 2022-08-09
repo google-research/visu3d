@@ -20,14 +20,13 @@ import abc
 from collections.abc import Sequence  # pylint: disable=g-importing-member
 from typing import Any, Dict, List, Optional, Union
 
+import dataclass_array as dca
 import einops
 from etils import enp
 from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-import
 import numpy as np
-from visu3d import array_dataclass
 from visu3d.plotly import fig_config_utils
 from visu3d.plotly import traces_builder
-from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 from visu3d.utils.lazy_imports import plotly_go as go
 
@@ -157,7 +156,7 @@ def make_traces(
   traces = []
   for val in data:
     if isinstance(val, Visualizable):
-      if isinstance(val, array_dataclass.DataclassArray):
+      if isinstance(val, dca.DataclassArray):
         val = val.as_np()
       sub_traces = val.make_traces()
       # Normalizing trace
@@ -461,7 +460,7 @@ def subsample(
   assert arrays[0] is not None
   shape = arrays[0].shape
   assert len(shape) >= 1
-  batch_size = np_utils.size_of(shape[:-1])
+  batch_size = dca.utils.np_utils.size_of(shape[:-1])
 
   if batch_size > num_samples:
     # All arrays are sub-sampled the same way, so generate ids separately

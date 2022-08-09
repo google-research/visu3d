@@ -18,13 +18,13 @@ from __future__ import annotations
 
 import dataclasses
 
+import dataclass_array as dca
+from dataclass_array.typing import Axes
 from etils import enp
 from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
-from visu3d.typing import Axes  # pylint: disable=g-multiple-import
-from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 # TODO(epot): More dynamic sub-sampling controled in `v3d.make_fig`
@@ -111,7 +111,7 @@ class Ray(array_dataclass.DataclassArray):
   def look_at(self, target: Array['*shape 3']) -> Ray:
     """Change the direction to point to the target point."""
     # Could add a `keep_norm=True` ?
-    target = np_utils.asarray(target, xnp=self.xnp)
+    target = dca.utils.np_utils.asarray(target, xnp=self.xnp)
     return self.replace(dir=target - self.pos)
 
   # Protocols (inherited)

@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import dataclass_array as dca
 from etils import enp
 import numpy as np
 import pytest
@@ -30,7 +31,7 @@ H, W = 640, 480
 def make_camera_spec(
     *,
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
 ) -> v3d.PinholeCamera:
   spec = v3d.PinholeCamera.from_focal(
       resolution=(H, W),
@@ -45,7 +46,7 @@ def make_camera_spec(
 @pytest.mark.parametrize('spec_shape', [(), (3,), (2, 3)])
 def test_camera_spec_init(
     xnp: enp.NpModule,
-    spec_shape: v3d.typing.Shape,
+    spec_shape: dca.typing.Shape,
 ):
   if spec_shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')
@@ -80,8 +81,8 @@ def test_camera_spec_init(
 @pytest.mark.parametrize('point_shape', [(), (2, 3)])
 def test_camera_spec_central_point(
     xnp: enp.NpModule,
-    spec_shape: v3d.typing.Shape,
-    point_shape: v3d.typing.Shape,
+    spec_shape: dca.typing.Shape,
+    point_shape: dca.typing.Shape,
 ):
   if spec_shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')
@@ -114,7 +115,7 @@ def test_camera_spec_central_point(
 @pytest.mark.parametrize('spec_shape', [(), (2, 3)])
 def test_camera_px_centers(
     xnp: enp.NpModule,
-    spec_shape: v3d.typing.Shape,
+    spec_shape: dca.typing.Shape,
 ):
   if spec_shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')
@@ -146,7 +147,7 @@ def test_camera_px_centers(
 @pytest.mark.parametrize('spec_shape', [(), (2, 3)])
 def test_camera_points(
     xnp: enp.NpModule,
-    spec_shape: v3d.typing.Shape,
+    spec_shape: dca.typing.Shape,
 ):
   if spec_shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')
@@ -169,7 +170,7 @@ def test_camera_points(
   round_trip_points3d = spec.cam_from_px @ px
   assert isinstance(round_trip_points3d, v3d.Point3d)
   assert round_trip_points3d.shape == spec_shape + (5,)
-  v3d.testing.assert_allclose(round_trip_points3d, points3d, atol=1e-5)
+  dca.testing.assert_allclose(round_trip_points3d, points3d, atol=1e-5)
 
   # Round-trip with depth=None project to z=1
   px = px.replace(depth=None)

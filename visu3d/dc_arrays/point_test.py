@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import dataclass_array as dca
 from etils import enp
 import pytest
 import visu3d as v3d
@@ -29,7 +30,7 @@ set_tnp = enp.testing.set_tnp
 @pytest.mark.parametrize('with_color', [False, True])
 def test_point(
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
     with_color: bool,
 ):
   init_kwargs = {}
@@ -40,15 +41,15 @@ def test_point(
 
   tr = v3d.Transform(R=xnp.eye(3), t=xnp.zeros((3,)))
   p2 = tr @ p
-  v3d.testing.assert_array_equal(p, p2)
+  dca.testing.assert_array_equal(p, p2)
 
-  v3d.testing.assert_array_equal(p + [0, 0, 0], p)
-  v3d.testing.assert_array_equal(p + xnp.array([0, 0, 0]), p)
+  dca.testing.assert_array_equal(p + [0, 0, 0], p)
+  dca.testing.assert_array_equal(p + xnp.array([0, 0, 0]), p)
 
   p_clipped = p.clip(max=[0.5, 0.5, 5])
   p_clipped_expected = v3d.Point3d(p=xnp.array([0.5, 0.5, 1]), **init_kwargs)
   p_clipped_expected = p_clipped_expected.broadcast_to(shape)
-  v3d.testing.assert_array_equal(p_clipped, p_clipped_expected)
+  dca.testing.assert_array_equal(p_clipped, p_clipped_expected)
 
   # Display should works
   _ = p.fig
@@ -60,7 +61,7 @@ def test_point(
 @pytest.mark.parametrize('with_depth', [False, True])
 def test_point_2d(
     xnp: enp.NpModule,
-    shape: v3d.typing.Shape,
+    shape: dca.typing.Shape,
     with_color: bool,
     with_depth: bool,
 ):
@@ -84,13 +85,13 @@ def test_point_2d(
 
   # Round-trip projection from/to pixel should be a no-op
   if with_depth:
-    v3d.testing.assert_array_equal(p, p2d)
+    dca.testing.assert_array_equal(p, p2d)
 
   # Clip
   p_clipped = p.clip(max=[0.5, 5])
   p_clipped_expected = v3d.Point2d(p=xnp.array([0.5, 1]), **init_kwargs)
   p_clipped_expected = p_clipped_expected.broadcast_to(shape)
-  v3d.testing.assert_array_equal(p_clipped, p_clipped_expected)
+  dca.testing.assert_array_equal(p_clipped, p_clipped_expected)
 
   # Point2d does not support transform (3d)
   tr = v3d.Transform(R=xnp.eye(3), t=xnp.zeros((3,)))

@@ -16,24 +16,11 @@
 
 from __future__ import annotations
 
-import sys
-
 # pylint: disable=g-import-not-at-top,g-bad-import-order
 
-pytest = sys.modules.get('pytest')
-if pytest:
-  # Inside tests, rewrite `assert` statement in `v3d.testing` for better
-  # debug messages
-  pytest.register_assert_rewrite('visu3d.testing')
-
 # Core API
-from visu3d import typing
-from visu3d.array_dataclass import array_field
 from visu3d.array_dataclass import DataclassArray
-from visu3d.array_dataclass import DataclassParams
-from visu3d.ops import stack
 from visu3d.utils import lazy_imports
-from visu3d.vectorization import vectorize_method
 
 from visu3d import math
 from visu3d.math import DEG2RAD
@@ -57,17 +44,8 @@ from visu3d.dc_arrays.ray import Ray
 from visu3d.dc_arrays.transformation import custom_transform
 from visu3d.dc_arrays.transformation import Transform
 
-# Inside tests, can use `v3d.testing`
-if pytest:  # < Ensure open source does not trigger import
-  try:
-    from visu3d import testing
-  except ImportError:
-    pass
-
 # Updating this will auto-trigger a release on PyPI and GitHub
 # Note:
 # * Make sure to also update the `CHANGELOG.md` before this.
 # * Make sure to also trigger an `etils` release
 __version__ = '1.2.0'
-
-del sys, pytest

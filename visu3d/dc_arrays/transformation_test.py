@@ -20,6 +20,7 @@ import dataclasses
 import functools
 from typing import Optional
 
+import dataclass_array as dca
 from etils import enp
 from etils.array_types import FloatArray
 import numpy as np
@@ -175,9 +176,9 @@ _TR_EXPECTED_VALUES = {
 )
 def test_transformation(
     xnp: enp.NpModule,
-    tr_shape: v3d.typing.Shape,
-    other_shape: v3d.typing.Shape,
-    expected_shape: v3d.typing.Shape,
+    tr_shape: dca.typing.Shape,
+    other_shape: dca.typing.Shape,
+    expected_shape: dca.typing.Shape,
     test_values: TransformExpectedValue,
 ):
   init_kwargs = {}
@@ -225,14 +226,14 @@ def test_transformation(
   )
 
 
-def _assert_tr_common(tr: v3d.Transform, tr_shape: v3d.typing.Shape):
+def _assert_tr_common(tr: v3d.Transform, tr_shape: dca.typing.Shape):
   """Generic rules applied to all transformation."""
   assert tr.shape == tr_shape
   assert tr.R.shape == tr_shape + (3, 3)
   assert tr.t.shape == tr_shape + (3,)
 
   identity_tr = v3d.Transform(R=tr.xnp.eye(3), t=tr.xnp.zeros((3,)))
-  v3d.testing.assert_array_equal(
+  dca.testing.assert_array_equal(
       identity_tr,
       v3d.Transform.identity().as_xnp(tr.xnp),
   )
@@ -242,22 +243,22 @@ def _assert_tr_common(tr: v3d.Transform, tr_shape: v3d.typing.Shape):
   assert identity_tr.t.shape == tr_shape + (3,)
 
   # Inverting the matrix is equivalent to the matrix of the invert transform
-  v3d.testing.assert_array_equal(tr.inv.matrix4x4, enp.linalg.inv(tr.matrix4x4))
+  dca.testing.assert_array_equal(tr.inv.matrix4x4, enp.linalg.inv(tr.matrix4x4))
 
   # Inverting twice the transformation should be a no-op
-  v3d.testing.assert_array_equal(tr.inv.inv, tr)
+  dca.testing.assert_array_equal(tr.inv.inv, tr)
 
   # Composing the transformation with the inverse should be identity
-  v3d.testing.assert_array_equal(tr.inv @ tr, identity_tr)
-  v3d.testing.assert_array_equal(tr @ tr.inv, identity_tr)
-  v3d.testing.assert_array_equal(tr @ identity_tr, tr)
-  v3d.testing.assert_array_equal(identity_tr @ tr, tr)
+  dca.testing.assert_array_equal(tr.inv @ tr, identity_tr)
+  dca.testing.assert_array_equal(tr @ tr.inv, identity_tr)
+  dca.testing.assert_array_equal(tr @ identity_tr, tr)
+  dca.testing.assert_array_equal(identity_tr @ tr, tr)
 
   # Exporting/importing matrix from 4x4 should be a no-op
-  v3d.testing.assert_array_equal(v3d.Transform.from_matrix(tr.matrix4x4), tr)
+  dca.testing.assert_array_equal(v3d.Transform.from_matrix(tr.matrix4x4), tr)
 
-  v3d.testing.assert_array_equal(tr + [0, 0, 0], tr)
-  v3d.testing.assert_array_equal(tr + tr.xnp.array([0, 0, 0]), tr)
+  dca.testing.assert_array_equal(tr + [0, 0, 0], tr)
+  dca.testing.assert_array_equal(tr + tr.xnp.array([0, 0, 0]), tr)
 
   # Figure should work
   _ = tr.fig
@@ -265,8 +266,8 @@ def _assert_tr_common(tr: v3d.Transform, tr_shape: v3d.typing.Shape):
 
 def _assert_ray_transformed(
     tr: v3d.Transform,
-    other_shape: v3d.typing.Shape,
-    expected_shape: v3d.typing.Shape,
+    other_shape: dca.typing.Shape,
+    expected_shape: dca.typing.Shape,
     test_values: TransformExpectedValue,
 ):
   """Test ray transformation."""
@@ -283,13 +284,13 @@ def _assert_ray_transformed(
       dir=xnp.array(test_values.expected_dir),
   )
   expected_ray = expected_ray.broadcast_to(expected_shape)
-  v3d.testing.assert_array_equal(tr @ ray, expected_ray)
+  dca.testing.assert_array_equal(tr @ ray, expected_ray)
 
 
 def _assert_point_transformed(
     tr: v3d.Transform,
-    other_shape: v3d.typing.Shape,
-    expected_shape: v3d.typing.Shape,
+    other_shape: dca.typing.Shape,
+    expected_shape: dca.typing.Shape,
     test_values: TransformExpectedValue,
 ):
   """Test point transformation."""
@@ -305,8 +306,8 @@ def _assert_point_transformed(
   point_pos = xnp.array(_RAY_POS)
   point_pos = xnp.broadcast_to(point_pos, other_shape + (3,))
 
-  v3d.testing.assert_array_equal(tr @ point_pos, expected_point_pos)
-  v3d.testing.assert_array_equal(tr.apply_to_pos(point_pos), expected_point_pos)
+  dca.testing.assert_array_equal(tr @ point_pos, expected_point_pos)
+  dca.testing.assert_array_equal(tr.apply_to_pos(point_pos), expected_point_pos)
 
   # Test transform point direction
   expected_point_dir = xnp.array(test_values.expected_dir)
@@ -318,13 +319,13 @@ def _assert_point_transformed(
   point_dir = xnp.array(_RAY_DIR)
   point_dir = xnp.broadcast_to(point_dir, other_shape + (3,))
 
-  v3d.testing.assert_array_equal(tr.apply_to_dir(point_dir), expected_point_dir)
+  dca.testing.assert_array_equal(tr.apply_to_dir(point_dir), expected_point_dir)
 
 
 def _assert_tr_transformed(
     tr: v3d.Transform,
-    other_shape: v3d.typing.Shape,
-    expected_shape: v3d.typing.Shape,
+    other_shape: dca.typing.Shape,
+    expected_shape: dca.typing.Shape,
     test_values: TransformExpectedValue,
 ):
   """Test transform transformation."""
@@ -341,13 +342,13 @@ def _assert_tr_transformed(
   )
   expected_tr = expected_tr.broadcast_to(expected_shape)
 
-  v3d.testing.assert_array_equal(tr @ other_tr, expected_tr)
+  dca.testing.assert_array_equal(tr @ other_tr, expected_tr)
 
   # Composing transformations or matrix is equivalent
   # Only test for scalar shape as broadcasting & vectorization have different
   # rules
   if not tr.shape:
-    v3d.testing.assert_array_equal(
+    dca.testing.assert_array_equal(
         v3d.Transform.from_matrix(tr.matrix4x4 @ other_tr.matrix4x4),
         expected_tr,
     )
@@ -355,8 +356,8 @@ def _assert_tr_transformed(
 
 def _assert_camera_transformed(
     tr: v3d.Transform,
-    other_shape: v3d.typing.Shape,
-    expected_shape: v3d.typing.Shape,
+    other_shape: dca.typing.Shape,
+    expected_shape: dca.typing.Shape,
     test_values: TransformExpectedValue,
 ):
   """Test transform transformation."""
@@ -384,14 +385,14 @@ def _assert_camera_transformed(
   )
   expected_cam = expected_cam.broadcast_to(expected_shape)
 
-  v3d.testing.assert_array_equal(tr @ cam, expected_cam)
+  dca.testing.assert_array_equal(tr @ cam, expected_cam)
 
 
 def _assert_scale(
     tr: v3d.Transform,
     *,
     xnp: enp.NpModule,
-    tr_shape: v3d.typing.Shape,
+    tr_shape: dca.typing.Shape,
     expected_r: FloatArray[3, 3],
     expected_scale_xyz: FloatArray[3],
     expected_scale: Optional[FloatArray['']],
@@ -430,7 +431,7 @@ def _assert_scale(
 )
 def test_transformation_scale(
     xnp: enp.NpModule,
-    tr_shape: v3d.typing.Shape,
+    tr_shape: dca.typing.Shape,
 ):
   tr = v3d.Transform.from_angle(x=xnp.asarray(enp.tau / 4))
   tr = tr.broadcast_to(tr_shape)
@@ -498,9 +499,9 @@ def test_transformation_from_angle_multiple(xnp: enp.NpModule):
 
   assert tr.xnp is xnp
 
-  v3d.testing.assert_array_equal(tr.R, rz @ ry @ rx)
+  dca.testing.assert_array_equal(tr.R, rz @ ry @ rx)
 
-  v3d.testing.assert_array_equal(
+  dca.testing.assert_array_equal(
       v3d.Transform.from_angle(),
       v3d.Transform.identity(),
   )
@@ -524,12 +525,12 @@ def test_transformation_from_angle(xnp: enp.NpModule):
   assert tr_y.xnp is xnp
   assert tr_z.xnp is xnp
 
-  v3d.testing.assert_array_equal(tr_x.R, rx)
-  v3d.testing.assert_array_equal(tr_y.R, ry)
-  v3d.testing.assert_array_equal(tr_z.R, rz)
+  dca.testing.assert_array_equal(tr_x.R, rx)
+  dca.testing.assert_array_equal(tr_y.R, ry)
+  dca.testing.assert_array_equal(tr_z.R, rz)
 
   # Identity
-  v3d.testing.assert_array_equal(
+  dca.testing.assert_array_equal(
       v3d.Transform.from_angle(),
       v3d.Transform.identity(),
   )

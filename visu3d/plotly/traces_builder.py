@@ -37,13 +37,13 @@ class TraceNamer:
   def set_name(
       self,
       traces: list[plotly_base.BaseTraceType],
-      array: fig_utils.Visualizable,
+      array: fig_utils.VisualizableInterface,
   ) -> None:
     """Update the name of the traces."""
     if not traces:  # No traces
       return
 
-    if isinstance(array, fig_utils.Visualizable):
+    if fig_utils.is_visualizable(array):
       name = type(array).__name__
     elif enp.lazy.is_array(array):
       name = 'points'

@@ -18,6 +18,11 @@ Changelog follow https://keepachangelog.com/ format.
 
 ### Changed
 
+*   `v3d` dataclass array implementation has been moved to it's independent
+    [`dataclass_array`](https://github.com/google-research/dataclass_array)
+    package.
+*   Any object implementing the `.make_traces` protocol is not visualizable by
+    `v3d.make_fig`. No need to inherit `v3d.Visualizable` anymore.
 *   Support more complex `DType` (`FloatArray`,... accept `bfloat16`,
     `float64`,...).
 

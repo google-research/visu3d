@@ -41,7 +41,8 @@ def auto_plot_figs() -> None:
     return  # Non-notebook environement
 
   def make_fig(val):
-    if len(val) < 1 or not isinstance(val[0], fig_utils.Visualizable):
+    # Only check the first 5 elements
+    if not val or not any(fig_utils.is_visualizable(v) for v in val[:5]):
       return None
     fig_utils.make_fig(list(val))._ipython_display_()  # pylint: disable=protected-access
     return ''

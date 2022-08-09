@@ -27,6 +27,7 @@ from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-im
 import numpy as np
 from visu3d.plotly import fig_config_utils
 from visu3d.plotly import traces_builder
+from visu3d.utils import py_utils
 from visu3d.utils.lazy_imports import plotly_base
 from visu3d.utils.lazy_imports import plotly_go as go
 
@@ -57,6 +58,10 @@ _MAX_NUM_SAMPLE = 10_000  # pylint: disable=invalid-name
 # * `fig_utils.py`: The `make_fig` function
 # * `visualization`: `Visualizable` & typing annotations
 
+# Any class with the `make_traces` protocol
+# TODO(epot): Could use protocol instead
+VisualizableInterface = Any
+
 
 class Visualizable:  # (abc.ABC):
   """Interface for elements which are visualizable."""
@@ -74,7 +79,7 @@ class Visualizable:  # (abc.ABC):
     return make_fig([self])
 
 
-VisualizableItem = Union[Visualizable, Array[...]]
+VisualizableItem = Union[Visualizable, Array[...], VisualizableInterface]
 VisualizableArg = Union[VisualizableItem, List[VisualizableItem]]
 
 
@@ -155,7 +160,7 @@ def make_traces(
   # subsampling individual traces.
   traces = []
   for val in data:
-    if isinstance(val, Visualizable):
+    if is_visualizable(val):
       if isinstance(val, dca.DataclassArray):
         val = val.as_np()
       sub_traces = val.make_traces()
@@ -502,3 +507,8 @@ def _is_traces_2d(traces: list[plotly_base.BaseTraceType]) -> bool:
         f'Trying to mix 2d and 3d plots: {cls_names}. Please open a bug if '
         'this is an issue.')
   return has_2d
+
+
+def is_visualizable(item: VisualizableItem) -> bool:
+  """Returns `True` if the element is a visualizable item."""
+  return py_utils.supports_protocol(item, 'make_traces')

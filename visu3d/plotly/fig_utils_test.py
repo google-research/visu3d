@@ -74,8 +74,32 @@ class VisuObj(v3d.plotly.Visualizable):
     ]
 
 
+class VisuObjImplicit:
+  """Test object which do not inherit from `v3d.plotly.Visualizable`."""
+
+  def make_traces(self) -> list[plotly_base.BaseTraceType]:
+    """Construct the traces of the given object."""
+    return [
+        go.Scatter3d(
+            x=[0, 1, 2],
+            y=[0, 1, 2],
+            z=[0, 1, 2],
+        ),
+    ]
+
+
+class VisuObjInvalid:
+  """Not a visualizable."""
+
+
+def test_is_visualizable():
+  assert v3d.plotly.fig_utils.is_visualizable(VisuObj())
+  assert v3d.plotly.fig_utils.is_visualizable(VisuObjImplicit())
+  assert not v3d.plotly.fig_utils.is_visualizable(VisuObjInvalid())
+
+
 def test_make_fig():
-  x_vig = VisuObj()
+
   x_trace = go.Scatter3d(
       x=[0, 1, 2],
       y=[0, 1, 2],
@@ -83,11 +107,15 @@ def test_make_fig():
   )
   x_array = np.ones((4, 3))
   fig = v3d.make_fig([
-      x_vig,
+      VisuObj(),
+      VisuObjImplicit(),
       x_trace,
       x_array,
   ])
   assert isinstance(fig, go.Figure)
+
+  with pytest.raises(TypeError, match='Unsuported'):
+    v3d.make_fig([VisuObjInvalid()])
 
 
 @pytest.mark.parametrize('shape', [(), (4, 3), (700,), (3, 100, 4)])

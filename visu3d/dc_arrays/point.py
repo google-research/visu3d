@@ -25,6 +25,7 @@ from etils.array_types import FloatArray, ui8  # pylint: disable=g-multiple-impo
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
+from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 if typing.TYPE_CHECKING:
@@ -50,6 +51,8 @@ class Point3d(array_dataclass.DataclassArray):
     """Translate the position."""
     translation = self.xnp.asarray(translation)
     return self.replace(p=self.p + translation)
+
+  __sub__ = np_utils.__sub__
 
   def clip(
       self,

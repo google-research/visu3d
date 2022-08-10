@@ -28,6 +28,7 @@ from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import math
 from visu3d.dc_arrays import ray as ray_lib
+from visu3d.utils import np_utils
 from visu3d.utils import py_utils
 from visu3d.utils.lazy_imports import plotly_base
 
@@ -304,6 +305,8 @@ class Transform(TransformBase):
     """Translate the position."""
     translation = self.xnp.asarray(translation)
     return self.replace(t=self.t + translation)
+
+  __sub__ = np_utils.__sub__
 
   @dca.vectorize_method
   def __matmul__(self, other: _T) -> _T:

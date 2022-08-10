@@ -25,6 +25,7 @@ from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-im
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
+from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 # TODO(epot): More dynamic sub-sampling controled in `v3d.make_fig`
@@ -85,6 +86,8 @@ class Ray(array_dataclass.DataclassArray):
                       'In `ray + x`: x should be a FloatArray[..., 3].')
     translation = self.xnp.asarray(translation)
     return self.replace(pos=self.pos + translation)
+
+  __sub__ = np_utils.__sub__
 
   def scale_dir(self, scale: FloatArray['...']) -> Ray:
     """Scale the dir."""

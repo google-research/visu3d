@@ -26,6 +26,10 @@ Changelog follow https://keepachangelog.com/ format.
 *   Support more complex `DType` (`FloatArray`,... accept `bfloat16`,
     `float64`,...).
 
+### Fixed
+
+*   Translation by subtraction (`ray - np.array([0, 0, 0])`) now works
+
 ## [1.2.0] - 2022-05-27
 
 ### Changed

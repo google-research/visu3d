@@ -19,13 +19,15 @@ And utils intended to work on both `xnp.ndarray` and `v3d.DataclassArray`.
 
 from __future__ import annotations
 
-from typing import Union
+from typing import TypeVar, Union
 
 import dataclass_array as dca
 import einops
 from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d.utils.lazy_imports import scipy
+
+_T = TypeVar('_T')
 
 # Maybe some of those could live in `enp` ?
 
@@ -95,3 +97,9 @@ def interp_points(
   points_fine = scipy.interpolate.splev(t, tck)
   points_fine = einops.rearrange(points_fine, 'd t -> t d')
   return points_fine
+
+
+def __sub__(self: _T, translation: FloatArray['... 3']) -> _T:  # pylint: disable=invalid-name
+  """Add `my_obj - array` support, assuming `my_obj + array` exists."""
+  translation = self.xnp.asarray(translation)
+  return self + (-translation)

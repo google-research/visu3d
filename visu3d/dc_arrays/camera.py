@@ -27,6 +27,7 @@ from visu3d.dc_arrays import camera_spec
 from visu3d.dc_arrays import point as point_lib
 from visu3d.dc_arrays import ray as ray_lib
 from visu3d.dc_arrays import transformation
+from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 
@@ -102,6 +103,8 @@ class Camera(array_dataclass.DataclassArray):
   def __add__(self, translation: FloatArray['... 3']) -> Camera:
     """Translate the position."""
     return self.replace(world_from_cam=self.world_from_cam + translation)
+
+  __sub__ = np_utils.__sub__
 
   @dca.vectorize_method(static_args={'normalize'})
   def rays(self, normalize: bool = True) -> ray_lib.Ray:

@@ -98,6 +98,7 @@ def test_camera_rays(
 
   dca.testing.assert_array_equal(cam + [0, 0, 0], cam)
   dca.testing.assert_array_equal(cam + xnp.array([0, 0, 0]), cam)
+  dca.testing.assert_array_equal(cam - xnp.array([0, 0, 0]), cam)
 
   _ = cam.fig
 

@@ -14,6 +14,8 @@
 
 """Dataclass array wrapper."""
 
+from __future__ import annotations
+
 import dataclass_array as dca
 from visu3d.plotly import fig_utils
 

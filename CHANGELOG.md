@@ -29,6 +29,8 @@ Changelog follow https://keepachangelog.com/ format.
 ### Fixed
 
 *   Translation by subtraction (`ray - np.array([0, 0, 0])`) now works
+*   `FigConfig` property (`cam.fig_config`,...) works correctly for batched
+    camera.
 
 ## [1.2.0] - 2022-05-27
 

@@ -99,6 +99,8 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     w: Camera width resolution (in px).
     fig_config: Additional figure configuration.
   """
+  __dca_non_init_fields__ = ('fig_config',)
+
   resolution: Tuple[int, int]
   # Note: Because `FigConfig` is immutable, it is safe to use a shared instance
   # to avoid unecessary copy.
@@ -176,19 +178,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
       scale: float = FigConfig.scale,
   ) -> CameraSpec:
     """Returns a copy of self with figure params overwritten."""
-    new_config = self.fig_config.replace(scale=scale)
-
-    # We cannot directly use `replace(fig_config=fig_config)` because fig_config
-    # is declared as `init=False`
-    # We cannot have `fig_config` to be `init=True` as this creates a types of
-    # conflicts:
-    # * Inheritance fails with non-default argument 'K' follows default argument
-    # * Pytype complains too
-    # TODO(py310): Cleanup using `dataclass(kw_only)`
-    new_self = self.replace()
-    assert new_self is not self
-    new_self._setattr('fig_config', new_config)  # pylint: disable=protected-access
-    return new_self
+    return self.replace(fig_config=self.fig_config.replace(scale=scale))
 
   # Protocols & internals
 

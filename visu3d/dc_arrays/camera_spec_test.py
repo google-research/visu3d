@@ -27,6 +27,11 @@ set_tnp = enp.testing.set_tnp
 
 H, W = 640, 480
 
+FOCAL_PX = 35.
+
+FIELD_OF_VIEW_W_RADIANS = 2 * np.arctan(W / (2 * FOCAL_PX))
+FIELD_OF_VIEW_H_RADIANS = 2 * np.arctan(H / (2 * FOCAL_PX))
+
 
 def make_camera_spec(
     *,
@@ -35,7 +40,7 @@ def make_camera_spec(
 ) -> v3d.PinholeCamera:
   spec = v3d.PinholeCamera.from_focal(
       resolution=(H, W),
-      focal_in_px=35.,
+      focal_in_px=FOCAL_PX,
       xnp=xnp,
   )
   spec = spec.broadcast_to(shape)
@@ -59,6 +64,13 @@ def test_camera_spec_init(
   assert spec.hw == (H, W)
   assert spec.shape == spec_shape
   assert spec.K.shape == spec_shape + (3, 3)
+  assert spec.fw == FOCAL_PX
+  assert spec.fh == FOCAL_PX
+  assert spec.focal_px_wh == (FOCAL_PX, FOCAL_PX)
+  assert spec.focal_px == FOCAL_PX
+  assert spec.fov_w == FIELD_OF_VIEW_W_RADIANS
+  assert spec.fov_h == FIELD_OF_VIEW_H_RADIANS
+  assert spec.fov == (FIELD_OF_VIEW_W_RADIANS, FIELD_OF_VIEW_H_RADIANS)
 
   if xnp is None:
     xnp = np

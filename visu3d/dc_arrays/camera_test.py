@@ -25,8 +25,11 @@ import visu3d as v3d
 # Activate the fixture
 set_tnp = enp.testing.set_tnp
 
-
 H, W = 64, 128
+FOCAL_PX = 34.
+
+FIELD_OF_VIEW_W_RADIANS = 2 * np.arctan(W / (2 * FOCAL_PX))
+FIELD_OF_VIEW_H_RADIANS = 2 * np.arctan(H / (2 * FOCAL_PX))
 
 
 def _make_cam(
@@ -35,7 +38,7 @@ def _make_cam(
     shape: dca.typing.Shape,
 ) -> v3d.Camera:
   """Create a camera at (0, 4, 0) looking at the center."""
-  spec = v3d.PinholeCamera.from_focal(resolution=(H, W), focal_in_px=34.)
+  spec = v3d.PinholeCamera.from_focal(resolution=(H, W), focal_in_px=FOCAL_PX)
   cam = v3d.Camera.from_look_at(
       spec=spec.as_xnp(xnp),
       pos=[0, 4, 0],  # Camera on the `y` axis
@@ -60,6 +63,13 @@ def test_camera_properties(xnp: enp.NpModule, shape: dca.typing.Shape):
   assert cam.w == W
   assert cam.wh == (W, H)
   assert cam.hw == (H, W)
+  assert cam.spec.fw == FOCAL_PX
+  assert cam.spec.fh == FOCAL_PX
+  assert cam.spec.focal_px_wh == (FOCAL_PX, FOCAL_PX)
+  assert cam.spec.focal_px == FOCAL_PX
+  assert cam.spec.fov_w == FIELD_OF_VIEW_W_RADIANS
+  assert cam.spec.fov_h == FIELD_OF_VIEW_H_RADIANS
+  assert cam.spec.fov == (FIELD_OF_VIEW_W_RADIANS, FIELD_OF_VIEW_H_RADIANS)
 
 
 @enp.testing.parametrize_xnp()

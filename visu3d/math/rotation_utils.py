@@ -21,6 +21,8 @@ Attributes:
 
 from __future__ import annotations
 
+from typing import Tuple
+
 from etils import enp
 from etils.array_types import FloatArray
 
@@ -29,7 +31,6 @@ RAD2DEG = 360. / enp.tau
 
 # TODO(epot): Support vectorization
 
-
 # Could eventually add utils to combine rotations together, like:
 # yaw == ψ == psi == z
 # pitch == θ == theta == y
@@ -37,10 +38,9 @@ RAD2DEG = 360. / enp.tau
 # But might be better to let users explicitly compose transforms.
 
 
-def rot_x(angle: FloatArray['']) -> FloatArray['3 3']:
+@enp.check_and_normalize_arrays(strict=False)
+def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
   """Rotation matrix for rotation around X (in radians)."""
-  xnp = enp.lazy.get_xnp(angle, strict=False)
-  angle = xnp.asarray(angle)
   if angle.ndim:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
@@ -53,10 +53,9 @@ def rot_x(angle: FloatArray['']) -> FloatArray['3 3']:
   return R
 
 
-def rot_y(angle: FloatArray['']) -> FloatArray['3 3']:
+@enp.check_and_normalize_arrays(strict=False)
+def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
   """Rotation matrix for rotation around Y (in radians)."""
-  xnp = enp.lazy.get_xnp(angle, strict=False)
-  angle = xnp.asarray(angle)
   if angle.ndim:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
@@ -69,10 +68,9 @@ def rot_y(angle: FloatArray['']) -> FloatArray['3 3']:
   return R
 
 
-def rot_z(angle: FloatArray['']) -> FloatArray['3 3']:
+@enp.check_and_normalize_arrays(strict=False)
+def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
   """Rotation matrix for rotation around Z (in radians)."""
-  xnp = enp.lazy.get_xnp(angle, strict=False)
-  angle = xnp.asarray(angle)
   if angle.ndim:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
@@ -142,11 +140,13 @@ def euler_to_rot(
   return r_final
 
 
+@enp.check_and_normalize_arrays
 def rot_to_euler(
     rot: FloatArray['3 3'],
     *,
     eps: float = 1e-6,
-) -> tuple[FloatArray[''], FloatArray[''], FloatArray['']]:
+    xnp: enp.NpModule = ...,
+) -> Tuple[FloatArray[''], FloatArray[''], FloatArray['']]:
   """Extract euler angles from a 3x3 rotation matrix.
 
   Like `euler_to_rot`, it follow the z, y, x convension, BUT returns x, y, z.
@@ -156,12 +156,11 @@ def rot_to_euler(
   Args:
     rot: Rotation matrix
     eps: Precision threshold to detect 90 degree angles.
+    xnp: Np module used (jnp, tnp, np,...)
 
   Returns:
     The x, y, z euler angle (in radian)
   """
-  xnp = enp.lazy.get_xnp(rot)
-
   r00 = rot[0, 0]
   # r01 = rot[0, 1]
   r02 = rot[0, 2]
@@ -181,7 +180,7 @@ def rot_to_euler(
 
     theta_y = sign * enp.tau / 4
     theta_z = -sign * xnp.arctan2(-r12, r11)
-    theta_x = 0
+    theta_x = 0.
 
   theta_x = xnp.asarray(theta_x)
   theta_y = xnp.asarray(theta_y)
@@ -189,7 +188,13 @@ def rot_to_euler(
   return theta_x, theta_y, theta_z
 
 
-def is_orth(rot: FloatArray['3 3'], *, atol: float = 1e-6) -> bool:
+@enp.check_and_normalize_arrays
+def is_orth(
+    rot: FloatArray['3 3'],
+    *,
+    atol: float = 1e-6,
+    xnp: enp.NpModule = ...,
+) -> bool:
   """Check if the matrix is a valid orthogonal matrix `O(3)`.
 
   Each orthogonal matrix form a orthonormal basis.
@@ -202,11 +207,11 @@ def is_orth(rot: FloatArray['3 3'], *, atol: float = 1e-6) -> bool:
   Args:
     rot: The 3x3 matrix to check
     atol: Precision at which checking the matrix
+    xnp: Np module used (jnp, tnp, np,...)
 
   Returns:
     True if the matrix is orthogonal.
   """
-  xnp = enp.lazy.get_xnp(rot)
   if rot.shape != (3, 3):
     raise ValueError(f'Expected 3x3 shape, but got {rot.shape}')
 

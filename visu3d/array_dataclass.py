@@ -20,5 +20,6 @@ import dataclass_array as dca
 from visu3d.plotly import fig_utils
 
 
+@dca.dataclass_array(broadcast=True, cast_dtype=True)
 class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
   pass

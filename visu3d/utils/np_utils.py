@@ -52,7 +52,8 @@ def append_row(
     raise NotImplementedError()
   else:
     raise ValueError(
-        f'`append_row` does not support appending rank > 1. Got {value.shape}.')
+        f'`append_row` does not support appending rank > 1. Got {value.shape}.'
+    )
   return xnp.append(x, value, axis=axis)
 
 
@@ -86,7 +87,8 @@ def interp_points(
   if axis != -1:
     raise NotImplementedError(
         'interpolation currently only supports axis=-1. Open an issue if you '
-        'need this.')
+        'need this.'
+    )
   points = xnp.asarray(points)
   points = einops.rearrange(points, 'num_points d -> d num_points')
 

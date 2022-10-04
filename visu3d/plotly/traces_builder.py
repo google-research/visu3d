@@ -28,11 +28,10 @@ from visu3d.utils.lazy_imports import plotly_base
 @dataclasses.dataclass
 class TraceNamer:
   """Set plotly trace names."""
-  # pyformat: disable
+
   name_to_count: dict[str, itertools.count] = dataclasses.field(
       default_factory=lambda: collections.defaultdict(itertools.count),
   )
-  # pyformat: enable
 
   def set_name(
       self,

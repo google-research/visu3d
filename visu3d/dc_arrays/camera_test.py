@@ -35,7 +35,7 @@ def _make_cam(
     shape: dca.typing.Shape,
 ) -> v3d.Camera:
   """Create a camera at (0, 4, 0) looking at the center."""
-  spec = v3d.PinholeCamera.from_focal(resolution=(H, W), focal_in_px=34.)
+  spec = v3d.PinholeCamera.from_focal(resolution=(H, W), focal_in_px=34.0)
   cam = v3d.Camera.from_look_at(
       spec=spec.as_xnp(xnp),
       pos=[0, 4, 0],  # Camera on the `y` axis
@@ -94,7 +94,7 @@ def test_camera_rays(
     )
   else:
     # Ray destinations are aligned with the y=3 plane
-    np.testing.assert_allclose(rays.end[..., 1], np.full(shape + (H, W), 3.))
+    np.testing.assert_allclose(rays.end[..., 1], np.full(shape + (H, W), 3.0))
 
   dca.testing.assert_array_equal(cam + [0, 0, 0], cam)
   dca.testing.assert_array_equal(cam + xnp.array([0, 0, 0]), cam)
@@ -102,7 +102,7 @@ def test_camera_rays(
 
   _ = cam.fig
 
-  cam = cam.replace_fig_config(scale=3.)
+  cam = cam.replace_fig_config(scale=3.0)
   _ = cam.fig
 
 
@@ -153,7 +153,7 @@ def test_camera_render(
   cam = _make_cam(xnp=xnp, shape=shape)  # Camera on the `y` axis
   points = v3d.Point3d(
       p=[0, 0, 0],
-      rgb=[255., 255., 255.],
+      rgb=[255.0, 255.0, 255.0],
   )
   points = points.as_xnp(xnp)
   points = points.broadcast_to((1,) * len(shape) + point_shape)

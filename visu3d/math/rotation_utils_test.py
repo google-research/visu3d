@@ -30,19 +30,23 @@ def test_is_rotation_matrix(xnp: enp.NpModule):
   assert v3d.math.is_rot(xnp.eye(3))
   assert not v3d.math.is_rot(xnp.zeros((3, 3)))
 
-  not_rot = xnp.array([
-      [0., 0., 1.],
-      [0., 1., 0.],
-      [0., 0., 1.],
-  ])
+  not_rot = xnp.array(
+      [
+          [0.0, 0.0, 1.0],
+          [0.0, 1.0, 0.0],
+          [0.0, 0.0, 1.0],
+      ]
+  )
   assert not v3d.math.is_rot(not_rot)
 
   delta = 1e-8
-  rot = xnp.array([
-      [1. + delta, 0., 0.],
-      [0., 1., 0.],
-      [0., 0., 1.],
-  ])
+  rot = xnp.array(
+      [
+          [1.0 + delta, 0.0, 0.0],
+          [0.0, 1.0, 0.0],
+          [0.0, 0.0, 1.0],
+      ]
+  )
   assert v3d.math.is_rot(rot, atol=delta * 10)
 
 
@@ -53,20 +57,23 @@ def test_is_rotation_matrix_raises(xnp: enp.NpModule):
 
 
 @enp.testing.parametrize_xnp(with_none=True)
-@pytest.mark.parametrize('rad', [
-    0.0,
-    1 / 4 * enp.tau,
-    -1 / 4 * enp.tau,
-    1 / 2 * enp.tau,
-    -1 / 2 * enp.tau,
-    enp.tau,
-    # Same shifted by 1 tau
-    5 / 4 * enp.tau,
-    -5 / 4 * enp.tau,
-    3 / 2 * enp.tau,
-    -3 / 2 * enp.tau,
-    2 * enp.tau,
-])
+@pytest.mark.parametrize(
+    'rad',
+    [
+        0.0,
+        1 / 4 * enp.tau,
+        -1 / 4 * enp.tau,
+        1 / 2 * enp.tau,
+        -1 / 2 * enp.tau,
+        enp.tau,
+        # Same shifted by 1 tau
+        5 / 4 * enp.tau,
+        -5 / 4 * enp.tau,
+        3 / 2 * enp.tau,
+        -3 / 2 * enp.tau,
+        2 * enp.tau,
+    ],
+)
 def test_rotation_around_axis(xnp: enp.NpModule, rad: float):
   if xnp is not None:
     rad = xnp.asarray(rad)
@@ -94,11 +101,14 @@ def test_rotation_around_axis(xnp: enp.NpModule, rad: float):
 
 
 @enp.testing.parametrize_xnp(with_none=True)
-@pytest.mark.parametrize('rx, ry, rz', [
-    (0.0, 0.0, 0.0),
-    (1 / 4, -1 / 3, 1 / 5),
-    (5 / 4, -4 / 3, 6 / 5),
-])
+@pytest.mark.parametrize(
+    'rx, ry, rz',
+    [
+        (0.0, 0.0, 0.0),
+        (1 / 4, -1 / 3, 1 / 5),
+        (5 / 4, -4 / 3, 6 / 5),
+    ],
+)
 def test_euler_roundtrip(xnp: enp.NpModule, rx: float, ry: float, rz: float):
   if xnp is not None:
     rx = xnp.asarray(rx)

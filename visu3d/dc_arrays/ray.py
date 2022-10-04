@@ -47,6 +47,7 @@ class Ray(array_dataclass.DataclassArray):
     pos: Position
     dir: Direction
   """
+
   pos: FloatArray['*shape 3']
   dir: FloatArray['*shape 3']
 
@@ -82,8 +83,10 @@ class Ray(array_dataclass.DataclassArray):
   def __add__(self, translation: FloatArray['... 3']) -> Ray:
     """Translate the position."""
     if isinstance(translation, Ray):
-      raise TypeError('Cannot add Ray with Ray. '
-                      'In `ray + x`: x should be a FloatArray[..., 3].')
+      raise TypeError(
+          'Cannot add Ray with Ray. '
+          'In `ray + x`: x should be a FloatArray[..., 3].'
+      )
     translation = self.xnp.asarray(translation)
     return self.replace(pos=self.pos + translation)
 
@@ -92,8 +95,10 @@ class Ray(array_dataclass.DataclassArray):
   def scale_dir(self, scale: FloatArray['...']) -> Ray:
     """Scale the dir."""
     if isinstance(scale, Ray):
-      raise TypeError('Cannot multiply Ray with Ray. '
-                      'In `ray * x`: x should be a scalar factor.')
+      raise TypeError(
+          'Cannot multiply Ray with Ray. '
+          'In `ray * x`: x should be a scalar factor.'
+      )
     scale = self.xnp.asarray(scale)
     return self.replace(dir=self.dir * scale)
 

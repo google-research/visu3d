@@ -39,6 +39,7 @@ class Camera(array_dataclass.DataclassArray):
     spec: Camera intrinsics parameters
     world_from_cam: Camera pose (`v3d.Transformation`)
   """
+
   spec: camera_spec.CameraSpec
   world_from_cam: transformation.Transform
 
@@ -155,7 +156,8 @@ class Camera(array_dataclass.DataclassArray):
     # TODO(epot): Support float colors and make this differentiable!
     if not isinstance(points, point_lib.Point3d):
       raise TypeError(
-          f'Camera.render expect `v3d.Point3d` as input. Got: {points}.')
+          f'Camera.render expect `v3d.Point3d` as input. Got: {points}.'
+      )
 
     # Project 3d -> 2d coordinates
     points2d = self.px_from_world @ points
@@ -168,14 +170,13 @@ class Camera(array_dataclass.DataclassArray):
     # Compute the valid coordinates
     w_coords = px_coords[..., 0]
     h_coords = px_coords[..., 1]
-    # pyformat: disable
     valid_coords_mask = (
         (0 <= h_coords)
         & (h_coords < self.h - 1)
         & (0 <= w_coords)
         & (w_coords < self.w - 1)
         & (points2d.depth[..., 0] > 0)  # Filter points behind the camera
-    )    # pyformat: enable
+    )
     rgb = rgb[valid_coords_mask]
     px_coords = px_coords[valid_coords_mask]
 

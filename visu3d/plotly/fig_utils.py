@@ -71,7 +71,8 @@ class Visualizable:  # (abc.ABC):
     """Construct the traces of the given object."""
     raise NotImplementedError(
         f'To be visualizable, {type(self).__qualname__} should implement '
-        'the `.make_traces()` protocol.')
+        'the `.make_traces()` protocol.'
+    )
 
   @property
   def fig(self) -> go.Figure:
@@ -201,8 +202,10 @@ def make_points(
     The plotly trace to display
   """
   if coords.shape[-1] not in (2, 3):
-    raise ValueError('Points should be `(..., 2)` or `(..., 3)`. '
-                     f'now. Got shape={coords.shape}')
+    raise ValueError(
+        'Points should be `(..., 2)` or `(..., 3)`. '
+        f'now. Got shape={coords.shape}'
+    )
 
   # TODO(epot): Subsample array if nb points >500
   coords, color = subsample(coords, color, num_samples=num_samples)  # pylint: disable=unbalanced-tuple-unpacking
@@ -241,7 +244,7 @@ def _make_scatter_3d(
       **points_xyz_kwargs,
       mode='markers',
       marker=go.scatter3d.Marker(
-          size=2.,
+          size=2.0,
           color=color,
       ),
   )
@@ -261,7 +264,7 @@ def _make_scatter_2d(
       **points_xy_kwargs,
       mode='markers',
       marker=go.scattergl.Marker(
-          size=2.,
+          size=2.0,
           color=color,
       ),
   )
@@ -309,7 +312,7 @@ def make_lines_traces(
         # TODO(plotly): Absolute size currently broken:
         # https://github.com/plotly/plotly.js/issues/3613
         sizemode='absolute',  # Not sure what's the difference with `scaled`
-        sizeref=.5,
+        sizeref=0.5,
         # TODO(epot): Add color
         # colorscale=[[0, 'rgb(255,0,0)'], [1, 'rgb(255,0,0)']]
     )
@@ -505,7 +508,8 @@ def _is_traces_2d(traces: list[plotly_base.BaseTraceType]) -> bool:
     cls_names = {type(trace).__name__ for trace in traces}
     raise ValueError(
         f'Trying to mix 2d and 3d plots: {cls_names}. Please open a bug if '
-        'this is an issue.')
+        'this is an issue.'
+    )
   return has_2d
 
 

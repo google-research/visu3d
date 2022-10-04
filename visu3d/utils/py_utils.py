@@ -32,9 +32,8 @@ def supports_protocol(
     protocol_fn_name: str,
 ) -> bool:
   """Returns `True` if the class support the protocol."""
-  return (
-      hasattr(self_or_cls, protocol_fn_name)
-      and callable(getattr(self_or_cls, protocol_fn_name))
+  return hasattr(self_or_cls, protocol_fn_name) and callable(
+      getattr(self_or_cls, protocol_fn_name)
   )
 
 
@@ -50,7 +49,8 @@ def assert_supports_protocol(
     cls = _get_class(self_or_cls)
     raise NotImplementedError(
         f'`{cls.__qualname__}` does not implement the `.{protocol_fn_name}()` '
-        f'protocol. {msg}')
+        f'protocol. {msg}'
+    )
 
 
 def _get_class(self_or_cls: Union[_T, Type[_T]]) -> Type[_T]:
@@ -63,6 +63,7 @@ def _get_class(self_or_cls: Union[_T, Type[_T]]) -> Type[_T]:
 @dataclasses.dataclass
 class LazyModule:
   """Module loaded lazily during first call."""
+
   module_name: str
   module: Optional[types.ModuleType] = None
 

@@ -26,8 +26,8 @@ from typing import Tuple
 from etils import enp
 from etils.array_types import FloatArray
 
-DEG2RAD = enp.tau / 360.
-RAD2DEG = 360. / enp.tau
+DEG2RAD = enp.tau / 360.0
+RAD2DEG = 360.0 / enp.tau
 
 # TODO(epot): Support vectorization
 
@@ -45,11 +45,13 @@ def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
-  R = xnp.array([  # pylint: disable=invalid-name
-      [1, 0, 0],
-      [0, c, -s],
-      [0, s, c],
-  ])
+  R = xnp.array(  # pylint: disable=invalid-name
+      [
+          [1, 0, 0],
+          [0, c, -s],
+          [0, s, c],
+      ]
+  )
   return R
 
 
@@ -60,11 +62,13 @@ def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
-  R = xnp.array([  # pylint: disable=invalid-name
-      [c, 0, s],
-      [0, 1, 0],
-      [-s, 0, c],
-  ])
+  R = xnp.array(  # pylint: disable=invalid-name
+      [
+          [c, 0, s],
+          [0, 1, 0],
+          [-s, 0, c],
+      ]
+  )
   return R
 
 
@@ -75,11 +79,13 @@ def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
-  R = xnp.array([  # pylint: disable=invalid-name
-      [c, -s, 0],
-      [s, c, 0],
-      [0, 0, 1],
-  ])
+  R = xnp.array(  # pylint: disable=invalid-name
+      [
+          [c, -s, 0],
+          [s, c, 0],
+          [0, 0, 1],
+      ]
+  )
   return R
 
 
@@ -115,7 +121,8 @@ def euler_to_rot(
 
   if set(order) != set('xyz') or len(order) != 3:
     raise ValueError(
-        f'Order should contain x, y, z exactly once. Got {order!r}')
+        f'Order should contain x, y, z exactly once. Got {order!r}'
+    )
 
   def _accumulate_rot(r0, r1):
     return r1 if r0 is None else r0 @ r1
@@ -171,7 +178,7 @@ def rot_to_euler(
   r21 = rot[2, 1]
   r22 = rot[2, 2]
 
-  if xnp.abs(r20) < 1. - eps:  # Should allow to tune the precision ?
+  if xnp.abs(r20) < 1.0 - eps:  # Should allow to tune the precision ?
     theta_y = xnp.arcsin(-r20)
     theta_z = xnp.arctan2(r10, r00)
     theta_x = xnp.arctan2(r21, r22)
@@ -180,7 +187,7 @@ def rot_to_euler(
 
     theta_y = sign * enp.tau / 4
     theta_z = -sign * xnp.arctan2(-r12, r11)
-    theta_x = 0.
+    theta_x = 0.0
 
   theta_x = xnp.asarray(theta_x)
   theta_y = xnp.asarray(theta_y)
@@ -245,4 +252,4 @@ def is_rot(rot: FloatArray['3 3'], *, atol: float = 1e-6) -> bool:
     raise ValueError(f'Expected 3x3 shape, but got {rot.shape}')
 
   det = enp.linalg.det(rot)
-  return is_orth(rot, atol=atol) and det > 0.
+  return is_orth(rot, atol=atol) and det > 0.0

@@ -38,8 +38,10 @@ del abc  # TODO(epot): Why pytype don't like abc ?
 
 assert_supports_protocol = functools.partial(
     py_utils.assert_supports_protocol,
-    msg='Required to support camera transformations. See `v3d.Point3d` and '
-    '`v3d.Point2d` for example.',
+    msg=(
+        'Required to support camera transformations. See `v3d.Point3d` and '
+        '`v3d.Point2d` for example.'
+    ),
 )
 
 
@@ -51,6 +53,7 @@ class FigConfig:
   Attributes:
     scale: The scale of the camera.
   """
+
   scale: float = 1.0
 
   def replace(self, **kwargs) -> FigConfig:
@@ -99,6 +102,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     w: Camera width resolution (in px).
     fig_config: Additional figure configuration.
   """
+
   __dca_non_init_fields__ = ('fig_config',)
 
   resolution: Tuple[int, int]
@@ -246,6 +250,7 @@ class PinholeCamera(CameraSpec):
     K: Camera intrinsics parameters.
     resolution: (h, w) resolution
   """
+
   K: FloatArray['*shape 3 3']  # pylint: disable=invalid-name
 
   @classmethod
@@ -284,11 +289,13 @@ class PinholeCamera(CameraSpec):
     ch = h / 2  # h == y
     cw = w / 2  # w == x
 
-    K = xnp.array([  # pylint: disable=invalid-name
-        [focal_in_px, 0, cw],  # cx
-        [0, focal_in_px, ch],  # cy
-        [0, 0, 1],
-    ])
+    K = xnp.array(  # pylint: disable=invalid-name
+        [
+            [focal_in_px, 0, cw],  # cx
+            [0, focal_in_px, ch],  # cy
+            [0, 0, 1],
+        ]
+    )
     return cls(
         K=K,
         resolution=resolution,
@@ -350,7 +357,7 @@ class PinholeCamera(CameraSpec):
     # Normalize: s * [u, v, 1] -> [u, v, 1]
     # And only keep [u, v]
     depth = points2d[..., 2:3]
-    points2d = (points2d[..., :2] / (depth + 1e-8))
+    points2d = points2d[..., :2] / (depth + 1e-8)
 
     if with_depth:
       return points2d, depth
@@ -381,7 +388,7 @@ class PinholeCamera(CameraSpec):
 
     # [u, v] -> [u, v, 1]
     # Concatenate (..., 2) with (..., 1) -> (..., 3)
-    points2d = np_utils.append_row(points2d, 1., axis=-1)
+    points2d = np_utils.append_row(points2d, 1.0, axis=-1)
 
     # [X,Y,Z] / s = K-1 @ [u, v, 1]
     # (3, 3) @ (..., 3) -> (..., 3)
@@ -403,6 +410,6 @@ class PinholeCamera(CameraSpec):
         indexing='xy',
     )
     points2d = xnp.stack([coord_w, coord_h], axis=-1)
-    points2d = xnp.asarray(points2d, dtype=xnp.float32) + .5
+    points2d = xnp.asarray(points2d, dtype=xnp.float32) + 0.5
     assert points2d.shape == (self.h, self.w, 2)
     return points2d

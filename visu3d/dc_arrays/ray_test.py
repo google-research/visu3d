@@ -35,7 +35,6 @@ def test_ray(
     xnp: enp.NpModule,
     shape: dca.typing.Shape,
 ):
-
   def _broadcast(x: Array['*d'], shape=shape) -> Array['*d 3']:
     return xnp.broadcast_to(xnp.asarray(x), shape + (3,))
 
@@ -56,7 +55,7 @@ def test_ray(
 
   t = xnp.array([1, 0, 0])
   d = xnp.array([0, 2, 2])
-  sqrt8 = np.sqrt(0**2 + 2**2 + 2**2.)
+  sqrt8 = np.sqrt(0**2 + 2**2 + 2**2.0)
 
   p = _ray_broadcast(t=t, d=d)
 

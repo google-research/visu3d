@@ -36,6 +36,7 @@ class FigConfig:
     show_zero: Whether to show the `(0, 0, 0)` origin, otherwise the plot x, y,
       z axis adapt to the data.
   """
+
   show_zero: bool = True
 
   def replace(self, **kwargs) -> FigConfig:

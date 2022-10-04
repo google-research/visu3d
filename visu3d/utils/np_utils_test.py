@@ -25,7 +25,7 @@ from visu3d.utils import np_utils
 @enp.testing.parametrize_xnp()
 def test_append_row(xnp: enp.NpModule):
   x = xnp.ones((2, 4))
-  y = np_utils.append_row(x, value=4., axis=-1)
+  y = np_utils.append_row(x, value=4.0, axis=-1)
   assert isinstance(y, xnp.ndarray)
   expected = [
       [1, 1, 1, 1, 4],
@@ -33,7 +33,7 @@ def test_append_row(xnp: enp.NpModule):
   ]
   np.testing.assert_allclose(y, expected)
 
-  y = np_utils.append_row(x, value=4., axis=0)
+  y = np_utils.append_row(x, value=4.0, axis=0)
   assert isinstance(y, xnp.ndarray)
   expected = [
       [1, 1, 1, 1],

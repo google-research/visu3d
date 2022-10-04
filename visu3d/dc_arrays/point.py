@@ -44,6 +44,7 @@ class Point3d(array_dataclass.DataclassArray):
     p: 3d (x, y, z) coordinates
     rgb: uint8 color
   """
+
   p: FloatArray['*shape 3']
   rgb: Optional[ui8['*shape 3']] = None
 
@@ -93,6 +94,7 @@ class Point2d(array_dataclass.DataclassArray):
     rgb: uint8 color
     depth: The depth in camera coordinates.
   """
+
   p: FloatArray['*shape 2']
   depth: Optional[FloatArray['*shape 1']] = None
   rgb: Optional[ui8['*shape 3']] = None
@@ -125,7 +127,7 @@ class Point2d(array_dataclass.DataclassArray):
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
     traces = []
 
-    trace, = plotly.make_points(
+    (trace,) = plotly.make_points(
         self.p,
         color=self.rgb,
         num_samples=_MAX_NUM_SAMPLE,

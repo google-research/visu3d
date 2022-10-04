@@ -29,11 +29,13 @@ from visu3d.utils.lazy_imports import plotly_go as go
 @enp.testing.parametrize_xnp()
 def test_to_xyz_dict(xnp: enp.NpModule):
   chex.assert_tree_all_close(
-      v3d.plotly.to_xyz_dict([
-          [0, 1, 2],
-          [0, 10, 20],
-          [0, 100, 200],
-      ]),
+      v3d.plotly.to_xyz_dict(
+          [
+              [0, 1, 2],
+              [0, 10, 20],
+              [0, 100, 200],
+          ]
+      ),
       {
           'x': xnp.array([0, 0, 0]),
           'y': xnp.array([1, 10, 100]),
@@ -99,19 +101,20 @@ def test_is_visualizable():
 
 
 def test_make_fig():
-
   x_trace = go.Scatter3d(
       x=[0, 1, 2],
       y=[0, 1, 2],
       z=[0, 1, 2],
   )
   x_array = np.ones((4, 3))
-  fig = v3d.make_fig([
-      VisuObj(),
-      VisuObjImplicit(),
-      x_trace,
-      x_array,
-  ])
+  fig = v3d.make_fig(
+      [
+          VisuObj(),
+          VisuObjImplicit(),
+          x_trace,
+          x_array,
+      ]
+  )
   assert isinstance(fig, go.Figure)
 
   with pytest.raises(TypeError, match='Unsuported'):

@@ -61,6 +61,7 @@ class Transform(TransformBase):
       z1], [x2, y2, z2]]`)
     t: Translation of the transformation (`tx, ty, tz`)
   """
+
   R: FloatArray['*shape 3 3'] = (  # pylint: disable=invalid-name
       (1, 0, 0),
       (0, 1, 0),
@@ -218,8 +219,11 @@ class Transform(TransformBase):
     """
 
     def _err_msg():
-      return ('Cannot get `Transform.scale` when x, y, z scale are '
-              f'different: {self.scale_xyz}')
+      return (
+          'Cannot get `Transform.scale` when x, y, z scale are '
+          f'different: {self.scale_xyz}'
+      )
+
     xnp = self.xnp
     scale_xyz = xnp.round(self.scale_xyz, decimals=7)
     # TODO(epot): Move into `enp.ops.unique`
@@ -249,7 +253,7 @@ class Transform(TransformBase):
     if raise_error:
       raise ValueError(_err_msg())
     else:
-      global_scale, = global_scales
+      (global_scale,) = global_scales
     return global_scale
 
   def mul_scale(self, factor: FloatArray['*shape 3?']) -> Transform:
@@ -390,19 +394,19 @@ class Transform(TransformBase):
 
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
     rays = self.ray_basis
-    line_trace, = rays.make_traces()
+    (line_trace,) = rays.make_traces()
     line_trace.mode = 'lines+markers+text'
     # Add x, y, z text labels to the plot
     # Each point in the original line trace is:
     # [ray_origin, ray_end, None(=line break)]
     # So we only add the text on the `ray_end`
-    # pyformat: off
+    # fmt: off
     line_trace.text = [
         None, 'x', None,
         None, 'y', None,
         None, 'z', None,
     ] * rays.size
-    # pyformat: on
+    # fmt: on
     return [line_trace]
 
 
@@ -465,6 +469,7 @@ class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=inval
     method: Transform method (decorated by `@v3d.custom_transform`). Calling
       `custom_tr @ x` is equivalent of calling `self.method(x)`
   """
+
   self_: DcT = dca.field(  # pytype: disable=annotation-type-mismatch
       shape=(),
       dtype=dca.DataclassArray,
@@ -517,6 +522,7 @@ class ComposedTransform(TransformBase):
   Note: Should not be created directly but only inside `CustomTransform`.
 
   """
+
   left_tr: TransformBase
   right_tr: TransformBase
 

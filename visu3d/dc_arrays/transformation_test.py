@@ -34,6 +34,7 @@ set_tnp = enp.testing.set_tnp
 @dataclasses.dataclass
 class TransformExpectedValue:
   """Tests values."""
+
   # Expected rays values after transformation
   expected_pos: FloatArray[..., 3]
   expected_dir: FloatArray[..., 3]
@@ -50,11 +51,13 @@ class TransformExpectedValue:
 # Transformation values
 _RAY_POS = np.array([1, 3, 5])
 _RAY_DIR = np.array([2, 1, 4])
-_TR_R = np.array([
-    [0, 1, 0],
-    [1, 0, 0],
-    [0, 0, 1],
-])
+_TR_R = np.array(
+    [
+        [0, 1, 0],
+        [1, 0, 0],
+        [0, 0, 1],
+    ]
+)
 _TR_T = np.array([4, 3, 7])
 
 _TR_EXPECTED_VALUES = {
@@ -452,7 +455,7 @@ def test_transformation_scale(
       expected_scale=1,
   )
   assert_scale(
-      tr.mul_scale(3.),
+      tr.mul_scale(3.0),
       expected_r=[
           [3, 0, 0],
           [0, 0, -3],
@@ -462,7 +465,7 @@ def test_transformation_scale(
       expected_scale=3,
   )
   assert_scale(
-      tr.mul_scale(3.).normalize(),
+      tr.mul_scale(3.0).normalize(),
       expected_r=[
           [1, 0, 0],
           [0, 0, -1],

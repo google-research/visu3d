@@ -35,7 +35,7 @@ def make_camera_spec(
 ) -> v3d.PinholeCamera:
   spec = v3d.PinholeCamera.from_focal(
       resolution=(H, W),
-      focal_in_px=35.,
+      focal_in_px=35.0,
       xnp=xnp,
   )
   spec = spec.broadcast_to(shape)
@@ -72,7 +72,7 @@ def test_camera_spec_init(
 
   _ = spec.fig
 
-  spec = spec.replace_fig_config(scale=3.)
+  spec = spec.replace_fig_config(scale=3.0)
   _ = spec.fig
 
 
@@ -138,7 +138,7 @@ def test_camera_px_centers(
   # Scaling/normalizing don't change the projection
   np.testing.assert_allclose(
       round_trip_px,
-      spec.px_from_cam @ (cam_centers * 3.),
+      spec.px_from_cam @ (cam_centers * 3.0),
       atol=1e-4,
   )
 

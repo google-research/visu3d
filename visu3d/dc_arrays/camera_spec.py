@@ -20,10 +20,10 @@ import abc
 import dataclasses
 import functools
 import typing
-from typing import Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import dataclass_array as dca
-from dataclass_array.typing import DcOrArray
+from dataclass_array.typing import DcOrArray, DcT  # pylint: disable=g-multiple-import
 from etils import edc
 from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
@@ -47,7 +47,7 @@ assert_supports_protocol = functools.partial(
 
 @edc.dataclass(kw_only=True)
 @dataclasses.dataclass(frozen=True)
-class FigConfig:
+class TraceConfig(plotly.TraceConfig):
   """Figure configuration.
 
   Attributes:
@@ -55,9 +55,6 @@ class FigConfig:
   """
 
   scale: float = 1.0
-
-  def replace(self, **kwargs) -> FigConfig:
-    return dataclasses.replace(self, **kwargs)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -103,13 +100,11 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     fig_config: Additional figure configuration.
   """
 
-  __dca_non_init_fields__ = ('fig_config',)
-
   resolution: Tuple[int, int]
-  # Note: Because `FigConfig` is immutable, it is safe to use a shared instance
-  # to avoid unecessary copy.
-  fig_config: FigConfig = dataclasses.field(
-      default=FigConfig(),
+
+  # Overwrite `v3d.DataclassArray.fig_config`.
+  fig_config: TraceConfig = dataclasses.field(
+      default=TraceConfig(),
       repr=False,
       init=False,
   )
@@ -176,13 +171,16 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     """
     raise NotImplementedError
 
-  def replace_fig_config(
-      self,
+  # Could be removed but only kept for type-checking / auto-complete.
+  def replace_fig_config(  # pylint: disable=useless-parent-delegation
+      self: DcT,
       *,
-      scale: float = FigConfig.scale,
-  ) -> CameraSpec:
+      name: str = ...,  # pytype: disable=annotation-type-mismatch
+      scale: float = ...,  # pytype: disable=annotation-type-mismatch
+      **kwargs: Any,
+  ) -> DcT:
     """Returns a copy of self with figure params overwritten."""
-    return self.replace(fig_config=self.fig_config.replace(scale=scale))
+    return super().replace_fig_config(name=name, scale=scale, **kwargs)
 
   # Protocols & internals
 

@@ -42,7 +42,7 @@ def test_ray(
       t: Array['3'],
       d: Array['3'],
       shape=shape,
-  ) -> Array['*d 3']:
+  ) -> v3d.Ray:
     return v3d.Ray(
         pos=_broadcast(t, shape=shape),
         dir=_broadcast(d, shape=shape),
@@ -80,6 +80,9 @@ def test_ray(
   np.testing.assert_allclose(end, _broadcast(end))
 
   _ = p.fig
+
+  p = p.replace_fig_config(name='new_name')
+  assert p.fig_config.name == 'new_name'
 
 
 @enp.testing.parametrize_xnp()

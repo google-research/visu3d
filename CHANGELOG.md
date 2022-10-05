@@ -11,10 +11,13 @@ Changelog follow https://keepachangelog.com/ format.
 ### Added
 
 *   `v3d.math` expose rotation utils (convert from/to rotation matrix)
-*   Changed: `DataclassArray` now support dynamic shape fields (shape with
-    `None`), like `Array[..., None, None]`.
-*   Added: `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams`
-    to configure the dataclass options.
+*   `DataclassArray` now supports dynamic shape fields (shape with `None`), like
+    `Array[..., None, None]`.
+*   Object names displayed in plotly are customizable using
+    `points.replace_fig_config(name='My point cloud')`. All
+    `v3d.DataclassParams` objects now have a `.fig_config` property.
+*   `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams` to
+    configure the dataclass options.
 
 ### Changed
 

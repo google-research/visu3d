@@ -17,8 +17,10 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import Any
 
 import dataclass_array as dca
+from dataclass_array.typing import DcT
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 import numpy as np
 from visu3d import array_dataclass
@@ -42,6 +44,13 @@ class Camera(array_dataclass.DataclassArray):
 
   spec: camera_spec.CameraSpec
   world_from_cam: transformation.Transform
+
+  # Overwrite `v3d.DataclassArray.fig_config`.
+  fig_config: camera_spec.TraceConfig = dataclasses.field(
+      default=camera_spec.TraceConfig(),
+      repr=False,
+      init=False,
+  )
 
   @classmethod
   def from_look_at(
@@ -189,13 +198,16 @@ class Camera(array_dataclass.DataclassArray):
     img[px_coords[..., 1], px_coords[..., 0]] = rgb
     return img
 
-  def replace_fig_config(
-      self,
+  # Could be removed but only kept for type-checking / auto-complete.
+  def replace_fig_config(  # pylint: disable=useless-parent-delegation
+      self: DcT,
       *,
-      scale: float = camera_spec.FigConfig.scale,
-  ) -> Camera:
+      name: str = ...,  # pytype: disable=annotation-type-mismatch
+      scale: float = ...,  # pytype: disable=annotation-type-mismatch
+      **kwargs: Any,
+  ) -> DcT:
     """Returns a copy of self with figure params overwritten."""
-    return self.replace(spec=self.spec.replace_fig_config(scale=scale))
+    return super().replace_fig_config(name=name, scale=scale, **kwargs)
 
   # Protocols (inherited)
 
@@ -203,8 +215,9 @@ class Camera(array_dataclass.DataclassArray):
     return self.replace(world_from_cam=tr @ self.world_from_cam)
 
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
+    spec = self.spec.replace(fig_config=self.fig_config)
     # TODO(epot): Add arrow to indicates the orientation ?
-    start, end = self.spec._get_camera_lines()  # pylint: disable=protected-access
+    start, end = spec._get_camera_lines()  # pylint: disable=protected-access
     start = self.world_from_cam @ start
     end = self.world_from_cam @ end
     return plotly.make_lines_traces(start=start, end=end)

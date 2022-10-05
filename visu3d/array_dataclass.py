@@ -16,10 +16,52 @@
 
 from __future__ import annotations
 
+import dataclasses
+from typing import Any
+
 import dataclass_array as dca
+from dataclass_array.typing import DcT
+from visu3d.plotly import fig_config_utils
 from visu3d.plotly import fig_utils
 
 
+@dataclasses.dataclass(frozen=True)
 @dca.dataclass_array(broadcast=True, cast_dtype=True)
 class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
-  pass
+  """Wrapper around `dca.DataclassArray` for all v3d objects.
+
+  This class is like `dca.DataclassArray` but in addition:
+
+  * Add the `my_obj.fig` property to all objects.
+  * Add a `my_obj.fig_config` property to control object display options. As
+    `dca.DataclassArray` are immutable, options can be updated using
+    `my_obj = my_obj.replace_fig_config(**options)`.
+
+  """
+
+  __dca_non_init_fields__ = ('fig_config',)
+
+  # Note: Because `FigConfig` is immutable, it is safe to use a shared instance
+  # to avoid unecessary copy.
+  fig_config: fig_config_utils.TraceConfig = dataclasses.field(
+      default=fig_config_utils.TraceConfig(),
+      repr=False,
+      init=False,
+  )
+
+  def replace_fig_config(
+      self: DcT,
+      *,
+      name: str = ...,  # pytype: disable=annotation-type-mismatch
+      **kwargs: Any,
+  ) -> DcT:
+    """Returns a copy of self with figure params overwritten."""
+    fig_config_kwargs = dict(
+        name=name,
+        **kwargs,
+    )
+    # Filter Ellipsis values
+    fig_config_kwargs = {
+        k: v for k, v in fig_config_kwargs.items() if v is not ...
+    }
+    return self.replace(fig_config=self.fig_config.replace(**fig_config_kwargs))

@@ -17,8 +17,11 @@
 from __future__ import annotations
 
 import dataclasses
+from typing import Optional, TypeVar
 
 from etils import edc
+
+_T = TypeVar('_T')
 
 
 @edc.dataclass
@@ -39,8 +42,26 @@ class FigConfig:
 
   show_zero: bool = True
 
-  def replace(self, **kwargs) -> FigConfig:
+  def replace(self: _T, **kwargs) -> _T:
     return dataclasses.replace(self, **kwargs)
 
 
 fig_config = FigConfig()
+
+
+@edc.dataclass(kw_only=True)
+@dataclasses.dataclass(frozen=True)
+class TraceConfig:
+  """Configuration of a single v3d object.
+
+  Attributes:
+    name: The name of the figure.
+  """
+
+  # NOTE: When adding new properties here, please also update all
+  # `.replace_fig_config(` function to get type checking/auto-complete.
+
+  name: Optional[str] = None
+
+  def replace(self: _T, **kwargs) -> _T:
+    return dataclasses.replace(self, **kwargs)

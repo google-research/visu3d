@@ -76,6 +76,7 @@ def interp_points(
   Returns:
     The interpolated points of shape `(t, num_dims)`
   """
+  import scipy.interpolate
   if isinstance(points, dca.DataclassArray):
     # Could eventually add a protocol to support interpolation between Camera,
     # Ray,...

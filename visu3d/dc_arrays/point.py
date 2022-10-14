@@ -31,9 +31,6 @@ from visu3d.utils.lazy_imports import plotly_base
 if typing.TYPE_CHECKING:
   from visu3d.dc_arrays import camera_spec as camera_spec_lib
 
-# TODO(epot): More dynamic sub-sampling controled in `v3d.make_fig`
-_MAX_NUM_SAMPLE = 50_000  # pylint: disable=invalid-name
-
 
 # TODO(epot): Rename Point3d
 @dataclasses.dataclass(frozen=True)
@@ -47,6 +44,13 @@ class Point3d(array_dataclass.DataclassArray):
 
   p: FloatArray['*shape 3']
   rgb: Optional[ui8['*shape 3']] = None
+
+  # Overwrite `v3d.DataclassArray.fig_config`.
+  fig_config: plotly.TraceConfig = dataclasses.field(
+      default=plotly.TraceConfig(num_samples=10_000),
+      repr=False,
+      init=False,
+  )
 
   def __add__(self, translation: FloatArray['... 3']) -> Point3d:
     """Translate the position."""
@@ -99,6 +103,13 @@ class Point2d(array_dataclass.DataclassArray):
   depth: Optional[FloatArray['*shape 1']] = None
   rgb: Optional[ui8['*shape 3']] = None
 
+  # Overwrite `v3d.DataclassArray.fig_config`.
+  fig_config: plotly.TraceConfig = dataclasses.field(
+      default=plotly.TraceConfig(num_samples=50_000),
+      repr=False,
+      init=False,
+  )
+
   def clip(
       self,
       min: Optional[Union[FloatArray['2'], float]] = None,  # pylint: disable=redefined-builtin
@@ -127,19 +138,14 @@ class Point2d(array_dataclass.DataclassArray):
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
     traces = []
 
-    (trace,) = plotly.make_points(
-        self.p,
-        color=self.rgb,
-        num_samples=_MAX_NUM_SAMPLE,
-    )
+    (trace,) = plotly.make_points(self.p, color=self.rgb)
     traces.append(trace)
 
     if self.depth is not None:
       pass  # TODO(epot): Add depth trace (no displayed by default)
       # trace, = plotly.make_points(
       #     self.p,
-      #     color=self.depth,
-      #     num_samples=_MAX_NUM_SAMPLE,
+      #     color=self.depth
       # )
       # traces.append(trace)
 

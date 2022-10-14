@@ -20,13 +20,28 @@ import dataclasses
 from typing import Optional, TypeVar
 
 from etils import edc
+from visu3d import dc_arrays
 
 _T = TypeVar('_T')
 
 
 @edc.dataclass
 @dataclasses.dataclass
-class FigConfig:
+class _FigConfig:
+  """Figure configuration options (base class)."""
+
+  show_zero: bool = True
+  # The values are directly fetched at the source, so set init == False
+  # TODO(epot): Currently this does not support `v3d.make_fig(num_samples_ray=)`
+  num_samples_point3d: int = dataclasses.field(init=False)
+  num_samples_point2d: int = dataclasses.field(init=False)
+  num_samples_ray: int = dataclasses.field(init=False)
+
+  def replace(self: _T, **kwargs) -> _T:
+    return dataclasses.replace(self, **kwargs)
+
+
+class FigConfig(_FigConfig):
   """Figure configuration options.
 
   Can be mutated globally, like:
@@ -38,12 +53,38 @@ class FigConfig:
   Attributes:
     show_zero: Whether to show the `(0, 0, 0)` origin, otherwise the plot x, y,
       z axis adapt to the data.
+    num_samples_point3d: Max number of v3d.Point3d displayed by default (-1 for
+      all)
+    num_samples_point2d: Max number of v3d.Point2d displayed by default (-1 for
+      all)
+    num_samples_ray: Max number of v3d.Ray displayed by default (-1 for all)
   """
 
-  show_zero: bool = True
+  @property
+  def num_samples_point3d(self) -> int:
+    return dc_arrays.point.Point3d.fig_config.num_samples
 
-  def replace(self: _T, **kwargs) -> _T:
-    return dataclasses.replace(self, **kwargs)
+  @property
+  def num_samples_point2d(self) -> int:
+    return dc_arrays.point.Point2d.fig_config.num_samples
+
+  @property
+  def num_samples_ray(self) -> int:
+    return dc_arrays.ray.Ray.fig_config.num_samples
+
+  # Use setattr to mutate the frozen dataclasses
+
+  @num_samples_point3d.setter
+  def num_samples_point3d(self, value: int):
+    object.__setattr__(dc_arrays.point.Point3d.fig_config, 'num_samples', value)
+
+  @num_samples_point2d.setter
+  def num_samples_point2d(self, value: int):
+    object.__setattr__(dc_arrays.point.Point2d.fig_config, 'num_samples', value)
+
+  @num_samples_ray.setter
+  def num_samples_ray(self, value: int):
+    object.__setattr__(dc_arrays.ray.Ray.fig_config, 'num_samples', value)
 
 
 fig_config = FigConfig()
@@ -56,12 +97,15 @@ class TraceConfig:
 
   Attributes:
     name: The name of the figure.
+    num_samples: Maximum number of X to display (`-1` to display all). Keep
+      rendering time reasonable by displaying only a subset of the total X.
   """
 
   # NOTE: When adding new properties here, please also update all
   # `.replace_fig_config(` function to get type checking/auto-complete.
 
   name: Optional[str] = None
+  num_samples: int = -1
 
   def replace(self: _T, **kwargs) -> _T:
     return dataclasses.replace(self, **kwargs)

@@ -21,7 +21,6 @@ import dataclasses
 import itertools
 
 from etils import enp
-from visu3d.plotly import fig_config_utils
 from visu3d.plotly import fig_utils
 from visu3d.utils.lazy_imports import plotly_base
 
@@ -44,13 +43,7 @@ class TraceNamer:
       return
 
     elif fig_utils.is_visualizable(array):
-      if (
-          isinstance(
-              getattr(array, 'fig_config', None),
-              fig_config_utils.TraceConfig,
-          )
-          and array.fig_config.name
-      ):
+      if fig_utils.has_fig_config(array) and array.fig_config.name:
         # User-defined name
         name = array.fig_config.name
       else:

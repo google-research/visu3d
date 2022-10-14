@@ -10,12 +10,21 @@ Changelog follow https://keepachangelog.com/ format.
 
 ### Added
 
-*   `v3d.math` expose rotation utils (convert from/to rotation matrix)
+*   `v3d.math` to expose:
+    *   Rotation utils (convert from/to rotation matrix)
+    *   Subsampling util
+    *   Interpolation util
 *   `DataclassArray` now supports dynamic shape fields (shape with `None`), like
     `Array[..., None, None]`.
-*   Object names displayed in plotly are customizable using
-    `points.replace_fig_config(name='My point cloud')`. All
-    `v3d.DataclassParams` objects now have a `.fig_config` property.
+*   More trace customization options:
+    *   All `v3d.DataclassParams` objects now have a `.fig_config` property
+        (customizable with `obj = obj.replace_fig_config(**options)`).
+    *   Automatic subsample customizable with
+        `points.replace_fig_config(num_samples=10_000)`.
+    *   Object names displayed in plotly are customizable using
+        `points.replace_fig_config(name='My point cloud')`.
+    *   `v3d.fig_config.num_sample_xyz = 123` to overwrite the default number of
+        sampled rays, point,... (-1 for no subsampling)
 *   `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams` to
     configure the dataclass options.
 

@@ -50,5 +50,5 @@ def test_interpolate():
       [0, 2, 1],
       [0, 0, -5],
   ]
-  p_interp = v3d.utils.np_utils.interp_points(p, t=100)
+  p_interp = v3d.math.interp_points(p, t=100)
   assert p_interp.shape == (100, 3)

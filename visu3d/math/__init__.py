@@ -23,3 +23,4 @@ from visu3d.math.rotation_utils import rot_to_euler
 from visu3d.math.rotation_utils import rot_x
 from visu3d.math.rotation_utils import rot_y
 from visu3d.math.rotation_utils import rot_z
+from visu3d.utils.np_utils import interp_points

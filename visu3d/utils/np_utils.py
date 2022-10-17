@@ -25,7 +25,6 @@ import dataclass_array as dca
 import einops
 from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
-from visu3d.utils.lazy_imports import scipy
 
 _T = TypeVar('_T')
 
@@ -76,7 +75,8 @@ def interp_points(
   Returns:
     The interpolated points of shape `(t, num_dims)`
   """
-  import scipy.interpolate
+  import scipy.interpolate  # pylint: disable=g-import-not-at-top
+
   if isinstance(points, dca.DataclassArray):
     # Could eventually add a protocol to support interpolation between Camera,
     # Ray,...

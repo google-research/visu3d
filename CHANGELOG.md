@@ -10,8 +10,10 @@ Changelog follow https://keepachangelog.com/ format.
 
 ### Added
 
-*   `v3d.math` expose rotation utils (convert from/to rotation matrix)
-    *   Expose `v3d.math.interp_points` to the public API
+*   `v3d.math` to expose:
+    *   Rotation utils (convert from/to rotation matrix)
+    *   Subsampling util (`v3d.math.subsample`)
+    *   Interpolation util (`v3d.math.interp_points`)
 *   `DataclassArray` now supports dynamic shape fields (shape with `None`), like
     `Array[..., None, None]`.
 *   More trace customization options:

@@ -137,9 +137,6 @@ class Ray(array_dataclass.DataclassArray):
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
     start = self.pos
     end = self.end
-    start, end = plotly.subsample(
-        start, end, num_samples=self.fig_config.num_samples
-    )
     return plotly.make_lines_traces(
         start=start,
         end=end,

@@ -62,10 +62,6 @@ class TraceConfig:
 
   # NOTE: When adding new properties here, please also update all
   # `.replace_fig_config(` function to get type checking/auto-complete.
-
-  # TODO(epot): Could `num_samples` be made automatically applied for all
-  # dataclass_array, in `plotly.make_traces` (might have performance issue
-  # if many fields to subsample when only a few are actually used for display).
   # TODO(epot): More dynamic sub-sampling controled in `v3d.make_fig` per
   # figures (global control)
 

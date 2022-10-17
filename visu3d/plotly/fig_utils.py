@@ -25,6 +25,7 @@ import einops
 from etils import enp
 from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-import
 import numpy as np
+from visu3d import math
 from visu3d.plotly import fig_config_utils
 from visu3d.plotly import traces_builder
 from visu3d.utils import py_utils
@@ -47,11 +48,10 @@ _MARKER_SYMBOLS = {
     'x',
 }
 
-# TODO(epot): More dynamic sub-sampling:
+# TODO(epot): More dynamic sub-sampling for points ?
 # * controled in `v3d.make_fig`
 # * globally assigned (collect the global batch shape)
 # * Add a tqdm bar ?
-_MAX_NUM_SAMPLE = 10_000  # pylint: disable=invalid-name
 
 # TODO(epot): Refactor this file in 3 smaller files:
 # * `traces_utils.py`: The `make_xyz` functions
@@ -163,6 +163,14 @@ def make_traces(
   for val in data:
     if is_visualizable(val):
       if isinstance(val, dca.DataclassArray):
+        if has_fig_config(val):
+          val = math.subsample(
+              val,
+              num_samples=val.fig_config.num_samples,
+              # TODO(epot): Should likely make the seed depend on other
+              # factors like class name, position in make_traces *args,...
+              seed=0,
+          )
         val = val.as_np()
       sub_traces = val.make_traces()
       # Normalizing trace
@@ -188,7 +196,7 @@ def make_points(
     coords: FloatArray['*d num_dim'],
     *,
     color: Array['*d channel'] = None,
-    num_samples: Optional[int] = _MAX_NUM_SAMPLE,
+    num_samples: Optional[int] = None,
 ) -> list[plotly_base.BaseTraceType]:
   """Display a 2d or 3d point cloud.
 
@@ -206,12 +214,15 @@ def make_points(
         'Points should be `(..., 2)` or `(..., 3)`. '
         f'now. Got shape={coords.shape}'
     )
+  if color is not None:
+    assert color.shape[:-1] == coords.shape[:-1]
+    color = color.reshape((-1, color.shape[-1]))
+  coords = coords.reshape((-1, coords.shape[-1]))
 
   # TODO(epot): Subsample array if nb points >500
   coords, color = subsample(coords, color, num_samples=num_samples)  # pylint: disable=unbalanced-tuple-unpacking
 
   if color is not None:
-    assert color.shape[:-1] == coords.shape[:-1]
     color = _normalize_color(color)
 
   if coords.shape[-1] == 3:
@@ -463,7 +474,7 @@ def subsample(
     num_samples: Optional[int],
 ) -> list[Optional[Array['...']]]:
   """Flatten and subsample the arrays (keeping the last dimension)."""
-  if num_samples is None:  # No sampling
+  if num_samples is None or num_samples == -1:  # No sampling
     return list(arrays)
   assert arrays[0] is not None
   shape = arrays[0].shape
@@ -516,3 +527,9 @@ def _is_traces_2d(traces: list[plotly_base.BaseTraceType]) -> bool:
 def is_visualizable(item: VisualizableItem) -> bool:
   """Returns `True` if the element is a visualizable item."""
   return py_utils.supports_protocol(item, 'make_traces')
+
+
+def has_fig_config(item: VisualizableItem) -> bool:
+  return isinstance(
+      getattr(item, 'fig_config', None), fig_config_utils.TraceConfig
+  )

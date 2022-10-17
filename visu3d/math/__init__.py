@@ -14,6 +14,7 @@
 
 """Math and geometry API."""
 
+from visu3d.math.math_utils import subsample
 from visu3d.math.rotation_utils import DEG2RAD
 from visu3d.math.rotation_utils import euler_to_rot
 from visu3d.math.rotation_utils import is_orth

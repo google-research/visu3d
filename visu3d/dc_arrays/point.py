@@ -86,9 +86,7 @@ class Point3d(array_dataclass.DataclassArray):
     )
 
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
-    return plotly.make_points(
-        self.p, color=self.rgb, num_samples=self.fig_config.num_samples
-    )
+    return plotly.make_points(self.p, color=self.rgb)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -140,19 +138,14 @@ class Point2d(array_dataclass.DataclassArray):
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
     traces = []
 
-    (trace,) = plotly.make_points(
-        self.p,
-        color=self.rgb,
-        num_samples=self.fig_config.num_samples,
-    )
+    (trace,) = plotly.make_points(self.p, color=self.rgb)
     traces.append(trace)
 
     if self.depth is not None:
       pass  # TODO(epot): Add depth trace (no displayed by default)
       # trace, = plotly.make_points(
       #     self.p,
-      #     color=self.depth,
-      #     num_samples=self.fig_config.num_samples,
+      #     color=self.depth
       # )
       # traces.append(trace)
 

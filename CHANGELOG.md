@@ -8,6 +8,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+## [1.3.0] - 2022-10-17
+
 ### Added
 
 *   `v3d.math` to expose:
@@ -54,6 +56,7 @@ Changelog follow https://keepachangelog.com/ format.
 
 *   Normalize `look_at` by default
 
-[Unreleased]: https://github.com/google-research/visu3d/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/google-research/visu3d/compare/v1.3.0...HEAD
+[1.2.0]: https://github.com/google-research/visu3d/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/google-research/visu3d/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/google-research/visu3d/releases/tag/v0.3.2

@@ -23,6 +23,8 @@ Changelog follow https://keepachangelog.com/ format.
         `points.replace_fig_config(num_samples=10_000)`.
     *   Object names displayed in plotly are customizable using
         `points.replace_fig_config(name='My point cloud')`.
+    *   `v3d.fig_config.num_sample_xyz = 123` to overwrite the default number of
+        sampled rays, points,... (`None` for no subsampling)
 *   `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams` to
     configure the dataclass options.
 

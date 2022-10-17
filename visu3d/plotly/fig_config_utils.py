@@ -17,11 +17,25 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Optional, TypeVar
+from typing import Callable, Generic, Optional, TypeVar, Union
 
 from etils import edc
 
 _T = TypeVar('_T')
+
+
+class LazyValue(Generic[_T]):
+  """Lazyly compute a value."""
+
+  def __init__(self, value_fn: Callable[[], _T]):
+    self._value_fn = value_fn
+
+  @property
+  def value(self) -> _T:
+    return self._value_fn()
+
+  def __repr__(self) -> str:
+    return f'{type(self).__name__}({self.value})'
 
 
 @edc.dataclass
@@ -33,14 +47,25 @@ class FigConfig:
 
   ```python
   v3d.fig_config.show_zero = False
+  v3dfig_config..num_samples_point3d = None  # Do not subsample point display
   ```
 
   Attributes:
     show_zero: Whether to show the `(0, 0, 0)` origin, otherwise the plot x, y,
       z axis adapt to the data.
+    num_samples_point3d: Max number of `v3d.Point3d` displayed by default (
+      `None` for all)
+    num_samples_point2d: Max number of `v3d.Point2d` displayed by default (
+      `None` for all)
+    num_samples_ray: Max number of `v3d.Ray` displayed by default (`None` for
+      all)
   """
 
   show_zero: bool = True
+  # TODO(epot): Currently this does not support `v3d.make_fig(num_samples_ray=)`
+  num_samples_point3d: Optional[int] = 10_000
+  num_samples_point2d: Optional[int] = 50_000
+  num_samples_ray: Optional[int] = 500
 
   def replace(self: _T, **kwargs) -> _T:
     return dataclasses.replace(self, **kwargs)
@@ -62,11 +87,9 @@ class TraceConfig:
 
   # NOTE: When adding new properties here, please also update all
   # `.replace_fig_config(` function to get type checking/auto-complete.
-  # TODO(epot): More dynamic sub-sampling controled in `v3d.make_fig` per
-  # figures (global control)
 
   name: Optional[str] = None
-  num_samples: int = -1
+  num_samples: Union[LazyValue[Optional[int]], Optional[int]] = -1
 
   def replace(self: _T, **kwargs) -> _T:
     return dataclasses.replace(self, **kwargs)

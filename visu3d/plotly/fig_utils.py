@@ -164,9 +164,12 @@ def make_traces(
     if is_visualizable(val):
       if isinstance(val, dca.DataclassArray):
         if has_fig_config(val):
+          num_samples = val.fig_config.num_samples
+          if isinstance(num_samples, fig_config_utils.LazyValue):
+            num_samples = num_samples.value
           val = math.subsample(
               val,
-              num_samples=val.fig_config.num_samples,
+              num_samples=num_samples,
               # TODO(epot): Should likely make the seed depend on other
               # factors like class name, position in make_traces *args,...
               seed=0,

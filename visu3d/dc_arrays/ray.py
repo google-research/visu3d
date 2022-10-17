@@ -25,6 +25,7 @@ from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-im
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
+from visu3d.plotly import fig_config_utils
 from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
@@ -50,7 +51,11 @@ class Ray(array_dataclass.DataclassArray):
 
   # Overwrite `v3d.DataclassArray.fig_config`.
   fig_config: plotly.TraceConfig = dataclasses.field(
-      default=plotly.TraceConfig(num_samples=500),
+      default=plotly.TraceConfig(
+          num_samples=fig_config_utils.LazyValue(
+              lambda: fig_config_utils.fig_config.num_samples_ray
+          )
+      ),
       repr=False,
       init=False,
   )

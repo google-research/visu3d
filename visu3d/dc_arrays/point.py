@@ -25,6 +25,7 @@ from etils.array_types import FloatArray, ui8  # pylint: disable=g-multiple-impo
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
+from visu3d.plotly import fig_config_utils
 from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
@@ -47,7 +48,11 @@ class Point3d(array_dataclass.DataclassArray):
 
   # Overwrite `v3d.DataclassArray.fig_config`.
   fig_config: plotly.TraceConfig = dataclasses.field(
-      default=plotly.TraceConfig(num_samples=10_000),
+      default=plotly.TraceConfig(
+          num_samples=fig_config_utils.LazyValue(
+              lambda: fig_config_utils.fig_config.num_samples_point3d
+          )
+      ),
       repr=False,
       init=False,
   )
@@ -105,7 +110,11 @@ class Point2d(array_dataclass.DataclassArray):
 
   # Overwrite `v3d.DataclassArray.fig_config`.
   fig_config: plotly.TraceConfig = dataclasses.field(
-      default=plotly.TraceConfig(num_samples=50_000),
+      default=plotly.TraceConfig(
+          num_samples=fig_config_utils.LazyValue(
+              lambda: fig_config_utils.fig_config.num_samples_point2d
+          )
+      ),
       repr=False,
       init=False,
   )

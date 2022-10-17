@@ -31,9 +31,6 @@ from visu3d.utils.lazy_imports import plotly_base
 if typing.TYPE_CHECKING:
   from visu3d.dc_arrays import camera_spec as camera_spec_lib
 
-# TODO(epot): More dynamic sub-sampling controled in `v3d.make_fig`
-_MAX_NUM_SAMPLE = 50_000  # pylint: disable=invalid-name
-
 
 # TODO(epot): Rename Point3d
 @dataclasses.dataclass(frozen=True)
@@ -47,6 +44,13 @@ class Point3d(array_dataclass.DataclassArray):
 
   p: FloatArray['*shape 3']
   rgb: Optional[ui8['*shape 3']] = None
+
+  # Overwrite `v3d.DataclassArray.fig_config`.
+  fig_config: plotly.TraceConfig = dataclasses.field(
+      default=plotly.TraceConfig(num_samples=10_000),
+      repr=False,
+      init=False,
+  )
 
   def __add__(self, translation: FloatArray['... 3']) -> Point3d:
     """Translate the position."""
@@ -82,7 +86,9 @@ class Point3d(array_dataclass.DataclassArray):
     )
 
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
-    return plotly.make_points(self.p, color=self.rgb)
+    return plotly.make_points(
+        self.p, color=self.rgb, num_samples=self.fig_config.num_samples
+    )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -98,6 +104,13 @@ class Point2d(array_dataclass.DataclassArray):
   p: FloatArray['*shape 2']
   depth: Optional[FloatArray['*shape 1']] = None
   rgb: Optional[ui8['*shape 3']] = None
+
+  # Overwrite `v3d.DataclassArray.fig_config`.
+  fig_config: plotly.TraceConfig = dataclasses.field(
+      default=plotly.TraceConfig(num_samples=50_000),
+      repr=False,
+      init=False,
+  )
 
   def clip(
       self,
@@ -130,7 +143,7 @@ class Point2d(array_dataclass.DataclassArray):
     (trace,) = plotly.make_points(
         self.p,
         color=self.rgb,
-        num_samples=_MAX_NUM_SAMPLE,
+        num_samples=self.fig_config.num_samples,
     )
     traces.append(trace)
 
@@ -139,7 +152,7 @@ class Point2d(array_dataclass.DataclassArray):
       # trace, = plotly.make_points(
       #     self.p,
       #     color=self.depth,
-      #     num_samples=_MAX_NUM_SAMPLE,
+      #     num_samples=self.fig_config.num_samples,
       # )
       # traces.append(trace)
 

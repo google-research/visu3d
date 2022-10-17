@@ -53,11 +53,13 @@ class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
       self: DcT,
       *,
       name: str = ...,  # pytype: disable=annotation-type-mismatch
+      num_samples: int = ...,  # pytype: disable=annotation-type-mismatch
       **kwargs: Any,
   ) -> DcT:
     """Returns a copy of self with figure params overwritten."""
     fig_config_kwargs = dict(
         name=name,
+        num_samples=num_samples,
         **kwargs,
     )
     # Filter Ellipsis values

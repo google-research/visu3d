@@ -28,9 +28,6 @@ from visu3d.dc_arrays import transformation
 from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
-# TODO(epot): More dynamic sub-sampling controled in `v3d.make_fig`
-_MAX_NUM_SAMPLE = 500  # pylint: disable=invalid-name
-
 # TODO(epot):
 # * Make the dir optional to allow:
 #   ray = Ray(pos=[0, 0, 0]).look_at(target)
@@ -50,6 +47,13 @@ class Ray(array_dataclass.DataclassArray):
 
   pos: FloatArray['*shape 3']
   dir: FloatArray['*shape 3']
+
+  # Overwrite `v3d.DataclassArray.fig_config`.
+  fig_config: plotly.TraceConfig = dataclasses.field(
+      default=plotly.TraceConfig(num_samples=500),
+      repr=False,
+      init=False,
+  )
 
   @property
   def end(self) -> FloatArray['*shape 3']:
@@ -133,7 +137,9 @@ class Ray(array_dataclass.DataclassArray):
   def make_traces(self) -> list[plotly_base.BaseTraceType]:
     start = self.pos
     end = self.end
-    start, end = plotly.subsample(start, end, num_samples=_MAX_NUM_SAMPLE)
+    start, end = plotly.subsample(
+        start, end, num_samples=self.fig_config.num_samples
+    )
     return plotly.make_lines_traces(
         start=start,
         end=end,

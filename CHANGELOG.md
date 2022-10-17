@@ -14,9 +14,13 @@ Changelog follow https://keepachangelog.com/ format.
     *   Expose `v3d.math.interp_points` to the public API
 *   `DataclassArray` now supports dynamic shape fields (shape with `None`), like
     `Array[..., None, None]`.
-*   Object names displayed in plotly are customizable using
-    `points.replace_fig_config(name='My point cloud')`. All
-    `v3d.DataclassParams` objects now have a `.fig_config` property.
+*   More trace customization options:
+    *   All `v3d.DataclassParams` objects now have a `.fig_config` property
+        (customizable with `obj = obj.replace_fig_config(**options)`).
+    *   Automatic subsample customizable with
+        `points.replace_fig_config(num_samples=10_000)`.
+    *   Object names displayed in plotly are customizable using
+        `points.replace_fig_config(name='My point cloud')`.
 *   `DataclassArray.__dca_params__` can be set to `v3d.DataclassParams` to
     configure the dataclass options.
 

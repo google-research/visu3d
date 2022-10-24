@@ -90,13 +90,17 @@ VisualizableArg = Union[VisualizableItem, List[VisualizableItem]]
 #   customize metadata (color, point name,...) ?
 # * Allow nested structure to auto-group multiple traces ?
 def make_fig(
-    data: VisualizableArg,
+    *data: VisualizableArg,
     **fig_config_kwargs: Any,
 ) -> go.Figure:
   """Returns the figure from the given data.
 
+  ```python
+  v3d.make_fig([obj0, obj1])  # Or `v3d.make_fig(obj0, obj1)`
+  ```
+
   Args:
-    data: The data to plot. Either a `v3d.Vizualizable` or a `np.array` point
+    *data: The data to plot. Either a `v3d.Vizualizable` or a `np.array` point
       cloud, or a list of the above.
     **fig_config_kwargs: Figure options forwarded to `v3d.plotly.FigConfig`
 
@@ -104,7 +108,7 @@ def make_fig(
     The plotly `go.Figure`, can be further modified.
   """
   traces = make_traces(
-      data,
+      *data,
       **fig_config_kwargs,
   )
   fig = go.Figure(data=traces)
@@ -143,12 +147,16 @@ def make_fig(
 
 
 def make_traces(
-    data: VisualizableArg,
+    *data: VisualizableArg,
     **fig_config_kwargs: Any,
 ) -> list[plotly_base.BaseTraceType]:
   """Returns the traces from the given data."""
-  if not isinstance(data, (tuple, list)):
-    data = [data]
+  #
+  if len(data) == 1:  # `v3d.make_traces([a, b, c])` or `v3d.make_traces(a)`
+    (data,) = data
+    if not isinstance(data, (tuple, list)):
+      data = [data]
+  # Otherwise, called as `v3d.make_traces(a, b, c)`
 
   # TODO(epot): `curr_config` should be created in `make_fig` and
   # propagated downstream.
@@ -175,7 +183,7 @@ def make_traces(
               seed=0,
           )
         val = val.as_np()
-      sub_traces = val.make_traces()
+      sub_traces = val.make_traces()  # pytype: disable=attribute-error
       # Normalizing trace
       if isinstance(sub_traces, plotly_base.BaseTraceType):
         sub_traces = [sub_traces]

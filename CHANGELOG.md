@@ -8,6 +8,9 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*   Added: `v3d.make_fig` supports `v3d.make_fig(a, b, c)` (in addition of
+    `v3d.make_fig([a, b, c])`)
+
 ## [1.3.0] - 2022-10-17
 
 ### Added

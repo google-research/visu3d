@@ -117,6 +117,17 @@ def test_make_fig():
   )
   assert isinstance(fig, go.Figure)
 
+  fig = v3d.make_fig(
+      VisuObj(),
+      VisuObjImplicit(),
+      x_trace,
+      x_array,
+  )
+  assert isinstance(fig, go.Figure)
+
+  fig = v3d.make_fig(VisuObjImplicit())
+  assert isinstance(fig, go.Figure)
+
   with pytest.raises(TypeError, match='Unsuported'):
     v3d.make_fig([VisuObjInvalid()])
 

@@ -110,7 +110,7 @@ rays = cam.rays()  # Rays in world coordinates
 px_coords = cam.px_from_world @ point_cloud
 ```
 
-See [the API](https://github.com/google-research/visu3d/tree/main/visu3d/__init__.py;l=31)<!-- {.external} !-->
+See [the API](https://github.com/google-research/visu3d/tree/main/visu3d/__init__.py)<!-- {.external} !-->
 for a full list of primitive.
 
 </section>

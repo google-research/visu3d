@@ -10,6 +10,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 *   Added: `v3d.make_fig` supports `v3d.make_fig(a, b, c)` (in addition of
     `v3d.make_fig([a, b, c])`)
+*   Added: `v3d.fig_config.cam_scale` to globally control the size of the
+    cameras.
 
 ## [1.3.0] - 2022-10-17
 

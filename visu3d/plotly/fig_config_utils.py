@@ -22,6 +22,7 @@ from typing import Callable, Generic, Optional, TypeVar, Union
 from etils import edc
 
 _T = TypeVar('_T')
+_T2 = TypeVar('_T2')
 
 
 class LazyValue(Generic[_T]):
@@ -36,6 +37,14 @@ class LazyValue(Generic[_T]):
 
   def __repr__(self) -> str:
     return f'{type(self).__name__}({self.value})'
+
+  @classmethod
+  def resolve(cls, v: ValueLazyOrNot[_T2]) -> _T2:
+    """Resolve the lazy value."""
+    return v.value if isinstance(v, LazyValue) else v
+
+
+ValueLazyOrNot = Union[LazyValue[_T], _T]
 
 
 @edc.dataclass
@@ -59,6 +68,7 @@ class FigConfig:
       `None` for all)
     num_samples_ray: Max number of `v3d.Ray` displayed by default (`None` for
       all)
+    cam_scale: Scale of the camera.
   """
 
   show_zero: bool = True
@@ -66,6 +76,7 @@ class FigConfig:
   num_samples_point3d: Optional[int] = 10_000
   num_samples_point2d: Optional[int] = 50_000
   num_samples_ray: Optional[int] = 500
+  cam_scale: float = 1.0
 
   def replace(self: _T, **kwargs) -> _T:
     return dataclasses.replace(self, **kwargs)
@@ -88,8 +99,10 @@ class TraceConfig:
   # NOTE: When adding new properties here, please also update all
   # `.replace_fig_config(` function to get type checking/auto-complete.
 
+  # TODO(epot): Auto-resolve the `ValueLazyOrNot` values in `__getattr__`
+
   name: Optional[str] = None
-  num_samples: Union[LazyValue[Optional[int]], Optional[int]] = -1
+  num_samples: ValueLazyOrNot[Optional[int]] = None
 
   def replace(self: _T, **kwargs) -> _T:
     return dataclasses.replace(self, **kwargs)

@@ -30,6 +30,7 @@ from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
+from visu3d.plotly import fig_config_utils
 from visu3d.utils import np_utils
 from visu3d.utils import py_utils
 from visu3d.utils.lazy_imports import plotly_base
@@ -54,7 +55,9 @@ class TraceConfig(plotly.TraceConfig):
     scale: The scale of the camera.
   """
 
-  scale: float = 1.0
+  scale: fig_config_utils.ValueLazyOrNot[float] = fig_config_utils.LazyValue(
+      lambda: fig_config_utils.fig_config.cam_scale
+  )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -191,6 +194,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
 
   @dca.vectorize_method
   def _get_camera_lines(self) -> FloatArray['*shape 4 3']:
+    scale = fig_config_utils.LazyValue.resolve(self.fig_config.scale)
     corners_px = [  # Screen corners, in (u, v) coordinates
         [0, 0],
         [0, self.h],
@@ -198,7 +202,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
         [self.w, self.h],
     ]
     corners_world = self.cam_from_px @ self.xnp.array(corners_px)
-    corners_world = corners_world * self.fig_config.scale
+    corners_world = corners_world * scale
 
     start = [
         # 4 lines from center -> corners

@@ -12,6 +12,8 @@ Changelog follow https://keepachangelog.com/ format.
     `v3d.make_fig([a, b, c])`)
 *   Added: `v3d.fig_config.cam_scale` to globally control the size of the
     cameras.
+*   Fixed: Subsampling for displaying simple `np.array` point clouds (regression
+    from previous release).
 
 ## [1.3.0] - 2022-10-17
 

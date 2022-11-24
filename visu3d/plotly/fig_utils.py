@@ -172,12 +172,9 @@ def make_traces(
     if is_visualizable(val):
       if isinstance(val, dca.DataclassArray):
         if has_fig_config(val):
-          num_samples = fig_config_utils.LazyValue.resolve(
-              val.fig_config.num_samples
-          )
           val = math.subsample(
               val,
-              num_samples=num_samples,
+              num_samples=val.fig_config.num_samples,
               # TODO(epot): Should likely make the seed depend on other
               # factors like class name, position in make_traces *args,...
               seed=0,
@@ -191,7 +188,7 @@ def make_traces(
       traces.extend(sub_traces)
     elif enp.lazy.is_array(val) or isinstance(val, list):
       val = np.asarray(val)
-      sub_traces = make_points(val)
+      sub_traces = make_points(val, num_samples=curr_config.num_samples_point3d)
       trace_namer.set_name(sub_traces, val)
       traces.extend(sub_traces)
     elif isinstance(val, plotly_base.BaseTraceType):  # Already a trace

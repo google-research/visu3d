@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import dataclasses
+import typing
 from typing import Callable, Generic, Optional, TypeVar, Union
 
 from etils import edc
@@ -99,10 +100,15 @@ class TraceConfig:
   # NOTE: When adding new properties here, please also update all
   # `.replace_fig_config(` function to get type checking/auto-complete.
 
-  # TODO(epot): Auto-resolve the `ValueLazyOrNot` values in `__getattr__`
-
   name: Optional[str] = None
-  num_samples: ValueLazyOrNot[Optional[int]] = None
+  num_samples: Optional[int] = None
+
+  if not typing.TYPE_CHECKING:
+
+    def __getattribute__(self, name: str):
+      # Auto-resolve lazy values
+      value = super().__getattribute__(name)
+      return LazyValue.resolve(value)
 
   def replace(self: _T, **kwargs) -> _T:
     return dataclasses.replace(self, **kwargs)

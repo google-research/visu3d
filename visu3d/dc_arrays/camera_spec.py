@@ -55,7 +55,7 @@ class TraceConfig(plotly.TraceConfig):
     scale: The scale of the camera.
   """
 
-  scale: fig_config_utils.ValueLazyOrNot[float] = fig_config_utils.LazyValue(
+  scale: float = fig_config_utils.LazyValue(  # pytype: disable=annotation-type-mismatch
       lambda: fig_config_utils.fig_config.cam_scale
   )
 
@@ -194,7 +194,6 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
 
   @dca.vectorize_method
   def _get_camera_lines(self) -> FloatArray['*shape 4 3']:
-    scale = fig_config_utils.LazyValue.resolve(self.fig_config.scale)
     corners_px = [  # Screen corners, in (u, v) coordinates
         [0, 0],
         [0, self.h],
@@ -202,7 +201,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
         [self.w, self.h],
     ]
     corners_world = self.cam_from_px @ self.xnp.array(corners_px)
-    corners_world = corners_world * scale
+    corners_world = corners_world * self.fig_config.scale
 
     start = [
         # 4 lines from center -> corners

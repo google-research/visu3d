@@ -90,9 +90,9 @@ def test_rotation_around_axis(xnp: enp.NpModule, rad: float):
   assert enp.lazy.get_xnp(rz) is xnp
 
   identity = xnp.eye(3)
-  np.testing.assert_allclose(rx @ v3d.math.rot_x(-rad), identity)
-  np.testing.assert_allclose(ry @ v3d.math.rot_y(-rad), identity)
-  np.testing.assert_allclose(rz @ v3d.math.rot_z(-rad), identity)
+  np.testing.assert_allclose(rx @ v3d.math.rot_x(-rad), identity, atol=1e-6)
+  np.testing.assert_allclose(ry @ v3d.math.rot_y(-rad), identity, atol=1e-6)
+  np.testing.assert_allclose(rz @ v3d.math.rot_z(-rad), identity, atol=1e-6)
 
   # Round trip euler <> matrix
   _assert_euler_round_trip(rx, xnp=xnp)

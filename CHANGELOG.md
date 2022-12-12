@@ -8,6 +8,9 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*   `v3d.math`:
+    *   Added: `v3d.math.carthesian_to_spherical` and
+        `v3d.math.spherical_to_carthesian`
 *   Added: `v3d.make_fig` supports `v3d.make_fig(a, b, c)` (in addition of
     `v3d.make_fig([a, b, c])`)
 *   Added: `v3d.fig_config.cam_scale` to globally control the size of the

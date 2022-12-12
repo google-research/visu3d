@@ -83,7 +83,7 @@ class Point3d(array_dataclass.DataclassArray):
   def apply_px_from_cam(self, spec: camera_spec_lib.CameraSpec) -> Point2d:
     """Apply the `px_from_cam @ self` transformation."""
     # TODO(epot): Expose with_depth in the public API
-    p, depth = spec._px_from_cam(self.p, with_depth=True)  # pylint: disable=protected-access
+    p, depth = spec._px_and_depth_from_cam(self.p)  # pylint: disable=protected-access
     return Point2d(
         p=p,
         rgb=self.rgb,

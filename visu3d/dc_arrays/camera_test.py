@@ -26,16 +26,35 @@ import visu3d as v3d
 set_tnp = enp.testing.set_tnp
 
 
-H, W = 64, 128
+H, W = 16, 32
+
+
+parametrize_spec = pytest.mark.parametrize(
+    'spec',
+    [
+        v3d.PinholeCamera,
+        v3d.Spec360,
+    ],
+)
+
+
+def _make_spec(spec: type[v3d.CameraSpec]) -> v3d.CameraSpec:
+  if spec is v3d.PinholeCamera:
+    return v3d.PinholeCamera.from_focal(resolution=(H, W), focal_in_px=35.0)
+  elif spec is v3d.Spec360:
+    return v3d.Spec360(resolution=(H, W))
+  else:
+    raise AssertionError(spec)
 
 
 def _make_cam(
     *,
     xnp: enp.NpModule,
     shape: dca.typing.Shape,
+    spec: type[v3d.CameraSpec],
 ) -> v3d.Camera:
   """Create a camera at (0, 4, 0) looking at the center."""
-  spec = v3d.PinholeCamera.from_focal(resolution=(H, W), focal_in_px=34.0)
+  spec = _make_spec(spec)
   cam = v3d.Camera.from_look_at(
       spec=spec.as_xnp(xnp),
       pos=[0, 4, 0],  # Camera on the `y` axis
@@ -47,9 +66,51 @@ def _make_cam(
 
 
 @enp.testing.parametrize_xnp()
+@parametrize_spec
+def test_camera_xnp(xnp: enp.NpModule, spec: type[v3d.CameraSpec]):
+  spec = _make_spec(spec)
+
+  assert (
+      v3d.Camera.from_look_at(
+          spec=spec,
+          pos=[0, 4.0, 0],  # Camera on the `y` axis
+          target=[0, 0.0, 0],
+      ).xnp
+      is np
+  )
+  assert (
+      v3d.Camera.from_look_at(
+          spec=spec.as_xnp(xnp),
+          pos=[0, 4.0, 0],
+          target=[0, 0.0, 0],
+      ).xnp
+      is xnp
+  )
+  assert (
+      v3d.Camera.from_look_at(
+          spec=spec,
+          pos=xnp.array([0, 4.0, 0]),
+          target=[0, 0.0, 0],
+      ).xnp
+      is xnp
+  )
+  assert (
+      v3d.Camera.from_look_at(
+          spec=spec,
+          pos=[0, 4.0, 0],
+          target=xnp.array([0.0, 0, 0]),
+      ).xnp
+      is xnp
+  )
+
+
+@enp.testing.parametrize_xnp()
 @pytest.mark.parametrize('shape', [(), (3,)])
-def test_camera_properties(xnp: enp.NpModule, shape: dca.typing.Shape):
-  cam = _make_cam(xnp=xnp, shape=shape)
+@parametrize_spec
+def test_camera_properties(
+    xnp: enp.NpModule, shape: dca.typing.Shape, spec: type[v3d.CameraSpec]
+):
+  cam = _make_cam(xnp=xnp, shape=shape, spec=spec)
 
   # Properties
   assert cam.shape == shape
@@ -65,15 +126,17 @@ def test_camera_properties(xnp: enp.NpModule, shape: dca.typing.Shape):
 @enp.testing.parametrize_xnp()
 @pytest.mark.parametrize('shape', [(), (3,), (1, 1)])
 @pytest.mark.parametrize('normalize', [False, True])
+@parametrize_spec
 def test_camera_rays(
     xnp: enp.NpModule,
     shape: dca.typing.Shape,
     normalize: bool,
+    spec: type[v3d.CameraSpec],
 ):
   if shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')
 
-  cam = _make_cam(xnp=xnp, shape=shape)  # Camera on the `y` axis
+  cam = _make_cam(xnp=xnp, shape=shape, spec=spec)
 
   rays = cam.rays(normalize=normalize)
   assert isinstance(rays, v3d.Ray)
@@ -84,7 +147,7 @@ def test_camera_rays(
       cam.world_from_cam[..., None, None].broadcast_to(shape + (H, W)).t,
   )
 
-  if normalize:
+  if normalize or spec == v3d.Spec360:
     np.testing.assert_allclose(rays.norm(), np.ones(shape + (H, W)), atol=1e-6)
     # Ray is normalized
     np.testing.assert_allclose(
@@ -92,9 +155,11 @@ def test_camera_rays(
         np.ones(shape + (H, W)),
         atol=1e-6,
     )
-  else:
+  elif spec == v3d.PinholeCamera:
     # Ray destinations are aligned with the y=3 plane
     np.testing.assert_allclose(rays.end[..., 1], np.full(shape + (H, W), 3.0))
+  else:
+    raise AssertionError
 
   dca.testing.assert_array_equal(cam + [0, 0, 0], cam)
   dca.testing.assert_array_equal(cam + xnp.array([0, 0, 0]), cam)
@@ -108,16 +173,18 @@ def test_camera_rays(
 
 @enp.testing.parametrize_xnp()
 @pytest.mark.parametrize('shape', [(), (3,), (2, 2)])
+@parametrize_spec
 def test_camera_transform(
     xnp: enp.NpModule,
     shape: dca.typing.Shape,
+    spec: type[v3d.CameraSpec],
 ):
   """Test low-level camera transforms."""
 
   if shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')
 
-  cam = _make_cam(xnp=xnp, shape=shape)  # Camera on the `y` axis
+  cam = _make_cam(xnp=xnp, shape=shape, spec=spec)  # Camera on the `y` axis
   rays = cam.rays(normalize=False)
 
   with enp.lazy.jax.checking_leaks():
@@ -142,15 +209,17 @@ def test_camera_transform(
 @enp.testing.parametrize_xnp()
 @pytest.mark.parametrize('shape', [(), (3,), (1, 1)])
 @pytest.mark.parametrize('point_shape', [(), (3,), (1, 1)])
+@parametrize_spec
 def test_camera_render(
     xnp: enp.NpModule,
     shape: dca.typing.Shape,
     point_shape: dca.typing.Shape,
+    spec: type[v3d.CameraSpec],
 ):
   if shape and xnp is enp.lazy.tnp:
     pytest.skip('Vectorization not supported yet with TF')
 
-  cam = _make_cam(xnp=xnp, shape=shape)  # Camera on the `y` axis
+  cam = _make_cam(xnp=xnp, shape=shape, spec=spec)  # Camera on the `y` axis
   points = v3d.Point3d(
       p=[0, 0, 0],
       rgb=[255.0, 255.0, 255.0],

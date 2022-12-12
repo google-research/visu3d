@@ -8,6 +8,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*   DataclassArrays:
+    *   Added: `v3d.Spec360` camera spec to support 360 videos.
 *   `v3d.math`:
     *   Added: `v3d.math.carthesian_to_spherical` and
         `v3d.math.spherical_to_carthesian`

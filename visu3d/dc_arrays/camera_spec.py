@@ -19,15 +19,16 @@ from __future__ import annotations
 import abc
 import dataclasses
 import functools
-import typing
 from typing import Any, Optional, Tuple
 
 import dataclass_array as dca
 from dataclass_array.typing import DcOrArray, DcT  # pylint: disable=g-multiple-import
 from etils import edc
 from etils import enp
+from etils import epy
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
+from visu3d import math
 from visu3d import plotly
 from visu3d.dc_arrays import transformation
 from visu3d.plotly import fig_config_utils
@@ -130,10 +131,19 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     """`(Width, Height)` in pixel (for usage in `(u, v)` coordinates)."""
     return (self.w, self.h)
 
-  # @abc.abstractmethod
   @property
-  def px_from_cam(self) -> transformation.TransformBase:
+  @transformation.custom_transform
+  def px_from_cam(  # pylint: disable=property-with-parameters
+      self,
+      points3d: DcOrArray,
+  ) -> transformation.TransformBase:  # pylint: disable=g-doc-args
     """Project camera 3d coordinates to px 2d coordinates.
+
+    Usage:
+
+    ```python
+    pts2d = spec.px_from_cam @ pts3d
+    ```
 
     Input can have arbitrary batch shape, including no batch shape for a
     single point as input.
@@ -141,15 +151,44 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     Returns:
       The transformation 3d cam coordinates -> 2d pixel coordinates.
     """
-    raise NotImplementedError
+    points3d = dca.utils.np_utils.asarray(points3d, xnp=self.xnp)
+    if isinstance(points3d, dca.DataclassArray):
+      assert_supports_protocol(points3d, 'apply_px_from_cam')
+      return points3d.apply_px_from_cam(self)
+    else:
+      return self._px_and_depth_from_cam(points3d)[0]
 
   # @abc.abstractmethod
+  def _px_and_depth_from_cam(
+      self,
+      points3d,
+  ) -> tuple[FloatArray['*d 2'], FloatArray['*d 1']]:
+    """Project camera 3d coordinates to px 2d coordinates (internal).
+
+    Args:
+      points3d: 3d points
+
+    Returns:
+      `(point2d, depth)`
+    """
+    raise NotImplementedError
+
   @property
-  def cam_from_px(self) -> transformation.TransformBase:
+  @transformation.custom_transform
+  def cam_from_px(  # pylint: disable=property-with-parameters
+      self,
+      points2d: FloatArray['*d 2'],
+  ) -> transformation.TransformBase:  # pylint: disable=g-doc-args
     """Unproject 2d pixel coordinates in image space to camera space.
 
+    Usage:
+
+    ```python
+    pts3d = spec.cam_from_px @ pts2d
+    ```
+
     Note: Points returned by this function are not normalized. Points
-    are returned at z=1.
+    are returned at z=1 for pinhole camera.
 
     Input can have arbitrary batch shape, including no batch shape for a
     single point as input.
@@ -157,9 +196,22 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     Returns:
       The transformation 2d pixel coordinates -> 3d cam coordinates.
     """
-    raise NotImplementedError
+    points2d = dca.utils.np_utils.asarray(points2d, xnp=self.xnp)
+    if isinstance(points2d, dca.DataclassArray):
+      assert_supports_protocol(points2d, 'apply_cam_from_px')
+      return points2d.apply_cam_from_px(self)
+    else:
+      return self._cam_from_px(points2d)
 
   # @abc.abstractmethod
+  def _cam_from_px(
+      self,
+      points2d: FloatArray['*d 2'],
+  ) -> FloatArray['*d 3']:
+    """Implemementation of `spec.cam_from_px @ ptss`."""
+    raise NotImplementedError
+
+  @dca.vectorize_method
   def px_centers(self) -> FloatArray['*shape h w 2']:
     """Returns 2D coordinates of centers of all pixels in the camera image.
 
@@ -172,7 +224,16 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     Returns:
       2D image coordinates of center of all pixels of shape `(h, w, 2)`.
     """
-    raise NotImplementedError
+    xnp = self.xnp
+    coord_w, coord_h = xnp.meshgrid(
+        xnp.arange(self.w),  # w
+        xnp.arange(self.h),  # h
+        indexing='xy',
+    )
+    points2d = xnp.stack([coord_w, coord_h], axis=-1)
+    points2d = xnp.asarray(points2d, dtype=xnp.float32) + 0.5
+    assert points2d.shape == (self.h, self.w, 2)
+    return points2d
 
   # Could be removed but only kept for type-checking / auto-complete.
   def replace_fig_config(  # pylint: disable=useless-parent-delegation
@@ -290,65 +351,20 @@ class PinholeCamera(CameraSpec):
     ch = h / 2  # h == y
     cw = w / 2  # w == x
 
-    K = xnp.array(  # pylint: disable=invalid-name
-        [
-            [focal_in_px, 0, cw],  # cx
-            [0, focal_in_px, ch],  # cy
-            [0, 0, 1],
-        ]
-    )
+    K = xnp.array([  # pylint: disable=invalid-name
+        [focal_in_px, 0, cw],  # cx
+        [0, focal_in_px, ch],  # cy
+        [0, 0, 1],
+    ])
     return cls(
         K=K,
         resolution=resolution,
     )
 
-  @property
-  @transformation.custom_transform
-  def px_from_cam(  # pylint: disable=bad-staticmethod-argument,property-with-parameters
-      self,
-      points3d: DcOrArray,
-  ) -> DcOrArray:
-    points3d = dca.utils.np_utils.asarray(points3d, xnp=self.xnp)
-    if isinstance(points3d, dca.DataclassArray):
-      assert_supports_protocol(points3d, 'apply_px_from_cam')
-      return points3d.apply_px_from_cam(self)
-    else:
-      return self._px_from_cam(points3d)
-
-  @typing.overload
-  def _px_from_cam(
-      self,
-      points3d: FloatArray['*d 3'],
-      *,
-      with_depth: bool = False,
-  ) -> FloatArray['*d 2']:
-    ...
-
-  @typing.overload
-  def _px_from_cam(
-      self,
-      points3d: FloatArray['*d 3'],
-      *,
-      with_depth: bool = True,
-  ) -> tuple[FloatArray['*d 2'], FloatArray['*d 1']]:
-    ...
-
-  def _px_from_cam(
+  def _px_and_depth_from_cam(
       self,
       points3d,
-      *,
-      with_depth: bool = False,
   ):
-    """Project camera 3d coordinates to px 2d coordinates (internal).
-
-    Args:
-      points3d: 3d points
-      with_depth: If `True`, also return the depth in a separated valiable
-
-    Returns:
-      `point2d`: If `with_depth=False`
-      `(point2d, depth)`: If `with_depth=True`
-    """
     if points3d.shape[-1] != 3:
       raise ValueError(f'Expected cam coords {points3d.shape} to be (..., 3)')
 
@@ -359,26 +375,9 @@ class PinholeCamera(CameraSpec):
     # And only keep [u, v]
     depth = points2d[..., 2:3]
     points2d = points2d[..., :2] / (depth + 1e-8)
+    return points2d, depth
 
-    if with_depth:
-      return points2d, depth
-    else:
-      return points2d
-
-  @property
-  @transformation.custom_transform
-  def cam_from_px(  # pylint: disable=bad-staticmethod-argument,property-with-parameters
-      self,
-      points2d: FloatArray['*d 2'],
-  ) -> FloatArray['*d 3']:
-    points2d = dca.utils.np_utils.asarray(points2d, xnp=self.xnp)
-    if isinstance(points2d, dca.DataclassArray):
-      assert_supports_protocol(points2d, 'apply_cam_from_px')
-      return points2d.apply_cam_from_px(self)
-    else:
-      return self._cam_from_px(points2d)
-
-  def _cam_from_px(  # pylint: disable=bad-staticmethod-argument,property-with-parameters
+  def _cam_from_px(
       self,
       points2d: FloatArray['*d 2'],
   ) -> FloatArray['*d 3']:
@@ -402,15 +401,57 @@ class PinholeCamera(CameraSpec):
     points3d = points3d / self.xnp.expand_dims(points3d[..., 2], axis=-1)
     return points3d
 
-  @dca.vectorize_method
-  def px_centers(self):
-    xnp = self.xnp
-    coord_w, coord_h = xnp.meshgrid(
-        xnp.arange(self.w),  # w
-        xnp.arange(self.h),  # h
-        indexing='xy',
+
+@dataclasses.dataclass(frozen=True)
+class Spec360(CameraSpec):
+  """Camera spec representing 360 panorama.
+
+  Uses equirectangular projection for the 2d.
+  """
+
+  def _px_and_depth_from_cam(
+      self,
+      points3d,
+  ):
+    points3d = self._cv_from_wolfram.inv @ points3d
+    depth, theta, phi = math.carthesian_to_spherical(points3d)
+
+    # Scale angles to (0, h), (0, w)
+    points2d = self.xnp.stack([theta, phi], axis=-1)
+    points2d = points2d * self.xnp.array(
+        [self.w / enp.tau, (2 * self.h) / enp.tau]
     )
-    points2d = xnp.stack([coord_w, coord_h], axis=-1)
-    points2d = xnp.asarray(points2d, dtype=xnp.float32) + 0.5
-    assert points2d.shape == (self.h, self.w, 2)
-    return points2d
+    return points2d, depth[..., None]
+
+  def _cam_from_px(
+      self,
+      points2d: FloatArray['*d 2'],
+  ) -> FloatArray['*d 3']:
+    # Normalize points to:
+    # * i: [0, w] -> [0, tau]
+    # * j: [0, h] -> [0, tau / 2]
+    # Reminder, 2d pixels are in (u, v) coordinates (so `(w, h)`)
+    # (h, w, 2)
+    angles = points2d * self.xnp.array(
+        [enp.tau / self.w, enp.tau / (2 * self.h)]
+    )
+    theta = angles[..., 0]
+    phi = angles[..., 1]
+
+    # Compute (x, y, z) direction
+    points3d = math.spherical_to_carthesian(theta=theta, phi=phi)
+    points3d = self._cv_from_wolfram @ points3d
+    return points3d
+
+  @epy.backports.cached_property
+  def _cv_from_wolfram(self) -> transformation.Transform:
+    """Convert Wolfram cathesian coordinates to OpenCv camera convention."""
+    return transformation.Transform(
+        R=self.xnp.array([
+            [0, -1, 0],
+            [0, 0, -1],
+            [-1, 0, 0],
+        ]),
+    )
+
+  # TODO(epot): Better camera plotly display!

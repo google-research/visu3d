@@ -38,6 +38,7 @@ from visu3d.plotly.fig_config_utils import fig_config
 from visu3d.dc_arrays.camera import Camera
 from visu3d.dc_arrays.camera_spec import CameraSpec
 from visu3d.dc_arrays.camera_spec import PinholeCamera
+from visu3d.dc_arrays.camera_spec import Spec360
 from visu3d.dc_arrays.point import Point3d
 from visu3d.dc_arrays.point import Point2d
 from visu3d.dc_arrays.ray import Ray

@@ -16,6 +16,7 @@
 
 from visu3d.math.coord_utils import carthesian_to_spherical
 from visu3d.math.coord_utils import spherical_to_carthesian
+from visu3d.math.interp_utils import interp_img
 from visu3d.math.math_utils import subsample
 from visu3d.math.rotation_utils import DEG2RAD
 from visu3d.math.rotation_utils import euler_to_rot

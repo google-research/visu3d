@@ -50,8 +50,7 @@ dev = [
     "chex",
     "jax[cpu]",
     "jupyter",
-    # TODO(epot): Restore "tf-nightly", it create segfault during tests
-    "tensorflow",
+    "tf-nightly",
     "tensorflow_datasets",
     "plotly",
     "scipy",

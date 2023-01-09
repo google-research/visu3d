@@ -57,7 +57,7 @@ class FigConfig:
 
   ```python
   v3d.fig_config.show_zero = False
-  v3dfig_config..num_samples_point3d = None  # Do not subsample point display
+  v3d.fig_config.num_samples_point3d = None  # Do not subsample point display
   ```
 
   Attributes:

@@ -60,3 +60,9 @@ dev = [
 [build-system]
 requires = ["flit_core >=3.5,<4"]
 build-backend = "flit_core.buildapi"
+
+[tool.yapf]
+based_on_style = "google"
+indent_width = 2
+dedent_closing_brackets = true
+split_before_dot = true

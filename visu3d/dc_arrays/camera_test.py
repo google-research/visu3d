@@ -168,6 +168,7 @@ def test_camera_rays(
   _ = cam.fig
 
   cam = cam.replace_fig_config(scale=3.0)
+  assert cam.fig_config.scale == 3.0
   _ = cam.fig
 
 

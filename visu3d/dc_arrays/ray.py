@@ -53,7 +53,7 @@ class Ray(array_dataclass.DataclassArray):
   fig_config: plotly.TraceConfig = dataclasses.field(
       default=plotly.TraceConfig(
           num_samples=fig_config_utils.LazyValue(
-              lambda: fig_config_utils.fig_config.num_samples_ray
+              lambda fig_config: fig_config.num_samples_ray
           )
       ),
       repr=False,

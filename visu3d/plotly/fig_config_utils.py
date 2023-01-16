@@ -18,34 +18,11 @@ from __future__ import annotations
 
 import dataclasses
 import typing
-from typing import Callable, Generic, Optional, TypeVar, Union
+from typing import Callable, Generic, Optional, TypeVar
 
 from etils import edc
 
 _T = TypeVar('_T')
-_T2 = TypeVar('_T2')
-
-
-class LazyValue(Generic[_T]):
-  """Lazyly compute a value."""
-
-  def __init__(self, value_fn: Callable[[], _T]):
-    self._value_fn = value_fn
-
-  @property
-  def value(self) -> _T:
-    return self._value_fn()
-
-  def __repr__(self) -> str:
-    return f'{type(self).__name__}({self.value})'
-
-  @classmethod
-  def resolve(cls, v: ValueLazyOrNot[_T2]) -> _T2:
-    """Resolve the lazy value."""
-    return v.value if isinstance(v, LazyValue) else v
-
-
-ValueLazyOrNot = Union[LazyValue[_T], _T]
 
 
 @edc.dataclass
@@ -69,17 +46,21 @@ class FigConfig:
       `None` for all)
     num_samples_ray: Max number of `v3d.Ray` displayed by default (`None` for
       all)
-    cam_scale: Scale of the camera.
+    cam_scale: Scale of the cameras.
   """
 
+  # When updating this, also update `v3d.make_fig` (for auto-complete /
+  # discoverability)
+
   show_zero: bool = True
-  # TODO(epot): Currently this does not support `v3d.make_fig(num_samples_ray=)`
   num_samples_point3d: Optional[int] = 10_000
   num_samples_point2d: Optional[int] = 50_000
   num_samples_ray: Optional[int] = 500
   cam_scale: float = 1.0
 
   def replace(self: _T, **kwargs) -> _T:
+    # Filter `...` (forwarded from `v3d.make_fig`)
+    kwargs = {k: v for k, v in kwargs.items() if v is not ...}
     return dataclasses.replace(self, **kwargs)
 
 
@@ -103,12 +84,48 @@ class TraceConfig:
   name: Optional[str] = None
   num_samples: Optional[int] = None
 
+  # Hidden reference to the global `fig_config`.
+  # This allow to locally overwrite the default `fig_config`, like:
+  # `v3d.make_fig(rays, num_samples_ray=None)`
+  # This is used for the lazy values
+  _fig_config: FigConfig = dataclasses.field(default=fig_config, repr=False)
+
   if not typing.TYPE_CHECKING:
 
     def __getattribute__(self, name: str):
       # Auto-resolve lazy values
       value = super().__getattribute__(name)
-      return LazyValue.resolve(value)
+      if isinstance(value, LazyValue):
+        return value.get_value(self._fig_config)
+      else:
+        return value
 
   def replace(self: _T, **kwargs) -> _T:
-    return dataclasses.replace(self, **kwargs)
+    """Alias for `dataclasses.replace`."""
+    # Use a custom replace because `dataclasses.replace` remove the `LazyValue`
+
+    def _get_attr(name: str) -> _T:
+      if name in kwargs:
+        return kwargs[name]
+      else:
+        return super(TraceConfig, self).__getattribute__(name)
+
+    init_kwargs = {
+        f.name: _get_attr(f.name) for f in dataclasses.fields(self) if f.init
+    }
+    return type(self)(**init_kwargs)
+
+
+class LazyValue(Generic[_T]):
+  """Lazyly compute a value."""
+
+  def __init__(self, value_fn: Callable[[FigConfig], _T]):
+    self._value_fn = value_fn
+
+  def get_value(self, fig_config_: FigConfig) -> _T:
+    return self._value_fn(fig_config_)
+
+  def __repr__(self) -> str:
+    # Technically, this should be the `object._fig_config` on which the
+    # `LazyValue` is attached. Could be implemented with descriptor.
+    return f'{type(self).__name__}({self._value_fn(fig_config)})'

@@ -21,6 +21,8 @@ Changelog follow https://keepachangelog.com/ format.
         cameras.
     *   Changed: Do not add `0` suffix in the figure labels (for the first
         element)
+    *   Fixed: `v3d.make_fig(pts, num_samples_point3d=None)` works (previously
+        the argument had no effect).
 *   Fixed: Subsampling for displaying simple `np.array` point clouds (regression
     from previous release).
 

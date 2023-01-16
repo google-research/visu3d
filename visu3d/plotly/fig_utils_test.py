@@ -139,3 +139,45 @@ def test_subsample(shape: dca.typing.Shape):
 
   r = v3d.Point3d(p=np.ones(shape + (3,)), rgb=np.ones(shape + (3,)))
   _ = r.fig
+
+
+def test_mutate_fig_config():
+  new_fig_config = v3d.fig_config.replace(cam_scale=4.0, show_zero=...)
+  assert new_fig_config.cam_scale == 4.0
+  assert new_fig_config.show_zero is True  # pylint: disable=g-bool-id-comparison
+
+  original_cam = v3d.Camera.from_look_at(
+      pos=[3, 3, 3],
+      target=[0, 0, 0],
+      spec=v3d.PinholeCamera.from_focal(
+          resolution=(200, 200),
+          focal_in_px=100.0,
+      ),
+  )
+  cam = original_cam
+  assert cam.fig_config.scale == 1.0
+
+  # Update globally change the LazyValue
+  v3d.fig_config.cam_scale = 2.0
+  assert cam.fig_config.scale == 2.0
+
+  # No-op replace should not resolve the value
+  cam = cam.replace_fig_config()
+  assert cam.fig_config.scale == 2.0
+
+  v3d.fig_config.cam_scale = 3.0
+  assert cam.fig_config.scale == 3.0
+
+  # After the value has been set, the LazyValue is resolved
+  cam = cam.replace_fig_config(scale=4.0)
+  assert cam.fig_config.scale == 4.0
+
+  cam = cam.replace_fig_config()
+  assert cam.fig_config.scale == 4.0
+
+  new_fig_config = v3d.fig_config.replace(cam_scale=5.0)
+  cam = original_cam.replace_fig_config(_fig_config=new_fig_config)
+  assert cam.fig_config.scale == 5.0
+
+  new_fig_config.cam_scale = 6.0
+  assert cam.fig_config.scale == 6.0

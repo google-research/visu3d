@@ -25,6 +25,7 @@ import einops
 from etils import enp
 from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-import
 import numpy as np
+from visu3d import array_dataclass as v3d_dataclass_array
 from visu3d import math
 from visu3d.plotly import fig_config_utils
 from visu3d.plotly import traces_builder
@@ -91,6 +92,13 @@ VisualizableArg = Union[VisualizableItem, List[VisualizableItem]]
 # * Allow nested structure to auto-group multiple traces ?
 def make_fig(
     *data: VisualizableArg,
+    # Those arguments match `v3d.fig_config` options
+    # They are duplicated for discoverability / auto-complete
+    show_zero: bool = ...,  # pytype: disable=annotation-type-mismatch
+    num_samples_point3d: Optional[int] = ...,  # pytype: disable=annotation-type-mismatch
+    num_samples_point2d: Optional[int] = ...,  # pytype: disable=annotation-type-mismatch
+    num_samples_ray: Optional[int] = ...,  # pytype: disable=annotation-type-mismatch
+    cam_scale: float = ...,  # pytype: disable=annotation-type-mismatch
     **fig_config_kwargs: Any,
 ) -> go.Figure:
   """Returns the figure from the given data.
@@ -99,16 +107,33 @@ def make_fig(
   v3d.make_fig([obj0, obj1])  # Or `v3d.make_fig(obj0, obj1)`
   ```
 
+  The figure will use `v3d.fig_config` global figure configuration. Individual
+  config options can be overwritten here through kwargs.
+
   Args:
     *data: The data to plot. Either a `v3d.Vizualizable` or a `np.array` point
       cloud, or a list of the above.
-    **fig_config_kwargs: Figure options forwarded to `v3d.plotly.FigConfig`
+    show_zero: Whether to show the `(0, 0, 0)` origin, otherwise the plot x, y,
+      z axis adapt to the data.
+    num_samples_point3d: Max number of `v3d.Point3d` displayed by default (
+      `None` for all)
+    num_samples_point2d: Max number of `v3d.Point2d` displayed by default (
+      `None` for all)
+    num_samples_ray: Max number of `v3d.Ray` displayed by default (`None` for
+      all)
+    cam_scale: Scale of the cameras.
+    **fig_config_kwargs: Additional figure options (see `v3d.fig_config`)
 
   Returns:
     The plotly `go.Figure`, can be further modified.
   """
   traces = make_traces(
       *data,
+      show_zero=show_zero,
+      num_samples_point3d=num_samples_point3d,
+      num_samples_point2d=num_samples_point2d,
+      num_samples_ray=num_samples_ray,
+      cam_scale=cam_scale,
       **fig_config_kwargs,
   )
   fig = go.Figure(data=traces)
@@ -172,6 +197,9 @@ def make_traces(
     if is_visualizable(val):
       if isinstance(val, dca.DataclassArray):
         if has_fig_config(val):
+          # Overwrite the global fig_config with the local copy
+          if isinstance(val, v3d_dataclass_array.DataclassArray):
+            val = val.replace_fig_config(_fig_config=curr_config)
           val = math.subsample(
               val,
               num_samples=val.fig_config.num_samples,

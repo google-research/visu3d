@@ -57,7 +57,7 @@ class TraceConfig(plotly.TraceConfig):
   """
 
   scale: float = fig_config_utils.LazyValue(  # pytype: disable=annotation-type-mismatch
-      lambda: fig_config_utils.fig_config.cam_scale
+      lambda fig_config: fig_config.cam_scale
   )
 
 

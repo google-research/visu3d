@@ -50,7 +50,7 @@ class Point3d(array_dataclass.DataclassArray):
   fig_config: plotly.TraceConfig = dataclasses.field(
       default=plotly.TraceConfig(
           num_samples=fig_config_utils.LazyValue(
-              lambda: fig_config_utils.fig_config.num_samples_point3d
+              lambda fig_config: fig_config.num_samples_point3d
           )
       ),
       repr=False,
@@ -112,7 +112,7 @@ class Point2d(array_dataclass.DataclassArray):
   fig_config: plotly.TraceConfig = dataclasses.field(
       default=plotly.TraceConfig(
           num_samples=fig_config_utils.LazyValue(
-              lambda: fig_config_utils.fig_config.num_samples_point2d
+              lambda fig_config: fig_config.num_samples_point2d
           )
       ),
       repr=False,

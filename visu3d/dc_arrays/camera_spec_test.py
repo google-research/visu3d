@@ -73,6 +73,7 @@ def test_camera_spec_init(
   _ = spec.fig
 
   spec = spec.replace_fig_config(scale=3.0)
+  assert spec.fig_config.scale == 3.0
   _ = spec.fig
 
 

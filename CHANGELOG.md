@@ -14,10 +14,13 @@ Changelog follow https://keepachangelog.com/ format.
     *   Added: `v3d.math.interp_img`
     *   Added: `v3d.math.carthesian_to_spherical` and
         `v3d.math.spherical_to_carthesian`
-*   Added: `v3d.make_fig` supports `v3d.make_fig(a, b, c)` (in addition of
-    `v3d.make_fig([a, b, c])`)
-*   Added: `v3d.fig_config.cam_scale` to globally control the size of the
-    cameras.
+*   Visualization:
+    *   Added: `v3d.make_fig` supports `v3d.make_fig(a, b, c)` (in addition of
+        `v3d.make_fig([a, b, c])`)
+    *   Added: `v3d.fig_config.cam_scale` to globally control the size of the
+        cameras.
+    *   Changed: Do not add `0` suffix in the figure labels (for the first
+        element)
 *   Fixed: Subsampling for displaying simple `np.array` point clouds (regression
     from previous release).
 

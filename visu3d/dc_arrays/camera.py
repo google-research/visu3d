@@ -60,7 +60,7 @@ class Camera(array_dataclass.DataclassArray):
       target: FloatArray['*shape 3'],
       spec: camera_spec.CameraSpec,
   ) -> Camera:
-    """Factory which create a camera looking at `end`.
+    """Factory which creates a camera looking at `target`.
 
     This assume the camera is parallel to the floor. See `v3d.CameraSpec`
     for axis conventions.

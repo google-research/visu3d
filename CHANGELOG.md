@@ -8,6 +8,9 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*   `v3d.math`:
+    *   Fixed: `.ndim` attribute error when using `@tf.function`
+
 ## [1.4.0] - 2023-01-16
 
 *   DataclassArrays:

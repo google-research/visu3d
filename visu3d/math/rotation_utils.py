@@ -41,7 +41,9 @@ RAD2DEG = 360.0 / enp.tau
 @enp.check_and_normalize_arrays(strict=False)
 def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
   """Rotation matrix for rotation around X (in radians)."""
-  if angle.ndim:
+  # Can't use `angle.ndim` because of
+  # https://github.com/tensorflow/tensorflow/issues/48612
+  if len(angle.shape):  # pylint: disable=g-explicit-length-test
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
@@ -58,7 +60,9 @@ def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
 @enp.check_and_normalize_arrays(strict=False)
 def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
   """Rotation matrix for rotation around Y (in radians)."""
-  if angle.ndim:
+  # Can't use `angle.ndim` because of
+  # https://github.com/tensorflow/tensorflow/issues/48612
+  if len(angle.shape):  # pylint: disable=g-explicit-length-test
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
@@ -75,7 +79,9 @@ def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
 @enp.check_and_normalize_arrays(strict=False)
 def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
   """Rotation matrix for rotation around Z (in radians)."""
-  if angle.ndim:
+  # Can't use `angle.ndim` because of
+  # https://github.com/tensorflow/tensorflow/issues/48612
+  if len(angle.shape):  # pylint: disable=g-explicit-length-test
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)

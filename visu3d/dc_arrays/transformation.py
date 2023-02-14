@@ -230,7 +230,7 @@ class Transform(TransformBase):
     if xnp is enp.lazy.np:
       global_scales = xnp.unique(scale_xyz)
       raise_error = len(global_scales) != 1
-    elif xnp is enp.lazy.jnp:
+    elif enp.lazy.has_jax and xnp is enp.lazy.jnp:
       global_scales, global_count = xnp.unique(
           scale_xyz,
           size=1,
@@ -245,7 +245,10 @@ class Transform(TransformBase):
       checkify.check(global_count[0] == 3, msg=_err_msg())
 
       raise_error = False
-    elif xnp is enp.lazy.tnp:
+    elif enp.lazy.has_torch and xnp is enp.lazy.torch:
+      global_scales = enp.lazy.torch.unique(scale_xyz)
+      raise_error = len(global_scales) != 1
+    elif enp.lazy.has_tf and xnp is enp.lazy.tnp:
       global_scales, _ = enp.lazy.tf.unique(scale_xyz)
       raise_error = len(global_scales) != 1
     else:
@@ -548,7 +551,7 @@ def _get_r_look_at_(
   cam_forward = enp.linalg.normalize(target - pos)
 
   # In world coordinates, `z` is pointing up
-  world_up = xnp.array([0, 0, 1])
+  world_up = xnp.array([0, 0, 1.0], dtype=xnp.float32)
   # The width of the cam is parallel to the ground (prependicular to z), so
   # use cross-product.
   cam_w = xnp.cross(cam_forward, world_up)

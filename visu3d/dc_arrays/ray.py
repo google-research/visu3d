@@ -123,6 +123,8 @@ class Ray(array_dataclass.DataclassArray):
     """Returns the average ray."""
     # Mean reduce across all axis but the last one
     axis = self._to_absolute_axis(axis)
+    if axis == ():  # Pytorch do not support `axis=()`  # pylint: disable=g-explicit-bool-comparison
+      return self
     return self.map_field(lambda t: t.mean(axis=axis))
 
   def look_at(self, target: Array['*shape 3']) -> Ray:

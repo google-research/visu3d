@@ -3,8 +3,8 @@
 [![Unittests](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml/badge.svg)](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml)
 [![PyPI version](https://badge.fury.io/py/visu3d.svg)](https://badge.fury.io/py/visu3d)
 
-`visu3d` is an abstraction layer between TF/Jax/Numpy and your program. It
-provides:
+`visu3d` is an abstraction layer between TF/Jax/Numpy/Torch and your program.
+It provides:
 
 *   Standard primitives for 3d geometry (`Ray`, `Camera`, `Transform`,...).
     You can combine those standard primitives with your custom ones.

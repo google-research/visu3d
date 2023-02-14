@@ -351,11 +351,14 @@ class PinholeCamera(CameraSpec):
     ch = h / 2  # h == y
     cw = w / 2  # w == x
 
-    K = xnp.array([  # pylint: disable=invalid-name
-        [focal_in_px, 0, cw],  # cx
-        [0, focal_in_px, ch],  # cy
-        [0, 0, 1],
-    ])
+    K = xnp.asarray(  # pylint: disable=invalid-name
+        [
+            [focal_in_px, 0, cw],  # cx
+            [0, focal_in_px, ch],  # cy
+            [0, 0, 1],
+        ],
+        dtype=xnp.float32,
+    )
     return cls(
         K=K,
         resolution=resolution,

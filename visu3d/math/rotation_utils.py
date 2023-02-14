@@ -21,7 +21,7 @@ Attributes:
 
 from __future__ import annotations
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from etils import enp
 from etils.array_types import FloatArray
@@ -95,12 +95,14 @@ def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
   return R
 
 
+@enp.check_and_normalize_arrays(strict=False)
 def euler_to_rot(
-    x=None,
-    y=None,
-    z=None,
+    x: Optional[FloatArray['']] = None,
+    y: Optional[FloatArray['']] = None,
+    z: Optional[FloatArray['']] = None,
     *,
     order: str = 'zyx',
+    xnp: enp.NpModule = ...,
 ) -> FloatArray['3 3']:
   """Creates a 3x3 matrix from the euler radian angles.
 
@@ -119,6 +121,7 @@ def euler_to_rot(
     y: Rotation around y (in radians): pitch == θ == theta == y
     z: Rotation around z (in radians): yaw == ψ == psi == z
     order: Axis order convention used (e.g. `'xyz'`, `'zyx'`,...)
+    xnp: Np module used (jnp, tnp, np,...)
 
   Returns:
     tr: The transformation.
@@ -149,7 +152,7 @@ def euler_to_rot(
     r_final = _accumulate_rot(r_final, r)
 
   if r_final is None:  # All x, y, z undefined => Identity
-    r_final = enp.lazy.np.eye(3)
+    r_final = xnp.eye(3)
   return r_final
 
 

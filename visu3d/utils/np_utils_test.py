@@ -21,6 +21,9 @@ import numpy as np
 import visu3d as v3d
 from visu3d.utils import np_utils
 
+# Activate the fixture
+enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
+
 
 @enp.testing.parametrize_xnp()
 def test_append_row(xnp: enp.NpModule):

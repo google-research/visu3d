@@ -85,6 +85,13 @@ def interp_img(
   y0i = xnp.clip(y0i, 0, h - 1)
   y1i = xnp.clip(y1i, 0, h - 1)
 
+  if enp.lazy.has_torch and xnp is enp.lazy.torch:
+    # Pytorch indexing do not support int32
+    x0i = x0i.astype(np.int64)
+    x1i = x1i.astype(np.int64)
+    y0i = y0i.astype(np.int64)
+    y1i = y1i.astype(np.int64)
+
   # Extract the `(num_coords, c)` value for each corners
   val_a = img[y0i, x0i]
   val_b = img[y1i, x0i]

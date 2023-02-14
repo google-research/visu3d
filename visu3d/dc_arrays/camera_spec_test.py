@@ -23,7 +23,7 @@ import pytest
 import visu3d as v3d
 
 # Activate the fixture
-set_tnp = enp.testing.set_tnp
+enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
 
 H, W = 640, 480
 
@@ -48,7 +48,9 @@ def test_camera_spec_init(
     xnp: enp.NpModule,
     spec_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp is enp.lazy.tnp:
+  if spec_shape and xnp in [
+      enp.lazy.tnp,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
@@ -64,10 +66,10 @@ def test_camera_spec_init(
     xnp = np
   assert spec.xnp is xnp
 
-  x = _broadcast_to(xnp, [0, 0, 1], (1,) * len(spec_shape) + (3,))
+  x = _broadcast_to(xnp, [0, 0, 1.0], (1,) * len(spec_shape) + (3,))
   assert isinstance(spec.px_from_cam @ x, xnp.ndarray)
 
-  x = _broadcast_to(xnp, [0, 0], (1,) * len(spec_shape) + (2,))
+  x = _broadcast_to(xnp, [0, 0.0], (1,) * len(spec_shape) + (2,))
   assert isinstance(spec.cam_from_px @ x, xnp.ndarray)
 
   _ = spec.fig
@@ -85,7 +87,9 @@ def test_camera_spec_central_point(
     spec_shape: dca.typing.Shape,
     point_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp is enp.lazy.tnp:
+  if spec_shape and xnp in [
+      enp.lazy.tnp,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
@@ -93,7 +97,7 @@ def test_camera_spec_central_point(
   # Projecting the central point (batched)
   central_point_cam = _broadcast_to(
       xnp,
-      [0, 0, 1],
+      [0, 0, 1.0],
       spec_shape + point_shape + (3,),
   )
   central_point_px = spec.px_from_cam @ central_point_cam
@@ -118,7 +122,9 @@ def test_camera_px_centers(
     xnp: enp.NpModule,
     spec_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp is enp.lazy.tnp:
+  if spec_shape and xnp in [
+      enp.lazy.tnp,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
@@ -150,14 +156,19 @@ def test_camera_points(
     xnp: enp.NpModule,
     spec_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp is enp.lazy.tnp:
+  if spec_shape and xnp in [
+      enp.lazy.tnp,
+      # TODO(epot): Fix
+      # We cannot vmap over non-Tensor arguments
+      enp.lazy.torch,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
 
   # Random point cloud in camera coordinates
   rng = np.random.default_rng(0)
-  coords3d = rng.random(spec_shape + (5, 3))
+  coords3d = rng.random(spec_shape + (5, 3), dtype=np.float32)
   rgb = rng.integers(255, size=spec_shape + (5, 3))
   points3d = v3d.Point3d(p=coords3d, rgb=rgb)
   points3d = points3d.as_xnp(xnp)
@@ -186,4 +197,4 @@ def test_camera_points(
 
 
 def _broadcast_to(xnp: enp.NpModule, array, shape):
-  return xnp.broadcast_to(xnp.array(array), shape)
+  return xnp.broadcast_to(xnp.asarray(array), shape)

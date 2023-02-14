@@ -8,6 +8,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*   Add `torch` support (experimental) (Fix #12). Require to call
+    `dca.activate_torch_support()`
 *   `v3d.math`:
     *   Fixed: `.ndim` attribute error when using `@tf.function`
 

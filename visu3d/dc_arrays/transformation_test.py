@@ -28,7 +28,7 @@ import pytest
 import visu3d as v3d
 
 # Activate the fixture
-set_tnp = enp.testing.set_tnp
+enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
 
 
 @dataclasses.dataclass
@@ -49,16 +49,17 @@ class TransformExpectedValue:
 
 
 # Transformation values
-_RAY_POS = np.array([1, 3, 5])
-_RAY_DIR = np.array([2, 1, 4])
+_RAY_POS = np.array([1, 3, 5], dtype=np.float32)
+_RAY_DIR = np.array([2, 1, 4], dtype=np.float32)
 _TR_R = np.array(
     [
         [0, 1, 0],
         [1, 0, 0],
         [0, 0, 1],
-    ]
+    ],
+    dtype=np.float32,
 )
-_TR_T = np.array([4, 3, 7])
+_TR_T = np.array([4, 3, 7], dtype=np.float32)
 
 _TR_EXPECTED_VALUES = {
     # Test identity
@@ -71,8 +72,8 @@ _TR_EXPECTED_VALUES = {
     ),
     # Test identity
     'identity': TransformExpectedValue(
-        R=np.eye(3),
-        t=np.zeros((3,)),
+        R=np.eye(3, dtype=np.float32),
+        t=np.zeros((3,), dtype=np.float32),
         # Identity should be a no-op
         expected_pos=_RAY_POS,
         expected_dir=_RAY_DIR,
@@ -81,7 +82,7 @@ _TR_EXPECTED_VALUES = {
     ),
     # Test translation only
     'trans_only': TransformExpectedValue(
-        R=np.eye(3),
+        R=np.eye(3, dtype=np.float32),
         t=[3, -1, 2],
         # Only position translated
         expected_pos=_RAY_POS + [3, -1, 2],
@@ -195,7 +196,11 @@ def test_transformation(
     tr = tr.as_xnp(xnp)
   tr = tr.broadcast_to(tr_shape)
 
-  if tr_shape and xnp is enp.lazy.tnp:
+  if tr_shape and xnp in [
+      enp.lazy.tnp,
+      # Batching rule not implemented for aten::concatenate.
+      enp.lazy.torch,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   _assert_tr_common(tr, tr_shape=tr_shape)
@@ -439,7 +444,11 @@ def test_transformation_scale(
   tr = v3d.Transform.from_angle(x=xnp.asarray(enp.tau / 4))
   tr = tr.broadcast_to(tr_shape)
 
-  if tr_shape and xnp is enp.lazy.tnp:
+  if tr_shape and xnp in [
+      enp.lazy.tnp,
+      # Attempted to vmap over aten::_unique2
+      enp.lazy.torch,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   assert_scale = functools.partial(_assert_scale, xnp=xnp, tr_shape=tr_shape)
@@ -501,6 +510,10 @@ def test_transformation_from_angle_multiple(xnp: enp.NpModule):
   tr = v3d.Transform.from_angle(x=x, y=y, z=z)
 
   assert tr.xnp is xnp
+
+  if xnp is enp.lazy.torch:  # Torch do not support `np @ Tensor`
+    rz = xnp.asarray(rz, dtype=np.float32)
+    ry = xnp.asarray(ry, dtype=np.float32)
 
   dca.testing.assert_array_equal(tr.R, rz @ ry @ rx)
 

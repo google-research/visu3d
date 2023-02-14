@@ -20,7 +20,7 @@ import pytest
 import visu3d as v3d
 
 # Activate the fixture
-set_tnp = enp.testing.set_tnp
+enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
 
 
 @enp.testing.parametrize_xnp()

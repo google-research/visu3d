@@ -24,9 +24,9 @@ import pytest
 import visu3d as v3d
 
 # Activate the fixture
-set_tnp = enp.testing.set_tnp
+enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
 
-# assert not v3d.Ray._dca_tree_map_registered
+assert not v3d.Ray._dca_jax_tree_registered
 
 
 @enp.testing.parametrize_xnp()
@@ -72,7 +72,7 @@ def test_ray(
   assert norm.shape == shape
   np.testing.assert_allclose(
       norm,
-      xnp.broadcast_to(sqrt8, shape),
+      xnp.broadcast_to(xnp.asarray(float(sqrt8)), shape),
   )
 
   end = p.end

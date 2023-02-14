@@ -188,7 +188,6 @@ class Camera(array_dataclass.DataclassArray):
     )
     rgb = rgb[valid_coords_mask]
     px_coords = px_coords[valid_coords_mask]
-
     px_coords = self.xnp.around(px_coords).astype(np.int32)
 
     # TODO(epot): Should we create a `xnp.array` ?

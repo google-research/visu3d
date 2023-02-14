@@ -23,7 +23,7 @@ import pytest
 import visu3d as v3d
 
 # Activate the fixture
-set_tnp = enp.testing.set_tnp
+enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
 
 
 H, W = 16, 32
@@ -133,7 +133,9 @@ def test_camera_rays(
     normalize: bool,
     spec: type[v3d.CameraSpec],
 ):
-  if shape and xnp is enp.lazy.tnp:
+  if shape and xnp in [
+      enp.lazy.tnp,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   cam = _make_cam(xnp=xnp, shape=shape, spec=spec)
@@ -182,7 +184,11 @@ def test_camera_transform(
 ):
   """Test low-level camera transforms."""
 
-  if shape and xnp is enp.lazy.tnp:
+  if shape and xnp in [
+      enp.lazy.tnp,
+      # Batching rule not implemented for aten::concatenate
+      enp.lazy.torch,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   cam = _make_cam(xnp=xnp, shape=shape, spec=spec)  # Camera on the `y` axis
@@ -217,7 +223,11 @@ def test_camera_render(
     point_shape: dca.typing.Shape,
     spec: type[v3d.CameraSpec],
 ):
-  if shape and xnp is enp.lazy.tnp:
+  if shape and xnp in [
+      enp.lazy.tnp,
+      # Batching rule not implemented for aten::concatenate.
+      enp.lazy.torch,
+  ]:
     pytest.skip('Vectorization not supported yet with TF')
 
   cam = _make_cam(xnp=xnp, shape=shape, spec=spec)  # Camera on the `y` axis

@@ -35,9 +35,9 @@ def test_point(
 ):
   init_kwargs = {}
   if with_color:
-    init_kwargs['rgb'] = xnp.ones(shape=shape + (3,))
+    init_kwargs['rgb'] = xnp.ones(shape + (3,))
 
-  p = v3d.Point3d(p=xnp.ones(shape=shape + (3,)), **init_kwargs)
+  p = v3d.Point3d(p=xnp.ones(shape + (3,)), **init_kwargs)
 
   tr = v3d.Transform(R=xnp.eye(3), t=xnp.zeros((3,)))
   p2 = tr @ p
@@ -67,11 +67,11 @@ def test_point_2d(
 ):
   init_kwargs = {}
   if with_color:
-    init_kwargs['rgb'] = xnp.ones(shape=shape + (3,))
+    init_kwargs['rgb'] = xnp.ones(shape + (3,))
   if with_depth:
-    init_kwargs['depth'] = xnp.ones(shape=shape + (1,))
+    init_kwargs['depth'] = xnp.ones(shape + (1,))
 
-  p = v3d.Point2d(p=xnp.ones(shape=shape + (2,)), **init_kwargs)
+  p = v3d.Point2d(p=xnp.ones(shape + (2,)), **init_kwargs)
 
   # Point2d can be projected back and forth to camera
   spec = v3d.PinholeCamera.from_focal(resolution=(4, 4), focal_in_px=35)

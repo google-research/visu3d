@@ -512,8 +512,8 @@ def test_transformation_from_angle_multiple(xnp: enp.NpModule):
   assert tr.xnp is xnp
 
   if xnp is enp.lazy.torch:  # Torch do not support `np @ Tensor`
-    rz = xnp.asarray(rz, dtype=np.float32)
-    ry = xnp.asarray(ry, dtype=np.float32)
+    rz = xnp.asarray(rz, dtype=xnp.float32)
+    ry = xnp.asarray(ry, dtype=xnp.float32)
 
   dca.testing.assert_array_equal(tr.R, rz @ ry @ rx)
 

@@ -3,7 +3,7 @@
 [![Unittests](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml/badge.svg)](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml)
 [![PyPI version](https://badge.fury.io/py/visu3d.svg)](https://badge.fury.io/py/visu3d)
 
-`visu3d` is an abstraction layer between TF/Jax/Numpy/Torch and your program.
+`visu3d` is an abstraction layer between Torch/TF/Jax/Numpy and your program.
 It provides:
 
 *   Standard primitives for 3d geometry (`Ray`, `Camera`, `Transform`,...).
@@ -68,17 +68,16 @@ cam, rays, point_cloud  # Tuple auto-displayed without `v3d.make_fig` call
 </section>
 <section class="zippy">
 
-Same code seamlessly **works across Jax, TensorFlow, Numpy** (please help us for
-[torch support](https://github.com/google-research/visu3d/issues/12)).
+Same code seamlessly **works across Torch, Jax, TensorFlow, Numpy**.
 
 ```python
 rays = rays.as_jax()  # .as_tf(), as_np(), .as_jax()
 assert isinstance(rays.pos, jnp.ndarray)
 assert rays.xnp is jnp
 
-rays = rays.as_tf()
-assert isinstance(rays.pos, tf.Tensor)
-assert rays.xnp is tf.experimental.numpy
+rays = rays.as_torch()
+assert isinstance(rays.pos, torch.Tensor)
+assert rays.xnp is torch
 ```
 
 With native support for auto-diff, `jax.vmap`, `jax.tree_utils`,...

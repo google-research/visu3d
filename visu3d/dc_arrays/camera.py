@@ -21,6 +21,7 @@ from typing import Any
 
 import dataclass_array as dca
 from dataclass_array.typing import DcT
+from etils import enp
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 import numpy as np
 from visu3d import array_dataclass
@@ -188,7 +189,7 @@ class Camera(array_dataclass.DataclassArray):
     )
     rgb = rgb[valid_coords_mask]
     px_coords = px_coords[valid_coords_mask]
-    px_coords = self.xnp.around(px_coords).astype(np.int32)
+    px_coords = enp.compat.astype(enp.compat.round(px_coords), np.int32)
 
     # TODO(epot): Should we create a `xnp.asarray` ?
     # TODO(epot): The dtype should be cloned from point.rgb !

@@ -53,7 +53,7 @@ def append_row(
     raise ValueError(
         f'`append_row` does not support appending rank > 1. Got {value.shape}.'
     )
-  return xnp.append(x, value, axis=axis)
+  return enp.compat.concat([x, value], axis=axis)
 
 
 def interp_points(

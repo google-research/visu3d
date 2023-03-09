@@ -204,7 +204,7 @@ class Transform(TransformBase):
   @dca.vectorize_method
   def scale_xyz(self) -> FloatArray['*shape 3']:
     """Returns the `(sx, sy, sz)` scale of the transform along each axis."""
-    return enp.linalg.norm(self.R, axis=0)
+    return enp.compat.norm(self.R, axis=0)
 
   @property
   @dca.vectorize_method
@@ -306,7 +306,7 @@ class Transform(TransformBase):
   def inv(self) -> Transform:
     """Returns the inverse camera transform."""
     # Might be a more optimized way than stacking/unstacking matrix
-    return type(self).from_matrix(enp.linalg.inv(self.matrix4x4))
+    return type(self).from_matrix(enp.compat.inv(self.matrix4x4))
 
   def __add__(self, translation: FloatArray['... 3']) -> Transform:
     """Translate the position."""

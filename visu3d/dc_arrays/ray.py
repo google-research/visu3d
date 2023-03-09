@@ -113,7 +113,7 @@ class Ray(array_dataclass.DataclassArray):
 
   def norm(self, keepdims: bool = False) -> FloatArray['*shape']:
     """Returns the norm of the dir."""
-    return enp.linalg.norm(self.dir, axis=-1, keepdims=keepdims)
+    return enp.compat.norm(self.dir, axis=-1, keepdims=keepdims)
 
   def normalize(self) -> Ray:
     """Normalize the directions."""

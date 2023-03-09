@@ -395,13 +395,13 @@ class PinholeCamera(CameraSpec):
 
     # [X,Y,Z] / s = K-1 @ [u, v, 1]
     # (3, 3) @ (..., 3) -> (..., 3)
-    k_inv = enp.linalg.inv(self.K)
+    k_inv = enp.compat.inv(self.K)
     points3d = self.xnp.einsum('ij,...j->...i', k_inv, points2d)
 
     # TODO(epot): Option to return normalized rays ?
     # Set z to -1
     # [X,Y,Z] -> [X, Y, Z=1]
-    points3d = points3d / self.xnp.expand_dims(points3d[..., 2], axis=-1)
+    points3d = points3d / enp.compat.expand_dims(points3d[..., 2], axis=-1)
     return points3d
 
 

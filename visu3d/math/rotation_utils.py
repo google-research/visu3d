@@ -233,7 +233,7 @@ def is_orth(
 
   should_be_identity = rot.T @ rot
   identity = xnp.eye(3, dtype=rot.dtype)
-  diff = enp.linalg.norm(identity - should_be_identity)
+  diff = enp.compat.norm(identity - should_be_identity)
   return diff < atol
 
 
@@ -260,5 +260,5 @@ def is_rot(rot: FloatArray['3 3'], *, atol: float = 1e-6) -> bool:
   if rot.shape != (3, 3):
     raise ValueError(f'Expected 3x3 shape, but got {rot.shape}')
 
-  det = enp.linalg.det(rot)
+  det = enp.compat.det(rot)
   return is_orth(rot, atol=atol) and det > 0.0

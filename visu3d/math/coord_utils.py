@@ -57,7 +57,7 @@ def carthesian_to_spherical(
     theta: azimuth / longitude in range `(0, tau)`
     elevation: polar / elevation /  colatitude in range `(0, tau/2)`
   """
-  r = enp.linalg.norm(point3d, axis=-1)
+  r = enp.compat.norm(point3d, axis=-1)
   theta = xnp.arctan2(point3d[..., 1], point3d[..., 0])  # (-tau/2, tau/2)
   theta = theta % enp.tau  # Normalize azimuth (-tau/2, tau/2) -> (0, tau)
   phi = xnp.arccos(point3d[..., 2] / r)  # elevation (0, tau/2)

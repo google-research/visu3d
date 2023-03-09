@@ -29,7 +29,7 @@ enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
 def test_append_row(xnp: enp.NpModule):
   x = xnp.ones((2, 4))
   y = np_utils.append_row(x, value=4.0, axis=-1)
-  assert isinstance(y, xnp.ndarray)
+  assert enp.compat.is_xnp_array(y, xnp)
   expected = [
       [1, 1, 1, 1, 4],
       [1, 1, 1, 1, 4],
@@ -37,7 +37,7 @@ def test_append_row(xnp: enp.NpModule):
   np.testing.assert_allclose(y, expected)
 
   y = np_utils.append_row(x, value=4.0, axis=0)
-  assert isinstance(y, xnp.ndarray)
+  assert enp.compat.is_xnp_array(y, xnp)
   expected = [
       [1, 1, 1, 1],
       [1, 1, 1, 1],

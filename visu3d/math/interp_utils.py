@@ -61,12 +61,12 @@ def interp_img(
   # `_f` (float centered coordinates).
   x0 = xnp.floor(x - 0.5)
   x0f = x0 + 0.5
-  x0i = x0.astype(np.int32)
+  x0i = enp.compat.astype(x0, np.int32)
   x1f = x0f + 1
   x1i = x0i + 1
-  y0 = xnp.floor(y - 0.5).astype(np.int32)
+  y0 = enp.compat.astype(xnp.floor(y - 0.5), np.int32)
   y0f = y0 + 0.5
-  y0i = y0.astype(np.int32)
+  y0i = enp.compat.astype(y0, np.int32)
   y1f = y0f + 1
   y1i = y0i + 1
 
@@ -87,10 +87,10 @@ def interp_img(
 
   if enp.lazy.has_torch and xnp is enp.lazy.torch:
     # Pytorch indexing do not support int32
-    x0i = x0i.astype(np.int64)
-    x1i = x1i.astype(np.int64)
-    y0i = y0i.astype(np.int64)
-    y1i = y1i.astype(np.int64)
+    x0i = enp.compat.astype(x0i, np.int64)
+    x1i = enp.compat.astype(x1i, np.int64)
+    y0i = enp.compat.astype(y0i, np.int64)
+    y1i = enp.compat.astype(y1i, np.int64)
 
   # Extract the `(num_coords, c)` value for each corners
   val_a = img[y0i, x0i]

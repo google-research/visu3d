@@ -22,7 +22,7 @@ import visu3d as v3d
 from visu3d.utils import np_utils
 
 # Activate the fixture
-enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
+enable_tf_np_mode = enp.testing.set_tnp
 
 
 @enp.testing.parametrize_xnp()

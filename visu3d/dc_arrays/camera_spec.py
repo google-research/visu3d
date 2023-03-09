@@ -401,7 +401,7 @@ class PinholeCamera(CameraSpec):
     # TODO(epot): Option to return normalized rays ?
     # Set z to -1
     # [X,Y,Z] -> [X, Y, Z=1]
-    points3d = points3d / self.xnp.expand_dims(points3d[..., 2], axis=-1)
+    points3d = points3d / enp.compat.expand_dims(points3d[..., 2], axis=-1)
     return points3d
 
 

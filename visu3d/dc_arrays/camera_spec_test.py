@@ -67,10 +67,10 @@ def test_camera_spec_init(
   assert spec.xnp is xnp
 
   x = _broadcast_to(xnp, [0, 0, 1.0], (1,) * len(spec_shape) + (3,))
-  assert isinstance(spec.px_from_cam @ x, xnp.ndarray)
+  assert enp.compat.is_array_xnp(spec.px_from_cam @ x, xnp)
 
   x = _broadcast_to(xnp, [0, 0.0], (1,) * len(spec_shape) + (2,))
-  assert isinstance(spec.cam_from_px @ x, xnp.ndarray)
+  assert enp.compat.is_array_xnp(spec.cam_from_px @ x, xnp)
 
   _ = spec.fig
 
@@ -101,7 +101,7 @@ def test_camera_spec_central_point(
       spec_shape + point_shape + (3,),
   )
   central_point_px = spec.px_from_cam @ central_point_cam
-  assert isinstance(central_point_px, xnp.ndarray)
+  assert enp.compat.is_array_xnp(central_point_px, xnp)
   assert central_point_px.shape == spec_shape + point_shape + (2,)
   np.testing.assert_allclose(
       central_point_px,
@@ -130,15 +130,15 @@ def test_camera_px_centers(
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
 
   px_centers = spec.px_centers()
-  assert isinstance(px_centers, xnp.ndarray)
+  assert enp.compat.is_array_xnp(px_centers, xnp)
   assert px_centers.shape == spec_shape + (H, W, 2)
 
   cam_centers = spec.cam_from_px @ px_centers
-  assert isinstance(cam_centers, xnp.ndarray)
+  assert enp.compat.is_array_xnp(cam_centers, xnp)
   assert cam_centers.shape == spec_shape + (H, W, 3)
 
   round_trip_px = spec.px_from_cam @ cam_centers
-  assert isinstance(round_trip_px, xnp.ndarray)
+  assert enp.compat.is_array_xnp(round_trip_px, xnp)
   assert round_trip_px.shape == spec_shape + (H, W, 2)
 
   np.testing.assert_allclose(round_trip_px, px_centers, atol=1e-4)

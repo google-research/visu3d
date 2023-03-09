@@ -187,9 +187,9 @@ def test_transformation(
 ):
   init_kwargs = {}
   if test_values.R is not None:
-    init_kwargs['R'] = xnp.array(test_values.R)
+    init_kwargs['R'] = xnp.asarray(test_values.R)
   if test_values.t is not None:
-    init_kwargs['t'] = xnp.array(test_values.t)
+    init_kwargs['t'] = xnp.asarray(test_values.t)
   tr = v3d.Transform(**init_kwargs)
 
   if test_values.R is None and test_values.t is None:
@@ -266,7 +266,7 @@ def _assert_tr_common(tr: v3d.Transform, tr_shape: dca.typing.Shape):
   dca.testing.assert_array_equal(v3d.Transform.from_matrix(tr.matrix4x4), tr)
 
   dca.testing.assert_array_equal(tr + [0, 0, 0], tr)
-  dca.testing.assert_array_equal(tr + tr.xnp.array([0, 0, 0]), tr)
+  dca.testing.assert_array_equal(tr + tr.xnp.asarray([0, 0, 0]), tr)
 
   # Figure should work
   _ = tr.fig
@@ -281,15 +281,15 @@ def _assert_ray_transformed(
   """Test ray transformation."""
   xnp = tr.xnp
   ray = v3d.Ray(
-      pos=xnp.array(_RAY_POS),
-      dir=xnp.array(_RAY_DIR),
+      pos=xnp.asarray(_RAY_POS),
+      dir=xnp.asarray(_RAY_DIR),
   )
   ray = ray.broadcast_to(other_shape)
   assert ray.shape == other_shape
 
   expected_ray = v3d.Ray(
-      pos=xnp.array(test_values.expected_pos),
-      dir=xnp.array(test_values.expected_dir),
+      pos=xnp.asarray(test_values.expected_pos),
+      dir=xnp.asarray(test_values.expected_dir),
   )
   expected_ray = expected_ray.broadcast_to(expected_shape)
   dca.testing.assert_array_equal(tr @ ray, expected_ray)
@@ -305,26 +305,26 @@ def _assert_point_transformed(
   xnp = tr.xnp
 
   # Test transform point position
-  expected_point_pos = xnp.array(test_values.expected_pos)
+  expected_point_pos = xnp.asarray(test_values.expected_pos)
   expected_point_pos = xnp.broadcast_to(
       expected_point_pos,
       expected_shape + (3,),
   )
 
-  point_pos = xnp.array(_RAY_POS)
+  point_pos = xnp.asarray(_RAY_POS)
   point_pos = xnp.broadcast_to(point_pos, other_shape + (3,))
 
   dca.testing.assert_array_equal(tr @ point_pos, expected_point_pos)
   dca.testing.assert_array_equal(tr.apply_to_pos(point_pos), expected_point_pos)
 
   # Test transform point direction
-  expected_point_dir = xnp.array(test_values.expected_dir)
+  expected_point_dir = xnp.asarray(test_values.expected_dir)
   expected_point_dir = xnp.broadcast_to(
       expected_point_dir,
       expected_shape + (3,),
   )
 
-  point_dir = xnp.array(_RAY_DIR)
+  point_dir = xnp.asarray(_RAY_DIR)
   point_dir = xnp.broadcast_to(point_dir, other_shape + (3,))
 
   dca.testing.assert_array_equal(tr.apply_to_dir(point_dir), expected_point_dir)
@@ -339,14 +339,14 @@ def _assert_tr_transformed(
   """Test transform transformation."""
   xnp = tr.xnp
   other_tr = v3d.Transform(
-      R=xnp.array(_TR_R),
-      t=xnp.array(_TR_T),
+      R=xnp.asarray(_TR_R),
+      t=xnp.asarray(_TR_T),
   )
   other_tr = other_tr.broadcast_to(other_shape)
 
   expected_tr = v3d.Transform(
-      R=xnp.array(test_values.expected_r),
-      t=xnp.array(test_values.expected_t),
+      R=xnp.asarray(test_values.expected_r),
+      t=xnp.asarray(test_values.expected_t),
   )
   expected_tr = expected_tr.broadcast_to(expected_shape)
 
@@ -378,8 +378,8 @@ def _assert_camera_transformed(
   cam = v3d.Camera(
       spec=spec,
       world_from_cam=v3d.Transform(
-          R=xnp.array(_TR_R),
-          t=xnp.array(_TR_T),
+          R=xnp.asarray(_TR_R),
+          t=xnp.asarray(_TR_T),
       ),
   )
   cam = cam.broadcast_to(other_shape)
@@ -387,8 +387,8 @@ def _assert_camera_transformed(
   expected_cam = v3d.Camera(
       spec=spec,
       world_from_cam=v3d.Transform(
-          R=xnp.array(test_values.expected_r),
-          t=xnp.array(test_values.expected_t),
+          R=xnp.asarray(test_values.expected_r),
+          t=xnp.asarray(test_values.expected_t),
       ),
   )
   expected_cam = expected_cam.broadcast_to(expected_shape)

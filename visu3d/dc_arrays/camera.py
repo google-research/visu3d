@@ -190,7 +190,7 @@ class Camera(array_dataclass.DataclassArray):
     px_coords = px_coords[valid_coords_mask]
     px_coords = self.xnp.around(px_coords).astype(np.int32)
 
-    # TODO(epot): Should we create a `xnp.array` ?
+    # TODO(epot): Should we create a `xnp.asarray` ?
     # TODO(epot): The dtype should be cloned from point.rgb !
     img = np.zeros((*self.resolution, 3), dtype=np.uint8)
     # px_coords is (h, w)

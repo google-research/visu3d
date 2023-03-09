@@ -89,7 +89,7 @@ def test_camera_xnp(xnp: enp.NpModule, spec: type[v3d.CameraSpec]):
   assert (
       v3d.Camera.from_look_at(
           spec=spec,
-          pos=xnp.array([0, 4.0, 0]),
+          pos=xnp.asarray([0, 4.0, 0]),
           target=[0, 0.0, 0],
       ).xnp
       is xnp
@@ -98,7 +98,7 @@ def test_camera_xnp(xnp: enp.NpModule, spec: type[v3d.CameraSpec]):
       v3d.Camera.from_look_at(
           spec=spec,
           pos=[0, 4.0, 0],
-          target=xnp.array([0.0, 0, 0]),
+          target=xnp.asarray([0.0, 0, 0]),
       ).xnp
       is xnp
   )
@@ -164,8 +164,8 @@ def test_camera_rays(
     raise AssertionError
 
   dca.testing.assert_array_equal(cam + [0, 0, 0], cam)
-  dca.testing.assert_array_equal(cam + xnp.array([0, 0, 0]), cam)
-  dca.testing.assert_array_equal(cam - xnp.array([0, 0, 0]), cam)
+  dca.testing.assert_array_equal(cam + xnp.asarray([0, 0, 0]), cam)
+  dca.testing.assert_array_equal(cam - xnp.asarray([0, 0, 0]), cam)
 
   _ = cam.fig
 

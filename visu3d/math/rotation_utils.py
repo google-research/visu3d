@@ -47,7 +47,7 @@ def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
-  R = xnp.array(  # pylint: disable=invalid-name
+  R = xnp.asarray(  # pylint: disable=invalid-name
       [
           [1, 0, 0],
           [0, c, -s],
@@ -66,7 +66,7 @@ def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
-  R = xnp.array(  # pylint: disable=invalid-name
+  R = xnp.asarray(  # pylint: disable=invalid-name
       [
           [c, 0, s],
           [0, 1, 0],
@@ -85,7 +85,7 @@ def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
     raise ValueError(f'Rotation angle should be scalar. Not {angle.shape}')
   c = xnp.cos(angle)
   s = xnp.sin(angle)
-  R = xnp.array(  # pylint: disable=invalid-name
+  R = xnp.asarray(  # pylint: disable=invalid-name
       [
           [c, -s, 0],
           [s, c, 0],

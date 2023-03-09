@@ -44,10 +44,10 @@ def test_point(
   dca.testing.assert_array_equal(p, p2)
 
   dca.testing.assert_array_equal(p + [0, 0, 0], p)
-  dca.testing.assert_array_equal(p + xnp.array([0, 0, 0]), p)
+  dca.testing.assert_array_equal(p + xnp.asarray([0, 0, 0]), p)
 
   p_clipped = p.clip(max=[0.5, 0.5, 5])
-  p_clipped_expected = v3d.Point3d(p=xnp.array([0.5, 0.5, 1]), **init_kwargs)
+  p_clipped_expected = v3d.Point3d(p=xnp.asarray([0.5, 0.5, 1]), **init_kwargs)
   p_clipped_expected = p_clipped_expected.broadcast_to(shape)
   dca.testing.assert_array_equal(p_clipped, p_clipped_expected)
 
@@ -89,7 +89,7 @@ def test_point_2d(
 
   # Clip
   p_clipped = p.clip(max=[0.5, 5])
-  p_clipped_expected = v3d.Point2d(p=xnp.array([0.5, 1]), **init_kwargs)
+  p_clipped_expected = v3d.Point2d(p=xnp.asarray([0.5, 1]), **init_kwargs)
   p_clipped_expected = p_clipped_expected.broadcast_to(shape)
   dca.testing.assert_array_equal(p_clipped, p_clipped_expected)
 

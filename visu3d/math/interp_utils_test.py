@@ -24,7 +24,7 @@ enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
 
 @enp.testing.parametrize_xnp()
 def test_interp_img(xnp: enp.NpModule):
-  img = xnp.array([
+  img = xnp.asarray([
       [0, 1, 2, 3],
       [1, 11, 21, 31],
       [2, 12, 22, 32],

@@ -87,7 +87,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
 
   This works with:
 
-  * `xnp.array`: `(..., 3) -> (..., 2)`
+  * `xnp.asarray`: `(..., 3) -> (..., 2)`
   * `v3d.Point3d` -> `v3d.Point2d`
   * Your custom objects. To support this transformation, your dataclass should
     implement the protocols:
@@ -261,7 +261,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
         [self.w, 0],
         [self.w, self.h],
     ]
-    corners_world = self.cam_from_px @ self.xnp.array(corners_px)
+    corners_world = self.cam_from_px @ self.xnp.asarray(corners_px)
     corners_world = corners_world * self.fig_config.scale
 
     start = [
@@ -421,7 +421,7 @@ class Spec360(CameraSpec):
 
     # Scale angles to (0, h), (0, w)
     points2d = self.xnp.stack([theta, phi], axis=-1)
-    points2d = points2d * self.xnp.array(
+    points2d = points2d * self.xnp.asarray(
         [self.w / enp.tau, (2 * self.h) / enp.tau]
     )
     return points2d, depth[..., None]
@@ -435,7 +435,7 @@ class Spec360(CameraSpec):
     # * j: [0, h] -> [0, tau / 2]
     # Reminder, 2d pixels are in (u, v) coordinates (so `(w, h)`)
     # (h, w, 2)
-    angles = points2d * self.xnp.array(
+    angles = points2d * self.xnp.asarray(
         [enp.tau / self.w, enp.tau / (2 * self.h)]
     )
     theta = angles[..., 0]
@@ -450,7 +450,7 @@ class Spec360(CameraSpec):
   def _cv_from_wolfram(self) -> transformation.Transform:
     """Convert Wolfram cathesian coordinates to OpenCv camera convention."""
     return transformation.Transform(
-        R=self.xnp.array([
+        R=self.xnp.asarray([
             [0, -1, 0],
             [0, 0, -1],
             [-1, 0, 0],

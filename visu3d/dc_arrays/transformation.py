@@ -551,7 +551,7 @@ def _get_r_look_at_(
   cam_forward = enp.linalg.normalize(target - pos)
 
   # In world coordinates, `z` is pointing up
-  world_up = xnp.array([0, 0, 1.0], dtype=xnp.float32)
+  world_up = xnp.asarray([0, 0, 1.0], dtype=xnp.float32)
   # The width of the cam is parallel to the ground (prependicular to z), so
   # use cross-product.
   cam_w = xnp.cross(cam_forward, world_up)

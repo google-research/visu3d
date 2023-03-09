@@ -41,7 +41,7 @@ enable_torch_tf_np_mode = enp.testing.enable_torch_tf_np_mode
     ],
 )
 def test_spherical_coordinates(xnp: enp.NpModule, value, shape):
-  pts = xnp.array(value)
+  pts = xnp.asarray(value)
 
   spherical = v3d.math.carthesian_to_spherical(pts)
 

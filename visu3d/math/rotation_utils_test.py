@@ -30,7 +30,7 @@ def test_is_rotation_matrix(xnp: enp.NpModule):
   assert v3d.math.is_rot(xnp.eye(3))
   assert not v3d.math.is_rot(xnp.zeros((3, 3)))
 
-  not_rot = xnp.array(
+  not_rot = xnp.asarray(
       [
           [0.0, 0.0, 1.0],
           [0.0, 1.0, 0.0],
@@ -40,7 +40,7 @@ def test_is_rotation_matrix(xnp: enp.NpModule):
   assert not v3d.math.is_rot(not_rot)
 
   delta = 1e-8
-  rot = xnp.array(
+  rot = xnp.asarray(
       [
           [1.0 + delta, 0.0, 0.0],
           [0.0, 1.0, 0.0],

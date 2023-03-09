@@ -53,8 +53,8 @@ def test_ray(
     assert p.shape == shape
     dca.testing.assert_allclose(p, _ray_broadcast(t=t, d=d, shape=shape))
 
-  t = xnp.array([1, 0, 0])
-  d = xnp.array([0, 2, 2])
+  t = xnp.asarray([1, 0, 0])
+  d = xnp.asarray([0, 2, 2])
   sqrt8 = np.sqrt(0**2 + 2**2 + 2**2.0)
 
   p = _ray_broadcast(t=t, d=d)

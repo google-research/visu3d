@@ -129,7 +129,6 @@ Converting any dataclass to dataclass array is trivial:
 from etils.array_types import FloatArray
 
 
-@dataclasses.dataclass(frozen=True)
 class MyRay(v3d.DataclassArray):
   pos: FloatArray[..., 3]
   dir: FloatArray[..., 3]

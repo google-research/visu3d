@@ -35,7 +35,6 @@ from visu3d.utils.lazy_imports import plotly_base
 # * Check broadcasting for `+` and `*`
 
 
-@dataclasses.dataclass(frozen=True)
 class Ray(array_dataclass.DataclassArray):
   """6d vector with position and direction.
 

@@ -25,7 +25,6 @@ from visu3d.plotly import fig_config_utils
 from visu3d.plotly import fig_utils
 
 
-@dataclasses.dataclass(frozen=True)
 @dca.dataclass_array(broadcast=True, cast_dtype=True)
 class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
   """Wrapper around `dca.DataclassArray` for all v3d objects.

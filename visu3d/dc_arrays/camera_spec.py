@@ -61,7 +61,6 @@ class TraceConfig(plotly.TraceConfig):
   )
 
 
-@dataclasses.dataclass(frozen=True)
 class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
   """Camera intrinsics specification.
 
@@ -291,7 +290,6 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     return self.xnp.asarray(start), self.xnp.asarray(end)
 
 
-@dataclasses.dataclass(frozen=True)
 class PinholeCamera(CameraSpec):
   """Simple camera model.
 
@@ -405,7 +403,6 @@ class PinholeCamera(CameraSpec):
     return points3d
 
 
-@dataclasses.dataclass(frozen=True)
 class Spec360(CameraSpec):
   """Camera spec representing 360 panorama.
 

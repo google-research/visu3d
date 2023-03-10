@@ -33,8 +33,6 @@ if typing.TYPE_CHECKING:
   from visu3d.dc_arrays import camera_spec as camera_spec_lib
 
 
-# TODO(epot): Rename Point3d
-@dataclasses.dataclass(frozen=True)
 class Point3d(array_dataclass.DataclassArray):
   """3d point cloud.
 
@@ -94,7 +92,6 @@ class Point3d(array_dataclass.DataclassArray):
     return plotly.make_points(self.p, color=self.rgb)
 
 
-@dataclasses.dataclass(frozen=True)
 class Point2d(array_dataclass.DataclassArray):
   """2d point cloud.
 

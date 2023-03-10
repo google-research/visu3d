@@ -11,6 +11,7 @@ Changelog follow https://keepachangelog.com/ format.
 *   **Add `torch` support! (Fix #12)**
 *   `v3d.math`:
     *   Fixed: `.ndim` attribute error when using `@tf.function`
+*   **Breaking**: `@dataclass(frozen=True)` is now automatically applied
 
 ## [1.4.0] - 2023-01-16
 

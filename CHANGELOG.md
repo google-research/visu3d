@@ -8,6 +8,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+## [1.5.0] - 2023-03-13
+
 *   **Add `torch` support! (Fix #12)**
 *   `v3d.math`:
     *   Fixed: `.ndim` attribute error when using `@tf.function`
@@ -81,7 +83,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 *   Normalize `look_at` by default
 
-[Unreleased]: https://github.com/google-research/visu3d/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/google-research/visu3d/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/google-research/visu3d/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/google-research/visu3d/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/google-research/visu3d/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/google-research/visu3d/compare/v1.1.0...v1.2.0

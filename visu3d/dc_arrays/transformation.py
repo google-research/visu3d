@@ -16,7 +16,6 @@
 
 from __future__ import annotations
 
-import dataclasses
 import functools
 from typing import Callable, Generic, TypeVar
 
@@ -52,7 +51,6 @@ class TransformBase(array_dataclass.DataclassArray):
     raise NotImplementedError('Abstract method.')
 
 
-@dataclasses.dataclass(frozen=True)
 class Transform(TransformBase):
   """Affine transformation (Position, rotation and scale of an object).
 
@@ -156,19 +154,19 @@ class Transform(TransformBase):
   @dca.vectorize_method
   def x_dir(self) -> FloatArray['*shape 3']:
     """`x` axis of the transformation (`[x0, x1, x2]`)."""
-    return self.R[:, 0]
+    return self.R[:, 0]  # pylint: disable=invalid-sequence-index
 
   @property
   @dca.vectorize_method
   def y_dir(self) -> FloatArray['*shape 3']:
     """`y` axis of the transformation (`[y0, y1, y2]`)."""
-    return self.R[:, 1]
+    return self.R[:, 1]  # pylint: disable=invalid-sequence-index
 
   @property
   @dca.vectorize_method
   def z_dir(self) -> FloatArray['*shape 3']:
     """`z` axis of the transformation (`[z0, z1, z2]`)."""
-    return self.R[:, 2]
+    return self.R[:, 2]  # pylint: disable=invalid-sequence-index
 
   @property
   @dca.vectorize_method
@@ -463,7 +461,6 @@ def custom_transform(
   return decorated
 
 
-@dataclasses.dataclass(frozen=True)
 class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=invalid-function-definition
   """Custom transformation method wrapper.
 
@@ -512,7 +509,6 @@ class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=inval
     )
 
 
-@dataclasses.dataclass(frozen=True)
 class ComposedTransform(TransformBase):
   """Transform composed to 2 transformations.
 

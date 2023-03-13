@@ -34,7 +34,6 @@ from visu3d.utils import np_utils
 from visu3d.utils.lazy_imports import plotly_base
 
 
-@dataclasses.dataclass(frozen=True)
 class Camera(array_dataclass.DataclassArray):
   """A camera located in space.
 

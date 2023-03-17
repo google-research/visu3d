@@ -133,10 +133,8 @@ def test_camera_rays(
     normalize: bool,
     spec: type[v3d.CameraSpec],
 ):
-  if shape and xnp in [
-      enp.lazy.tnp,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if shape:
+    dca.testing.skip_vmap_unavailable(xnp)
 
   cam = _make_cam(xnp=xnp, shape=shape, spec=spec)
 
@@ -184,12 +182,8 @@ def test_camera_transform(
 ):
   """Test low-level camera transforms."""
 
-  if shape and xnp in [
-      enp.lazy.tnp,
-      # Batching rule not implemented for aten::concatenate
-      enp.lazy.torch,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if shape:
+    dca.testing.skip_vmap_unavailable(xnp)
 
   cam = _make_cam(xnp=xnp, shape=shape, spec=spec)  # Camera on the `y` axis
   rays = cam.rays(normalize=False)
@@ -223,12 +217,13 @@ def test_camera_render(
     point_shape: dca.typing.Shape,
     spec: type[v3d.CameraSpec],
 ):
-  if shape and xnp in [
-      enp.lazy.tnp,
-      # Batching rule not implemented for aten::concatenate.
-      enp.lazy.torch,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if shape:
+    dca.testing.skip_vmap_unavailable(
+        xnp,
+        skip_torch=(
+            'not support batching operators that can support dynamic shape'
+        ),
+    )
 
   cam = _make_cam(xnp=xnp, shape=shape, spec=spec)  # Camera on the `y` axis
   points = v3d.Point3d(

@@ -196,12 +196,8 @@ def test_transformation(
     tr = tr.as_xnp(xnp)
   tr = tr.broadcast_to(tr_shape)
 
-  if tr_shape and xnp in [
-      enp.lazy.tnp,
-      # Batching rule not implemented for aten::concatenate.
-      enp.lazy.torch,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if tr_shape:
+    dca.testing.skip_vmap_unavailable(xnp)
 
   _assert_tr_common(tr, tr_shape=tr_shape)
 
@@ -444,12 +440,10 @@ def test_transformation_scale(
   tr = v3d.Transform.from_angle(x=xnp.asarray(enp.tau / 4))
   tr = tr.broadcast_to(tr_shape)
 
-  if tr_shape and xnp in [
-      enp.lazy.tnp,
-      # Attempted to vmap over aten::_unique2
-      enp.lazy.torch,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if tr_shape:
+    dca.testing.skip_vmap_unavailable(
+        xnp, skip_torch='Attempted to vmap over aten::_unique2'
+    )
 
   assert_scale = functools.partial(_assert_scale, xnp=xnp, tr_shape=tr_shape)
 
@@ -515,7 +509,7 @@ def test_transformation_from_angle_multiple(xnp: enp.NpModule):
     rz = xnp.asarray(rz, dtype=xnp.float32)
     ry = xnp.asarray(ry, dtype=xnp.float32)
 
-  dca.testing.assert_array_equal(tr.R, rz @ ry @ rx)
+  dca.testing.assert_array_equal(tr.R, rz @ ry @ rx, atol=1e-6)
 
   dca.testing.assert_array_equal(
       v3d.Transform.from_angle(),

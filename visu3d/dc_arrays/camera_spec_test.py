@@ -48,10 +48,8 @@ def test_camera_spec_init(
     xnp: enp.NpModule,
     spec_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp in [
-      enp.lazy.tnp,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if spec_shape:
+    dca.testing.skip_vmap_unavailable(xnp)
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
   assert spec.resolution == (H, W)
@@ -87,10 +85,8 @@ def test_camera_spec_central_point(
     spec_shape: dca.typing.Shape,
     point_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp in [
-      enp.lazy.tnp,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if spec_shape:
+    dca.testing.skip_vmap_unavailable(xnp)
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
 
@@ -122,10 +118,8 @@ def test_camera_px_centers(
     xnp: enp.NpModule,
     spec_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp in [
-      enp.lazy.tnp,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if spec_shape:
+    dca.testing.skip_vmap_unavailable(xnp)
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
 
@@ -156,13 +150,11 @@ def test_camera_points(
     xnp: enp.NpModule,
     spec_shape: dca.typing.Shape,
 ):
-  if spec_shape and xnp in [
-      enp.lazy.tnp,
-      # TODO(epot): Fix
-      # We cannot vmap over non-Tensor arguments
-      enp.lazy.torch,
-  ]:
-    pytest.skip('Vectorization not supported yet with TF')
+  if spec_shape:
+    dca.testing.skip_vmap_unavailable(
+        xnp,
+        skip_torch='cannot vmap over non-Tensor arguments',  # TODO(epot): Fix
+    )
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
 

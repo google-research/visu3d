@@ -8,6 +8,10 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+## [1.5.1] - 2023-03-20
+
+*   Add `torch==2.0.0` support
+
 ## [1.5.0] - 2023-03-13
 
 *   **Add `torch` support! (Fix #12)**

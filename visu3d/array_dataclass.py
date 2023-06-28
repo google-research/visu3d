@@ -1,4 +1,4 @@
-# Copyright 2022 The visu3d Authors.
+# Copyright 2023 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ from visu3d.plotly import fig_utils
 
 
 @dca.dataclass_array(broadcast=True, cast_dtype=True)
-class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
+class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):  # pytype: disable=base-class-error
   """Wrapper around `dca.DataclassArray` for all v3d objects.
 
   This class is like `dca.DataclassArray` but in addition:
@@ -65,4 +65,4 @@ class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
     fig_config_kwargs = {
         k: v for k, v in fig_config_kwargs.items() if v is not ...
     }
-    return self.replace(fig_config=self.fig_config.replace(**fig_config_kwargs))
+    return self.replace(fig_config=self.fig_config.replace(**fig_config_kwargs))  # pytype: disable=attribute-error

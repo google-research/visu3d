@@ -1,4 +1,4 @@
-# Copyright 2022 The visu3d Authors.
+# Copyright 2023 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -202,12 +202,12 @@ def make_traces(
             val = val.replace_fig_config(_fig_config=curr_config)
           val = math.subsample(
               val,
-              num_samples=val.fig_config.num_samples,
+              num_samples=val.fig_config.num_samples,  # pytype: disable=attribute-error
               # TODO(epot): Should likely make the seed depend on other
               # factors like class name, position in make_traces *args,...
               seed=0,
           )
-        val = val.as_np()
+        val = val.as_np()  # pytype: disable=attribute-error
       sub_traces = val.make_traces()  # pytype: disable=attribute-error
       # Normalizing trace
       if isinstance(sub_traces, plotly_base.BaseTraceType):

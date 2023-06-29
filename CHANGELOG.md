@@ -8,6 +8,11 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+## [1.5.2] - 2023-06-29
+
+*   Fix import error in Python 3.11
+*   Now require Python 3.9 (drop 3.8 support)
+
 ## [1.5.1] - 2023-03-20
 
 *   Add `torch==2.0.0` support
@@ -87,7 +92,9 @@ Changelog follow https://keepachangelog.com/ format.
 
 *   Normalize `look_at` by default
 
-[Unreleased]: https://github.com/google-research/visu3d/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/google-research/visu3d/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/google-research/visu3d/compare/v1.5.1...v1.5.2
+[1.5.1]: https://github.com/google-research/visu3d/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/google-research/visu3d/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/google-research/visu3d/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/google-research/visu3d/compare/v1.2.0...v1.3.0

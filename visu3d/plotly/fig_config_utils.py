@@ -1,4 +1,4 @@
-# Copyright 2022 The visu3d Authors.
+# Copyright 2023 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,7 +88,9 @@ class TraceConfig:
   # This allow to locally overwrite the default `fig_config`, like:
   # `v3d.make_fig(rays, num_samples_ray=None)`
   # This is used for the lazy values
-  _fig_config: FigConfig = dataclasses.field(default=fig_config, repr=False)
+  _fig_config: FigConfig = dataclasses.field(
+      default_factory=lambda: fig_config, repr=False
+  )
 
   if not typing.TYPE_CHECKING:
 

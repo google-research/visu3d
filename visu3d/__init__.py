@@ -1,4 +1,4 @@
-# Copyright 2022 The visu3d Authors.
+# Copyright 2023 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,4 +49,4 @@ from visu3d.dc_arrays.transformation import Transform
 # Note:
 # * Make sure to also update the `CHANGELOG.md` before this.
 # * Make sure to also trigger an `etils` release
-__version__ = '1.5.1'
+__version__ = '1.5.2'

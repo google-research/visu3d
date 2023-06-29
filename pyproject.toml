@@ -2,7 +2,7 @@
 name = "visu3d"
 description = "3d geometry made easy."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 authors = [{name = "Visu3d team", email="visu3d@google.com"}]
 classifiers = [

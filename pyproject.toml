@@ -57,6 +57,10 @@ dev = [
     "plotly",
     "scipy",
 ]
+docs = [
+    "sphinx-apitree[ext] @ https://github.com/conchylicultor/sphinx-apitree",
+    "visu3d[dev]",  # Install lazy deps
+]
 
 [tool.pyink]
 # Formatting configuration to follow Google style-guide

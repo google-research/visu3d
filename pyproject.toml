@@ -58,7 +58,7 @@ dev = [
     "scipy",
 ]
 docs = [
-    "sphinx-apitree[ext] @ https://github.com/conchylicultor/sphinx-apitree",
+    "sphinx-apitree[ext] @ git+https://github.com/conchylicultor/sphinx-apitree",
     "visu3d[dev]",  # Install lazy deps
 ]
 

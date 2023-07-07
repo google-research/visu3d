@@ -29,6 +29,7 @@ Transform <transform>
 :hidden:
 :caption: Links
 
+DataclassArray <https://dataclass-array.readthedocs.io/>
 GitHub <https://github.com/google-research/visu3d>
 ```
 

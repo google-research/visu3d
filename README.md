@@ -149,13 +149,13 @@ corresponding protocol.
 ### Documentation
 
 The best way to get started is to try the Colab tutorials (in the
-[docs/](https://github.com/google-research/visu3d/tree/main/docs/)):
+[documentation](https://visu3d.readthedocs.io/)):
 
-*   [Intro (Colab)](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/intro.ipynb)
+*   [Intro](https://visu3d.readthedocs.io/en/latest/intro.html) ([Colab](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/intro.ipynb))
     <!-- {.external} !-->
-*   [Transform (Colab)](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/transform.ipynb)
+*   [Transform](https://visu3d.readthedocs.io/en/latest/transform.html) ([Colab](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/transform.ipynb))
     <!-- {.external} !-->
-*   [Create your primitives (Colab)](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/dataclass.ipynb)
+*   [Create your primitives](https://visu3d.readthedocs.io/en/latest/dataclass.html) ([Colab](https://colab.research.google.com/github/google-research/visu3d/blob/main/docs/dataclass.ipynb))
     <!-- {.external} !-->
 
 Installation:

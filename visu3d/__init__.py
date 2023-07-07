@@ -16,7 +16,7 @@
 
 from __future__ import annotations
 
-# pylint: disable=g-import-not-at-top,g-bad-import-order
+# pylint: disable=g-import-not-at-top,g-bad-import-order,g-importing-member
 
 # Core API
 from visu3d.array_dataclass import DataclassArray

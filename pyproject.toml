@@ -60,6 +60,7 @@ dev = [
 docs = [
     "sphinx-apitree[ext] @ git+https://github.com/conchylicultor/sphinx-apitree",
     "visu3d[dev]",  # Install lazy deps
+    "scipy>=1.10",
 ]
 
 [tool.pyink]

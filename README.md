@@ -2,6 +2,7 @@
 
 [![Unittests](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml/badge.svg)](https://github.com/google-research/visu3d/actions/workflows/pytest_and_autopublish.yml)
 [![PyPI version](https://badge.fury.io/py/visu3d.svg)](https://badge.fury.io/py/visu3d)
+[![Documentation Status](https://readthedocs.org/projects/visu3d/badge/?version=latest)](https://visu3d.readthedocs.io/en/latest/?badge=latest)
 
 `visu3d` is an abstraction layer between Torch/TF/Jax/Numpy and your program.
 It provides:

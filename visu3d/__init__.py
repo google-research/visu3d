@@ -20,7 +20,6 @@ from __future__ import annotations
 
 # Core API
 from visu3d.array_dataclass import DataclassArray
-from visu3d.utils import lazy_imports
 
 from visu3d import math
 from visu3d.math import DEG2RAD

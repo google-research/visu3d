@@ -28,7 +28,7 @@ from visu3d.utils.lazy_imports import plotly_go as go
 
 @enp.testing.parametrize_xnp()
 def test_to_xyz_dict(xnp: enp.NpModule):
-  chex.assert_tree_all_close(
+  chex.assert_trees_all_close(
       v3d.plotly.to_xyz_dict([
           [0, 1, 2],
           [0, 10, 20],
@@ -41,7 +41,7 @@ def test_to_xyz_dict(xnp: enp.NpModule):
       },
   )
 
-  chex.assert_tree_all_close(
+  chex.assert_trees_all_close(
       v3d.plotly.to_xyz_dict(
           [
               [0, 1, 2],

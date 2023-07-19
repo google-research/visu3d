@@ -225,10 +225,10 @@ class Transform(TransformBase):
     xnp = self.xnp
     scale_xyz = xnp.round(self.scale_xyz, decimals=7)
     # TODO(epot): Move into `enp.ops.unique`
-    if xnp is enp.lazy.np:
+    if enp.lazy.is_np_xnp(xnp):
       global_scales = xnp.unique(scale_xyz)
       raise_error = len(global_scales) != 1
-    elif enp.lazy.has_jax and xnp is enp.lazy.jnp:
+    elif enp.lazy.is_jax_xnp(xnp):
       global_scales, global_count = xnp.unique(
           scale_xyz,
           size=1,
@@ -243,10 +243,10 @@ class Transform(TransformBase):
       checkify.check(global_count[0] == 3, msg=_err_msg())
 
       raise_error = False
-    elif enp.lazy.has_torch and xnp is enp.lazy.torch:
+    elif enp.lazy.is_torch_xnp(xnp):
       global_scales = enp.lazy.torch.unique(scale_xyz)
       raise_error = len(global_scales) != 1
-    elif enp.lazy.has_tf and xnp is enp.lazy.tnp:
+    elif enp.lazy.is_tf_xnp(xnp):
       global_scales, _ = enp.lazy.tf.unique(scale_xyz)
       raise_error = len(global_scales) != 1
     else:

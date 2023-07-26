@@ -48,4 +48,4 @@ from visu3d.dc_arrays.transformation import Transform
 # Note:
 # * Make sure to also update the `CHANGELOG.md` before this.
 # * Make sure to also trigger an `etils` release
-__version__ = '1.5.2'
+__version__ = '1.5.3'

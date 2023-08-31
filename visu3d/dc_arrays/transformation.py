@@ -248,7 +248,13 @@ class Transform(TransformBase):
       raise_error = len(global_scales) != 1
     elif enp.lazy.is_tf_xnp(xnp):
       global_scales, _ = enp.lazy.tf.unique(scale_xyz)
-      raise_error = len(global_scales) != 1
+      if enp.lazy.tf.executing_eagerly():
+        raise_error = len(global_scales) != 1
+      else:
+        # No sure how to detect error
+        raise NotImplementedError(
+            '`tr.scale` not supported for TF when `tr.shape != ()`'
+        )
     else:
       raise AssertionError(f'Unknown numpy module {xnp}')
     if raise_error:

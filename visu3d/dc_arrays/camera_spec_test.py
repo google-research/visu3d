@@ -155,6 +155,8 @@ def test_camera_points(
         xnp,
         skip_torch='cannot vmap over non-Tensor arguments',  # TODO(epot): Fix
     )
+  if spec_shape and xnp is enp.lazy.tnp:
+    pytest.skip('`TF fail when class has None values')
 
   spec = make_camera_spec(xnp=xnp, shape=spec_shape)
 

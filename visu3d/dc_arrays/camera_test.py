@@ -232,7 +232,7 @@ def test_camera_render(
   )
   points = points.as_xnp(xnp)
   points = points.broadcast_to((1,) * len(shape) + point_shape)
-  if shape and xnp is enp.lazy.jnp:
+  if shape and xnp in (enp.lazy.jnp, enp.lazy.tnp):
     pytest.skip('vmap not (yet) supported for cam.render')
   img = cam.render(points)
   assert img.shape == shape + (H, W, 3)

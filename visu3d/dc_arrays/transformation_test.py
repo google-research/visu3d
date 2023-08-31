@@ -444,6 +444,8 @@ def test_transformation_scale(
     dca.testing.skip_vmap_unavailable(
         xnp, skip_torch='Attempted to vmap over aten::_unique2'
     )
+  if tr_shape and xnp is enp.lazy.tnp:
+    pytest.skip('`tr.scale` not supported for TF batched')
 
   assert_scale = functools.partial(_assert_scale, xnp=xnp, tr_shape=tr_shape)
 

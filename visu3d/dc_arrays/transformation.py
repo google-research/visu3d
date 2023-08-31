@@ -135,7 +135,7 @@ class Transform(TransformBase):
     """
     return cls(
         t=pos,
-        R=_get_r_look_at_(pos=pos, target=target),
+        R=_get_r_look_at(pos=pos, target=target),
     )
 
   @dca.vectorize_method
@@ -148,7 +148,7 @@ class Transform(TransformBase):
     )
     # TODO(epot): Rather than overwriting R, should only apply the rotation
     # to the existing R.
-    return self.replace(R=_get_r_look_at_(pos=self.t, target=target))
+    return self.replace(R=_get_r_look_at(pos=self.t, target=target))
 
   @property
   @dca.vectorize_method
@@ -536,7 +536,7 @@ class ComposedTransform(TransformBase):
     return self.left_tr @ (self.right_tr @ other)
 
 
-def _get_r_look_at_(
+def _get_r_look_at(
     *,
     pos: FloatArray['*shape 3'],
     target: FloatArray['*shape 3'],
@@ -554,6 +554,10 @@ def _get_r_look_at_(
 
   # In world coordinates, `z` is pointing up
   world_up = xnp.asarray([0, 0, 1.0], dtype=xnp.float32)
+
+  # `torch.cross` do not support broadcasting
+  world_up = xnp.broadcast_to(world_up, cam_forward.shape)
+
   # The width of the cam is parallel to the ground (prependicular to z), so
   # use cross-product.
   cam_w = xnp.cross(cam_forward, world_up)

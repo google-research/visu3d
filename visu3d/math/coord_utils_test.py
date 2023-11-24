@@ -26,9 +26,7 @@ enable_tf_np_mode = enp.testing.set_tnp
 @enp.testing.parametrize_xnp()
 @pytest.mark.parametrize(
     'value, shape',
-    [
-        (
-            [
+    [([
                 [2.0, 4, 0.3],
                 [-2.0, -4, -0.3],
             ],

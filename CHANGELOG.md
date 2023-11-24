@@ -8,6 +8,10 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+## [1.5.4] - 2023-11-23
+
+*   Add `use_hw_coords` flag to `interp_img`.
+
 ## [1.5.3] - 2023-06-29
 
 *   Fix `etils` import error.

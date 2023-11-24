@@ -23,6 +23,7 @@ def interp_img(
     img: Array['h w c'],
     coords: FloatArray['*shape 2'],
     *,
+    use_hw_coords: bool = False,
     xnp: enp.NpModule = ...,
 ) -> FloatArray['*shape c']:
   """Bilinear interpolation of coordinates from an image.
@@ -33,12 +34,15 @@ def interp_img(
     match `img[0, 0]`).
   * Pixel coordinates are given in `coords=[w, h]`, NOT `[h, w]`. This is
     consistent with `cam.spec.px_centers()` and OpenCv conventions.
-    To invert, use `coords[..., ::-1]`
+    To invert, set `use_hw_coords` to True.
   * Coordinates outside the images use the image corners value.
 
   Args:
     img: Image from which interpolating values
-    coords: Pixel coordinates from which interpolate (in `w, h` convention).
+    coords: Pixel coordinates from which interpolate (in `w, h` convention,
+      unless `use_hw_coords` is True, in which case it will use the `h, w`
+      convention).
+    use_hw_coords: If True, coords will use (`h, w` convention).
     xnp: Numpy module to use
 
   Returns:
@@ -46,6 +50,9 @@ def interp_img(
     Note that returned value is always float (so interpolation of `uint8`
     return float)
   """
+  if use_hw_coords:
+    coords = coords[..., ::-1]
+
   h, w, c = img.shape
   *coord_shape, _ = coords.shape
 

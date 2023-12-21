@@ -50,6 +50,7 @@ class Camera(array_dataclass.DataclassArray):
       default=camera_spec.TraceConfig(),
       repr=False,
       init=False,
+      hash=False,
   )
 
   @classmethod

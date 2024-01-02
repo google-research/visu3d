@@ -53,6 +53,7 @@ class Point3d(array_dataclass.DataclassArray):
       ),
       repr=False,
       init=False,
+      hash=False,
   )
 
   def __add__(self, translation: FloatArray['... 3']) -> Point3d:

@@ -57,6 +57,7 @@ class Ray(array_dataclass.DataclassArray):
       ),
       repr=False,
       init=False,
+      hash=False,
   )
 
   @property

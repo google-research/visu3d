@@ -8,6 +8,8 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*   Add `hash()` support (e.g. after `etree.spec_like`).
+
 ## [1.5.4] - 2023-11-23
 
 *   Add `use_hw_coords` flag to `interp_img`.

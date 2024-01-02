@@ -46,6 +46,7 @@ class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
       default=fig_config_utils.TraceConfig(),
       repr=False,
       init=False,
+      hash=False,
   )
 
   def replace_fig_config(

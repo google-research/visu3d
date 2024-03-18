@@ -1,4 +1,4 @@
-# Copyright 2023 The visu3d Authors.
+# Copyright 2024 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import dataclass_array as dca
 from dataclass_array.typing import DcOrArray, DcT  # pylint: disable=g-multiple-import
 from etils import edc
 from etils import enp
-from etils import epy
 from etils.array_types import FloatArray  # pylint: disable=g-multiple-import
 from visu3d import array_dataclass
 from visu3d import math
@@ -443,7 +442,7 @@ class Spec360(CameraSpec):
     points3d = self._cv_from_wolfram @ points3d
     return points3d
 
-  @epy.backports.cached_property
+  @functools.cached_property
   def _cv_from_wolfram(self) -> transformation.Transform:
     """Convert Wolfram cathesian coordinates to OpenCv camera convention."""
     return transformation.Transform(

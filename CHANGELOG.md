@@ -8,6 +8,7 @@ Changelog follow https://keepachangelog.com/ format.
 
 ## [Unreleased]
 
+*  Drop Python 3.10 support
 *   Add `hash()` support (e.g. after `etree.spec_like`).
 
 ## [1.5.4] - 2023-11-23

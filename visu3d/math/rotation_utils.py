@@ -205,6 +205,40 @@ def rot_to_euler(
 
 
 @enp.check_and_normalize_arrays
+def rot_to_rad(
+    rot: FloatArray['*B 3 3'],
+    *,
+    xnp: enp.NpModule = ...,
+) -> FloatArray['*B']:
+  """Compute the absolute angle of rotation in radians of a 3x3 rotation matrix.
+
+  With a change of coordinate frame, any rotation matrix can be expressed as:
+  [[cos(t), -sin(t), 0], [sin(t), cos(t), 0], [0, 0, 1]], which gives
+  tr(A) = 2 * cos(t) + 1. This expression still holds for the original matrix as
+  trace(SAS^{-1})=trace(A).
+
+  ```python
+  rads = acos(0.5 * (trace(R) - 1))
+  ```
+
+  See:
+  https://en.wikipedia.org/wiki/Rotation_matrix#Determining_the_angle
+
+  Args:
+    rot: Rotation matrix
+    xnp: Np module used (jnp, tnp, np,...)
+
+  Returns:
+    rads: The absolute angle in radians represented by rot
+  """
+  trace = xnp.trace(rot, axis1=-2, axis2=-1)
+  # Because tr(A) = 2 * cos(t) + 1, it should lie in the interval [-1, 3]
+  # In case this doesn't happen due to numerical errors, we apply clipping.
+  trace = xnp.clip(trace, -1, 3)
+  return xnp.arccos(0.5 * (trace - 1))
+
+
+@enp.check_and_normalize_arrays
 def is_orth(
     rot: FloatArray['3 3'],
     *,

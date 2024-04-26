@@ -24,6 +24,7 @@ from visu3d.math.rotation_utils import is_orth
 from visu3d.math.rotation_utils import is_rot
 from visu3d.math.rotation_utils import RAD2DEG
 from visu3d.math.rotation_utils import rot_to_euler
+from visu3d.math.rotation_utils import rot_to_rad
 from visu3d.math.rotation_utils import rot_x
 from visu3d.math.rotation_utils import rot_y
 from visu3d.math.rotation_utils import rot_z

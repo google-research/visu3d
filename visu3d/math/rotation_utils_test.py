@@ -25,6 +25,16 @@ import visu3d as v3d
 enable_tf_np_mode = enp.testing.set_tnp
 
 
+@enp.testing.parametrize_xnp(skip=['torch'])
+def test_is_rot_to_rad(xnp: enp.NpModule):
+  rot = xnp.asarray([
+      [-1.0, 0.0, 0.0],
+      [0.0, -1.0, 0.0],
+      [0.0, 0.0, 1.0],
+  ])
+  np.testing.assert_allclose(v3d.math.rot_to_rad(rot), np.pi, atol=1e-6)
+
+
 @enp.testing.parametrize_xnp()
 def test_is_rotation_matrix(xnp: enp.NpModule):
   assert v3d.math.is_rot(xnp.eye(3))

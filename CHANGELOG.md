@@ -9,7 +9,8 @@ Changelog follow https://keepachangelog.com/ format.
 ## [Unreleased]
 
 *  Drop Python 3.10 support
-*   Add `hash()` support (e.g. after `etree.spec_like`).
+*  Add `hash()` support (e.g. after `etree.spec_like`).
+*  Added: `visu3d.math.rotation_utils.rot_to_rad`.
 
 ## [1.5.4] - 2023-11-23
 

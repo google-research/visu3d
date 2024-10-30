@@ -49,7 +49,6 @@ dev = [
     "pylint>=2.6.0",
     "pyink",
     # Lazy deps
-    "chex",
     "jax[cpu]",
     "jupyter",
     "tf-nightly",

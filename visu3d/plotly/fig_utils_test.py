@@ -12,11 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for plotly."""
-
 from __future__ import annotations
 
-import chex
 import dataclass_array as dca
 from etils import enp
 import numpy as np
@@ -28,7 +25,7 @@ from visu3d.utils.lazy_imports import plotly_go as go
 
 @enp.testing.parametrize_xnp()
 def test_to_xyz_dict(xnp: enp.NpModule):
-  chex.assert_trees_all_close(
+  dca.testing.assert_allclose(
       v3d.plotly.to_xyz_dict([
           [0, 1, 2],
           [0, 10, 20],
@@ -41,7 +38,7 @@ def test_to_xyz_dict(xnp: enp.NpModule):
       },
   )
 
-  chex.assert_trees_all_close(
+  dca.testing.assert_allclose(
       v3d.plotly.to_xyz_dict(
           [
               [0, 1, 2],

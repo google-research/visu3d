@@ -302,7 +302,7 @@ class Transform(TransformBase):
     t = einops.rearrange(self.t, '... d -> ... d 1')
     matrix3x4 = self.xnp.concatenate([self.R, t], axis=-1)
     assert matrix3x4.shape == (3, 4)
-    last_row = self.xnp.asarray([[0, 0, 0, 1]])
+    last_row = self.xnp.asarray([[0, 0, 0, 1]], dtype=matrix3x4.dtype)
     return self.xnp.concatenate([matrix3x4, last_row], axis=-2)
 
   @property

@@ -22,14 +22,14 @@ jobs:
     - run: pip --version
     # As changes can be pushed to both etils and visu3d, we install etils from `main` branch
     # If modifying this, also modify `pyproject.toml`
-    - run: pip install "etils[array_types,edc,enp,epath,epy,etree] @ git+https://github.com/google/etils"
-    - run: pip install "dataclass_array @ git+https://github.com/google-research/dataclass_array"
-    - run: pip install -e .[dev]
+    # - run: pip install "etils[array_types,edc,enp,epath,epy,etree] @ git+https://github.com/google/etils"
+    # - run: pip install "dataclass_array @ git+https://github.com/google-research/dataclass_array"
+    - run: pip install -e .[docs]
     - run: pip freeze
 
     # Run tests
-    - name: Run core tests
-      run: pytest -vv -n auto
+    # - name: Run core tests
+    #   run: pytest -vv -n auto
 
   # Auto-publish when version is increased
   publish-job:

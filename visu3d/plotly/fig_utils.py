@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class Visualizable:  # (abc.ABC):
     return make_fig([self])
 
 
-VisualizableItem = Union[Visualizable, Array[...], VisualizableInterface]
+VisualizableItem = Union[Visualizable, Array[...], VisualizableInterface]  # pyrefly: ignore[not-a-type]
 VisualizableArg = Union[VisualizableItem, List[VisualizableItem]]
 
 
@@ -178,9 +178,9 @@ def make_traces(
   """Returns the traces from the given data."""
   #
   if len(data) == 1:  # `v3d.make_traces([a, b, c])` or `v3d.make_traces(a)`
-    (data,) = data
+    (data,) = data  # pyrefly: ignore[bad-assignment]
     if not isinstance(data, (tuple, list)):
-      data = [data]
+      data = [data]  # pyrefly: ignore[bad-assignment]
   # Otherwise, called as `v3d.make_traces(a, b, c)`
 
   # TODO(epot): `curr_config` should be created in `make_fig` and
@@ -202,7 +202,7 @@ def make_traces(
             val = val.replace_fig_config(_fig_config=curr_config)
           val = math.subsample(
               val,
-              num_samples=val.fig_config.num_samples,
+              num_samples=val.fig_config.num_samples,  # pyrefly: ignore[missing-attribute]
               # TODO(epot): Should likely make the seed depend on other
               # factors like class name, position in make_traces *args,...
               seed=0,
@@ -229,9 +229,9 @@ def make_traces(
 
 
 def make_points(
-    coords: FloatArray['*d num_dim'],
+    coords: FloatArray['*d num_dim'],  # pyrefly: ignore[not-a-type]
     *,
-    color: Array['*d channel'] = None,
+    color: Array['*d channel'] = None,  # pyrefly: ignore[not-a-type]
     num_samples: Optional[int] = None,
 ) -> list[plotly_base.BaseTraceType]:
   """Display a 2d or 3d point cloud.
@@ -261,16 +261,16 @@ def make_points(
   if color is not None:
     color = _normalize_color(color)
 
-  if coords.shape[-1] == 3:
+  if coords.shape[-1] == 3:  # pyrefly: ignore[missing-attribute]
     point_cloud = _make_scatter_3d(coords, color=color)
-  elif coords.shape[-1] == 2:
+  elif coords.shape[-1] == 2:  # pyrefly: ignore[missing-attribute]
     point_cloud = _make_scatter_2d(coords, color=color)
   else:
     raise AssertionError
   return [point_cloud]
 
 
-def _normalize_color(color: Array['*d channel']):
+def _normalize_color(color: Array['*d channel']):  # pyrefly: ignore[not-a-type]
   """Normalize the color to plotly compatible arg."""
   if color.shape[-1] == 3:
     return [f'rgb({r}, {g}, {b})' for r, g, b in color]
@@ -281,9 +281,9 @@ def _normalize_color(color: Array['*d channel']):
 
 
 def _make_scatter_3d(
-    coords: FloatArray['*d 3'],
+    coords: FloatArray['*d 3'],  # pyrefly: ignore[not-a-type]
     *,
-    color: Array['*d channel'] = None,
+    color: Array['*d channel'] = None,  # pyrefly: ignore[not-a-type]
 ) -> go.Scatter3d:
   """Returns 3d scatter plots."""
   points_xyz_kwargs = to_xyz_dict(coords)
@@ -298,9 +298,9 @@ def _make_scatter_3d(
 
 
 def _make_scatter_2d(
-    coords: FloatArray['*d 2'],
+    coords: FloatArray['*d 2'],  # pyrefly: ignore[not-a-type]
     *,
-    color: Array['*d channel'] = None,
+    color: Array['*d channel'] = None,  # pyrefly: ignore[not-a-type]
 ) -> go.Scattergl:
   """Returns 2d scatter plots."""
   # TODO(epot): Correct axis (x, y) to match numpy !!
@@ -318,8 +318,8 @@ def _make_scatter_2d(
 
 
 def make_lines_traces(
-    start: FloatArray['*lines 3'],
-    end: FloatArray['*lines 3'],
+    start: FloatArray['*lines 3'],  # pyrefly: ignore[not-a-type]
+    end: FloatArray['*lines 3'],  # pyrefly: ignore[not-a-type]
     *,
     axis: int = -1,
     end_marker: Optional[str] = None,
@@ -370,8 +370,8 @@ def make_lines_traces(
 
 
 def make_lines_kwargs(
-    start: FloatArray['... 3'],
-    end: FloatArray['... 3'],
+    start: FloatArray['... 3'],  # pyrefly: ignore[not-a-type]
+    end: FloatArray['... 3'],  # pyrefly: ignore[not-a-type]
     *,
     axis: int = -1,
     end_marker: Optional[str] = None,
@@ -413,8 +413,8 @@ def make_lines_kwargs(
 
 
 def make_cones_kwargs(
-    start: FloatArray['... 3'],
-    direction: FloatArray['... 3'],
+    start: FloatArray['... 3'],  # pyrefly: ignore[not-a-type]
+    direction: FloatArray['... 3'],  # pyrefly: ignore[not-a-type]
     *,
     start_ratio: float = 0.98,
     axis: int = -1,
@@ -461,7 +461,7 @@ def _show_legend(traces: List[plotly_base.BaseTraceType]) -> bool:
 
 
 def to_xyz_dict(
-    arr: Array['... 3'],
+    arr: Array['... 3'],  # pyrefly: ignore[not-a-type]
     *,
     pattern: str = '{}',
     names: Union[str, Sequence[str]] = 'xyz',
@@ -506,9 +506,9 @@ def to_xyz_dict(
 
 
 def subsample(
-    *arrays: Optional[Array['... d']],
+    *arrays: Optional[Array['... d']],  # pyrefly: ignore[not-a-type]
     num_samples: Optional[int],
-) -> list[Optional[Array['...']]]:
+) -> list[Optional[Array['...']]]:  # pyrefly: ignore[not-a-type]
   """Flatten and subsample the arrays (keeping the last dimension)."""
   if num_samples is None or num_samples == -1:  # No sampling
     return list(arrays)
@@ -531,7 +531,7 @@ def subsample(
       raise ValueError('Incompatible shape')
     arr = einops.rearrange(arr, '... d -> (...) d')  # Flatten
     if batch_size > num_samples:
-      arr = arr[idx]
+      arr = arr[idx]  # pyrefly: ignore[unbound-name]
     arrays_out.append(arr)
 
   return arrays_out

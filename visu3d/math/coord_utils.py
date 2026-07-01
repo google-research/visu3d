@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,14 +32,14 @@ class _SphericalCoords(NamedTuple):
     elevation: polar / elevation /  colatitude `(0, tau/2)`
   """
 
-  r: FloatArray['*shape']
-  theta: FloatArray['*shape']
-  phi: FloatArray['*shape']
+  r: FloatArray['*shape']  # pyrefly: ignore[not-a-type]
+  theta: FloatArray['*shape']  # pyrefly: ignore[not-a-type]
+  phi: FloatArray['*shape']  # pyrefly: ignore[not-a-type]
 
 
 @enp.check_and_normalize_arrays(strict=False)
 def carthesian_to_spherical(
-    point3d: FloatArray['... 3'],
+    point3d: FloatArray['... 3'],  # pyrefly: ignore[not-a-type]
     *,
     xnp: enp.NpModule = ...,
 ) -> _SphericalCoords:
@@ -67,12 +67,12 @@ def carthesian_to_spherical(
 
 @enp.check_and_normalize_arrays(strict=False)
 def spherical_to_carthesian(
-    r: Optional[FloatArray['*shape']] = None,
-    theta: Optional[FloatArray['*shape']] = None,
-    phi: Optional[FloatArray['*shape']] = None,
+    r: Optional[FloatArray['*shape']] = None,  # pyrefly: ignore[not-a-type]
+    theta: Optional[FloatArray['*shape']] = None,  # pyrefly: ignore[not-a-type]
+    phi: Optional[FloatArray['*shape']] = None,  # pyrefly: ignore[not-a-type]
     *,
     xnp: enp.NpModule = ...,
-) -> FloatArray['*shape 3']:
+) -> FloatArray['*shape 3']:  # pyrefly: ignore[not-a-type]
   """Convert (r, theta, phi) to (x, y, z).
 
   Follow https://mathworld.wolfram.com/SphericalCoordinates.html

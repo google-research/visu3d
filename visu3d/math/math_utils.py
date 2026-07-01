@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,5 +38,5 @@ def subsample(
   idx = rng.choice(array.size, size=num_samples, replace=False)
 
   array = array.flatten()
-  array = array[idx]
+  array = array[idx]  # pyrefly: ignore[bad-assignment]
   return array

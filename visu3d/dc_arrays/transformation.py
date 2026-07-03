@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -60,12 +60,12 @@ class Transform(TransformBase):
     t: Translation of the transformation (`tx, ty, tz`)
   """
 
-  R: FloatArray['*shape 3 3'] = (  # pylint: disable=invalid-name
+  R: FloatArray['*shape 3 3'] = (  # pylint: disable=invalid-name  # pyrefly: ignore[not-a-type]
       (1, 0, 0),
       (0, 1, 0),
       (0, 0, 1),
   )
-  t: FloatArray['*shape 3'] = (0, 0, 0)
+  t: FloatArray['*shape 3'] = (0, 0, 0)  # pyrefly: ignore[not-a-type]
 
   @classmethod
   def identity(cls) -> Transform:
@@ -73,7 +73,7 @@ class Transform(TransformBase):
     return cls(R=enp.lazy.np.eye(3), t=[0, 0, 0])
 
   @classmethod
-  def from_matrix(cls, matrix: FloatArray['*shape 3 3']) -> Transform:
+  def from_matrix(cls, matrix: FloatArray['*shape 3 3']) -> Transform:  # pyrefly: ignore[not-a-type]
     """Constructs from a 4x4 transform matrix."""
     return cls(R=matrix[..., :3, :3], t=matrix[..., :3, 3])
 
@@ -111,8 +111,8 @@ class Transform(TransformBase):
   def from_look_at(
       cls,
       *,
-      pos: FloatArray['*shape 3'],
-      target: FloatArray['*shape 3'],
+      pos: FloatArray['*shape 3'],  # pyrefly: ignore[not-a-type]
+      target: FloatArray['*shape 3'],  # pyrefly: ignore[not-a-type]
   ) -> Transform:
     """Factory to create a transformation which look at.
 
@@ -139,7 +139,7 @@ class Transform(TransformBase):
     )
 
   @dca.vectorize_method
-  def look_at(self, target: FloatArray['*shape 3']) -> Transform:
+  def look_at(self, target: FloatArray['*shape 3']) -> Transform:  # pyrefly: ignore[not-a-type]
     """Returns a new transform looking at the target."""
     target = dca.utils.np_utils.asarray(
         target,
@@ -152,19 +152,19 @@ class Transform(TransformBase):
 
   @property
   @dca.vectorize_method
-  def x_dir(self) -> FloatArray['*shape 3']:
+  def x_dir(self) -> FloatArray['*shape 3']:  # pyrefly: ignore[not-a-type]
     """`x` axis of the transformation (`[x0, x1, x2]`)."""
     return self.R[:, 0]  # pylint: disable=invalid-sequence-index
 
   @property
   @dca.vectorize_method
-  def y_dir(self) -> FloatArray['*shape 3']:
+  def y_dir(self) -> FloatArray['*shape 3']:  # pyrefly: ignore[not-a-type]
     """`y` axis of the transformation (`[y0, y1, y2]`)."""
     return self.R[:, 1]  # pylint: disable=invalid-sequence-index
 
   @property
   @dca.vectorize_method
-  def z_dir(self) -> FloatArray['*shape 3']:
+  def z_dir(self) -> FloatArray['*shape 3']:  # pyrefly: ignore[not-a-type]
     """`z` axis of the transformation (`[z0, z1, z2]`)."""
     return self.R[:, 2]  # pylint: disable=invalid-sequence-index
 
@@ -200,7 +200,7 @@ class Transform(TransformBase):
 
   @property
   @dca.vectorize_method
-  def scale_xyz(self) -> FloatArray['*shape 3']:
+  def scale_xyz(self) -> FloatArray['*shape 3']:  # pyrefly: ignore[not-a-type]
     """Returns the `(sx, sy, sz)` scale of the transform along each axis."""
     return enp.compat.norm(self.R, axis=0)
 
@@ -263,7 +263,7 @@ class Transform(TransformBase):
       (global_scale,) = global_scales
     return global_scale
 
-  def mul_scale(self, factor: FloatArray['*shape 3?']) -> Transform:
+  def mul_scale(self, factor: FloatArray['*shape 3?']) -> Transform:  # pyrefly: ignore[not-a-type]
     """Scale the transformation `(sx, sy, sz)` by the given factor.
 
     This is similar to `v3d.Ray.scale_dir`, applied on each individual axis.
@@ -293,7 +293,7 @@ class Transform(TransformBase):
 
   @property
   @dca.vectorize_method
-  def matrix4x4(self) -> FloatArray['*shape 4 4']:
+  def matrix4x4(self) -> FloatArray['*shape 4 4']:  # pyrefly: ignore[not-a-type]
     """Returns the 4x4 transformation matrix.
 
     [R|t]
@@ -312,7 +312,7 @@ class Transform(TransformBase):
     # Might be a more optimized way than stacking/unstacking matrix
     return type(self).from_matrix(enp.compat.inv(self.matrix4x4))
 
-  def __add__(self, translation: FloatArray['... 3']) -> Transform:
+  def __add__(self, translation: FloatArray['... 3']) -> Transform:  # pyrefly: ignore[not-a-type]
     """Translate the position."""
     translation = self.xnp.asarray(translation)
     return self.replace(t=self.t + translation)
@@ -361,14 +361,14 @@ class Transform(TransformBase):
           'apply_transform',
           msg=f'`v3d.Transform` @ `{type(other).__name__}` not supported.',
       )
-      return other.apply_transform(self)
+      return other.apply_transform(self)  # pyrefly: ignore[missing-attribute]
     else:
       raise TypeError(f'Unexpected type: {type(other)}')
 
   # TODO(epot): Also add a `tr.apply_to` method which supports broadcasting
 
   @dca.vectorize_method
-  def apply_to_pos(self, point: FloatArray['*d 3']) -> FloatArray['*d 3']:
+  def apply_to_pos(self, point: FloatArray['*d 3']) -> FloatArray['*d 3']:  # pyrefly: ignore[not-a-type]
     """Apply the transformation on the point cloud."""
     self.assert_same_xnp(point)
     point = self.xnp.asarray(point)
@@ -379,8 +379,8 @@ class Transform(TransformBase):
   @dca.vectorize_method
   def apply_to_dir(
       self,
-      direction: FloatArray['*d 3'],
-  ) -> FloatArray['*d 3']:
+      direction: FloatArray['*d 3'],  # pyrefly: ignore[not-a-type]
+  ) -> FloatArray['*d 3']:  # pyrefly: ignore[not-a-type]
     """Apply the transformation on the direction."""
     self.assert_same_xnp(direction)
     # Direction are invariant to translation
@@ -487,10 +487,10 @@ class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=inval
   method: Callable[[DcT, _T], _T]
 
   @dca.vectorize_method
-  def __matmul__(self, other: _T) -> _T:
+  def __matmul__(self, other: _T) -> _T:  # pyrefly: ignore[bad-override]
     if isinstance(other, TransformBase):
       # If other is another transform: create a composed transform
-      return self.compose_transform(other)
+      return self.compose_transform(other)  # pyrefly: ignore[bad-return]
     else:
       return self.method(self.self_, other)
 
@@ -506,7 +506,7 @@ class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=inval
 
   def apply_transform(self, tr: Transform) -> DcT:
     """Called when `tr @ tr_custom`."""
-    return CustomTransform(
+    return CustomTransform(  # pyrefly: ignore[bad-return]
         self_=ComposedTransform(
             left_tr=tr,
             right_tr=self,
@@ -538,9 +538,9 @@ class ComposedTransform(TransformBase):
 
 def _get_r_look_at(
     *,
-    pos: FloatArray['*shape 3'],
-    target: FloatArray['*shape 3'],
-) -> FloatArray['*shape 3 3']:
+    pos: FloatArray['*shape 3'],  # pyrefly: ignore[not-a-type]
+    target: FloatArray['*shape 3'],  # pyrefly: ignore[not-a-type]
+) -> FloatArray['*shape 3 3']:  # pyrefly: ignore[not-a-type]
   """Compute the `R` (3, 3) matrix."""
   # TODO(epot): Support more conventions
   # * `up='z'`
@@ -570,7 +570,7 @@ def _get_r_look_at(
   return R
 
 
-def _assert_shape(array: FloatArray['*d 4'], name: str) -> None:
+def _assert_shape(array: FloatArray['*d 4'], name: str) -> None:  # pyrefly: ignore[not-a-type]
   """Test that array shape end by 3."""
   if array.shape[-1] != 3:
     raise ValueError(f'{name!r} shape should end be (3,). Got {array.shape}')

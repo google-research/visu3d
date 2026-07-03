@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ class Camera(array_dataclass.DataclassArray):
   def from_look_at(
       cls,
       *,
-      pos: FloatArray['*shape 3'],
-      target: FloatArray['*shape 3'],
+      pos: FloatArray['*shape 3'],  # pyrefly: ignore[not-a-type]
+      target: FloatArray['*shape 3'],  # pyrefly: ignore[not-a-type]
       spec: camera_spec.CameraSpec,
   ) -> Camera:
     """Factory which creates a camera looking at `target`.
@@ -81,7 +81,7 @@ class Camera(array_dataclass.DataclassArray):
     return cls(spec=spec, world_from_cam=world_from_cam)
 
   @dca.vectorize_method
-  def look_at(self, target: FloatArray['*shape 3']) -> Camera:
+  def look_at(self, target: FloatArray['*shape 3']) -> Camera:  # pyrefly: ignore[not-a-type]
     """Returns a new camera looking at the target."""
     world_from_cam = self.world_from_cam.look_at(target)
     return self.replace(world_from_cam=world_from_cam)
@@ -111,7 +111,7 @@ class Camera(array_dataclass.DataclassArray):
     """Width in pixel."""
     return self.spec.w
 
-  def __add__(self, translation: FloatArray['... 3']) -> Camera:
+  def __add__(self, translation: FloatArray['... 3']) -> Camera:  # pyrefly: ignore[not-a-type]
     """Translate the position."""
     return self.replace(world_from_cam=self.world_from_cam + translation)
 
@@ -154,7 +154,7 @@ class Camera(array_dataclass.DataclassArray):
     return self.world_from_cam @ self.spec.cam_from_px
 
   @dca.vectorize_method
-  def render(self, points: point_lib.Point3d) -> FloatArray['*shape h w 3']:
+  def render(self, points: point_lib.Point3d) -> FloatArray['*shape h w 3']:  # pyrefly: ignore[not-a-type]
     """Project 3d points to the camera screen.
 
     Args:
@@ -185,9 +185,9 @@ class Camera(array_dataclass.DataclassArray):
         & (h_coords < self.h - 1)
         & (0 <= w_coords)
         & (w_coords < self.w - 1)
-        & (points2d.depth[..., 0] > 0)  # Filter points behind the camera
+        & (points2d.depth[..., 0] > 0)  # Filter points behind the camera  # pyrefly: ignore[missing-attribute]
     )
-    rgb = rgb[valid_coords_mask]
+    rgb = rgb[valid_coords_mask]  # pyrefly: ignore[unsupported-operation]
     px_coords = px_coords[valid_coords_mask]
     px_coords = enp.compat.astype(enp.compat.round(px_coords), self.xnp.int32)
 
@@ -207,7 +207,7 @@ class Camera(array_dataclass.DataclassArray):
       **kwargs: Any,
   ) -> DcT:
     """Returns a copy of self with figure params overwritten."""
-    return super().replace_fig_config(name=name, scale=scale, **kwargs)
+    return super().replace_fig_config(name=name, scale=scale, **kwargs)  # pyrefly: ignore[bad-return]
 
   # Protocols (inherited)
 

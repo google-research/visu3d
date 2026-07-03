@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,9 +54,9 @@ def _make_cam(
     spec: type[v3d.CameraSpec],
 ) -> v3d.Camera:
   """Create a camera at (0, 4, 0) looking at the center."""
-  spec = _make_spec(spec)
+  spec = _make_spec(spec)  # pyrefly: ignore[bad-assignment]
   cam = v3d.Camera.from_look_at(
-      spec=spec.as_xnp(xnp),
+      spec=spec.as_xnp(xnp),  # pyrefly: ignore[missing-argument]
       pos=[0, 4, 0],  # Camera on the `y` axis
       target=[0, 0, 0],
   )
@@ -68,11 +68,11 @@ def _make_cam(
 @enp.testing.parametrize_xnp()
 @parametrize_spec
 def test_camera_xnp(xnp: enp.NpModule, spec: type[v3d.CameraSpec]):
-  spec = _make_spec(spec)
+  spec = _make_spec(spec)  # pyrefly: ignore[bad-assignment]
 
   assert (
       v3d.Camera.from_look_at(
-          spec=spec,
+          spec=spec,  # pyrefly: ignore[bad-argument-type]
           pos=[0, 4.0, 0],  # Camera on the `y` axis
           target=[0, 0.0, 0],
       ).xnp
@@ -80,7 +80,7 @@ def test_camera_xnp(xnp: enp.NpModule, spec: type[v3d.CameraSpec]):
   )
   assert (
       v3d.Camera.from_look_at(
-          spec=spec.as_xnp(xnp),
+          spec=spec.as_xnp(xnp),  # pyrefly: ignore[missing-argument]
           pos=[0, 4.0, 0],
           target=[0, 0.0, 0],
       ).xnp
@@ -88,7 +88,7 @@ def test_camera_xnp(xnp: enp.NpModule, spec: type[v3d.CameraSpec]):
   )
   assert (
       v3d.Camera.from_look_at(
-          spec=spec,
+          spec=spec,  # pyrefly: ignore[bad-argument-type]
           pos=xnp.asarray([0, 4.0, 0]),
           target=[0, 0.0, 0],
       ).xnp
@@ -96,7 +96,7 @@ def test_camera_xnp(xnp: enp.NpModule, spec: type[v3d.CameraSpec]):
   )
   assert (
       v3d.Camera.from_look_at(
-          spec=spec,
+          spec=spec,  # pyrefly: ignore[bad-argument-type]
           pos=[0, 4.0, 0],
           target=xnp.asarray([0.0, 0, 0]),
       ).xnp

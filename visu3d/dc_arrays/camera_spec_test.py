@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -167,7 +167,7 @@ def test_camera_points(
   points3d = v3d.Point3d(p=coords3d, rgb=rgb)
   points3d = points3d.as_xnp(xnp)
 
-  px = spec.px_from_cam @ points3d
+  px = spec.px_from_cam @ points3d  # pyrefly: ignore[unsupported-operation]
   assert isinstance(px, v3d.Point2d)
   assert px.shape == spec_shape + (5,)
   assert px.depth is not None
@@ -180,7 +180,7 @@ def test_camera_points(
 
   # Round-trip with depth=None project to z=1
   px = px.replace(depth=None)
-  round_trip_points3d = spec.cam_from_px @ px
+  round_trip_points3d = spec.cam_from_px @ px  # pyrefly: ignore[unsupported-operation]
   assert isinstance(round_trip_points3d, v3d.Point3d)
   assert round_trip_points3d.shape == spec_shape + (5,)
   np.testing.assert_allclose(

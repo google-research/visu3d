@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,13 +41,13 @@ class Point3d(array_dataclass.DataclassArray):
     rgb: uint8 color
   """
 
-  p: FloatArray['*shape 3']
-  rgb: Optional[ui8['*shape 3']] = None
+  p: FloatArray['*shape 3']  # pyrefly: ignore[not-a-type]
+  rgb: Optional[ui8['*shape 3']] = None  # pyrefly: ignore[not-a-type]
 
   # Overwrite `v3d.DataclassArray.fig_config`.
   fig_config: plotly.TraceConfig = dataclasses.field(
       default=plotly.TraceConfig(
-          num_samples=fig_config_utils.LazyValue(
+          num_samples=fig_config_utils.LazyValue(  # pyrefly: ignore[bad-argument-type]
               lambda fig_config: fig_config.num_samples_point3d
           )
       ),
@@ -56,7 +56,7 @@ class Point3d(array_dataclass.DataclassArray):
       hash=False,
   )
 
-  def __add__(self, translation: FloatArray['... 3']) -> Point3d:
+  def __add__(self, translation: FloatArray['... 3']) -> Point3d:  # pyrefly: ignore[not-a-type]
     """Translate the position."""
     translation = self.xnp.asarray(translation)
     return self.replace(p=self.p + translation)
@@ -65,8 +65,8 @@ class Point3d(array_dataclass.DataclassArray):
 
   def clip(
       self,
-      min: Optional[Union[FloatArray['3'], float]] = None,  # pylint: disable=redefined-builtin
-      max: Optional[Union[FloatArray['3'], float]] = None,  # pylint: disable=redefined-builtin
+      min: Optional[Union[FloatArray['3'], float]] = None,  # pylint: disable=redefined-builtin  # pyrefly: ignore[not-a-type]
+      max: Optional[Union[FloatArray['3'], float]] = None,  # pylint: disable=redefined-builtin  # pyrefly: ignore[not-a-type]
   ) -> Point3d:
     """Clip the position coordinates to the (min, max) boundaries."""
     min = dca.utils.np_utils.asarray(min, xnp=self.xnp, optional=True)
@@ -102,14 +102,14 @@ class Point2d(array_dataclass.DataclassArray):
     depth: The depth in camera coordinates.
   """
 
-  p: FloatArray['*shape 2']
-  depth: Optional[FloatArray['*shape 1']] = None
-  rgb: Optional[ui8['*shape 3']] = None
+  p: FloatArray['*shape 2']  # pyrefly: ignore[not-a-type]
+  depth: Optional[FloatArray['*shape 1']] = None  # pyrefly: ignore[not-a-type]
+  rgb: Optional[ui8['*shape 3']] = None  # pyrefly: ignore[not-a-type]
 
   # Overwrite `v3d.DataclassArray.fig_config`.
   fig_config: plotly.TraceConfig = dataclasses.field(
       default=plotly.TraceConfig(
-          num_samples=fig_config_utils.LazyValue(
+          num_samples=fig_config_utils.LazyValue(  # pyrefly: ignore[bad-argument-type]
               lambda fig_config: fig_config.num_samples_point2d
           )
       ),
@@ -119,13 +119,13 @@ class Point2d(array_dataclass.DataclassArray):
 
   def clip(
       self,
-      min: Optional[Union[FloatArray['2'], float]] = None,  # pylint: disable=redefined-builtin
-      max: Optional[Union[FloatArray['2'], float]] = None,  # pylint: disable=redefined-builtin
+      min: Optional[Union[FloatArray['2'], float]] = None,  # pylint: disable=redefined-builtin  # pyrefly: ignore[not-a-type]
+      max: Optional[Union[FloatArray['2'], float]] = None,  # pylint: disable=redefined-builtin  # pyrefly: ignore[not-a-type]
   ) -> Point3d:
     """Clip the position coordinates to the (min, max) boundaries."""
     min = dca.utils.np_utils.asarray(min, xnp=self.xnp, optional=True)
     max = dca.utils.np_utils.asarray(max, xnp=self.xnp, optional=True)
-    return self.replace(p=self.p.clip(min, max))
+    return self.replace(p=self.p.clip(min, max))  # pyrefly: ignore[bad-return]
 
   # Protocols
 

@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ def test_point_2d(
   spec = v3d.PinholeCamera.from_focal(resolution=(4, 4), focal_in_px=35)
   spec = spec.as_xnp(xnp)
 
-  p3d = spec.cam_from_px @ p
+  p3d = spec.cam_from_px @ p  # pyrefly: ignore[unsupported-operation]
   assert isinstance(p3d, v3d.Point3d)
 
   p2d = spec.px_from_cam @ p3d

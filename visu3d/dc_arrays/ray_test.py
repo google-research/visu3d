@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ def test_ray(
     xnp: enp.NpModule,
     shape: dca.typing.Shape,
 ):
-  def _broadcast(x: Array['*d'], shape=shape) -> Array['*d 3']:
+  def _broadcast(x: Array['*d'], shape=shape) -> Array['*d 3']:  # pyrefly: ignore[not-a-type]
     return xnp.broadcast_to(xnp.asarray(x), shape + (3,))
 
   def _ray_broadcast(
-      t: Array['3'],
-      d: Array['3'],
+      t: Array['3'],  # pyrefly: ignore[not-a-type]
+      d: Array['3'],  # pyrefly: ignore[not-a-type]
       shape=shape,
   ) -> v3d.Ray:
     return v3d.Ray(

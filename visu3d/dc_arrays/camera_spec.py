@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -152,7 +152,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     points3d = dca.utils.np_utils.asarray(points3d, xnp=self.xnp)
     if isinstance(points3d, dca.DataclassArray):
       assert_supports_protocol(points3d, 'apply_px_from_cam')
-      return points3d.apply_px_from_cam(self)
+      return points3d.apply_px_from_cam(self)  # pyrefly: ignore[missing-attribute]
     else:
       return self._px_and_depth_from_cam(points3d)[0]
 
@@ -160,7 +160,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
   def _px_and_depth_from_cam(
       self,
       points3d,
-  ) -> tuple[FloatArray['*d 2'], FloatArray['*d 1']]:
+  ) -> tuple[FloatArray['*d 2'], FloatArray['*d 1']]:  # pyrefly: ignore[not-a-type]
     """Project camera 3d coordinates to px 2d coordinates (internal).
 
     Args:
@@ -175,7 +175,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
   @transformation.custom_transform
   def cam_from_px(  # pylint: disable=property-with-parameters
       self,
-      points2d: FloatArray['*d 2'],
+      points2d: FloatArray['*d 2'],  # pyrefly: ignore[not-a-type]
   ) -> transformation.TransformBase:  # pylint: disable=g-doc-args
     """Unproject 2d pixel coordinates in image space to camera space.
 
@@ -197,20 +197,20 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     points2d = dca.utils.np_utils.asarray(points2d, xnp=self.xnp)
     if isinstance(points2d, dca.DataclassArray):
       assert_supports_protocol(points2d, 'apply_cam_from_px')
-      return points2d.apply_cam_from_px(self)
+      return points2d.apply_cam_from_px(self)  # pyrefly: ignore[missing-attribute]
     else:
       return self._cam_from_px(points2d)
 
   # @abc.abstractmethod
   def _cam_from_px(
       self,
-      points2d: FloatArray['*d 2'],
-  ) -> FloatArray['*d 3']:
+      points2d: FloatArray['*d 2'],  # pyrefly: ignore[not-a-type]
+  ) -> FloatArray['*d 3']:  # pyrefly: ignore[not-a-type]
     """Implemementation of `spec.cam_from_px @ ptss`."""
     raise NotImplementedError
 
   @dca.vectorize_method
-  def px_centers(self) -> FloatArray['*shape h w 2']:
+  def px_centers(self) -> FloatArray['*shape h w 2']:  # pyrefly: ignore[not-a-type]
     """Returns 2D coordinates of centers of all pixels in the camera image.
 
     This camera model uses the conventions:
@@ -242,7 +242,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
       **kwargs: Any,
   ) -> DcT:
     """Returns a copy of self with figure params overwritten."""
-    return super().replace_fig_config(name=name, scale=scale, **kwargs)
+    return super().replace_fig_config(name=name, scale=scale, **kwargs)  # pyrefly: ignore[bad-return]
 
   # Protocols & internals
 
@@ -252,7 +252,7 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
     return plotly.make_lines_traces(start=start, end=end)
 
   @dca.vectorize_method
-  def _get_camera_lines(self) -> FloatArray['*shape 4 3']:
+  def _get_camera_lines(self) -> FloatArray['*shape 4 3']:  # pyrefly: ignore[not-a-type]
     corners_px = [  # Screen corners, in (u, v) coordinates
         [0, 0],
         [0, self.h],
@@ -310,7 +310,7 @@ class PinholeCamera(CameraSpec):
     resolution: (h, w) resolution
   """
 
-  K: FloatArray['*shape 3 3']  # pylint: disable=invalid-name
+  K: FloatArray['*shape 3 3']  # pylint: disable=invalid-name  # pyrefly: ignore[not-a-type]
 
   @classmethod
   def from_focal(
@@ -379,8 +379,8 @@ class PinholeCamera(CameraSpec):
 
   def _cam_from_px(
       self,
-      points2d: FloatArray['*d 2'],
-  ) -> FloatArray['*d 3']:
+      points2d: FloatArray['*d 2'],  # pyrefly: ignore[not-a-type]
+  ) -> FloatArray['*d 3']:  # pyrefly: ignore[not-a-type]
     assert not self.shape  # Should be vectorized
     points2d = dca.utils.np_utils.asarray(points2d, xnp=self.xnp)
     if points2d.shape[-1] != 2:
@@ -424,8 +424,8 @@ class Spec360(CameraSpec):
 
   def _cam_from_px(
       self,
-      points2d: FloatArray['*d 2'],
-  ) -> FloatArray['*d 3']:
+      points2d: FloatArray['*d 2'],  # pyrefly: ignore[not-a-type]
+  ) -> FloatArray['*d 3']:  # pyrefly: ignore[not-a-type]
     # Normalize points to:
     # * i: [0, w] -> [0, tau]
     # * j: [0, h] -> [0, tau / 2]

@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -45,13 +45,13 @@ class Ray(array_dataclass.DataclassArray):
     dir: Direction
   """
 
-  pos: FloatArray['*shape 3']
-  dir: FloatArray['*shape 3']
+  pos: FloatArray['*shape 3']  # pyrefly: ignore[not-a-type]
+  dir: FloatArray['*shape 3']  # pyrefly: ignore[not-a-type]
 
   # Overwrite `v3d.DataclassArray.fig_config`.
   fig_config: plotly.TraceConfig = dataclasses.field(
       default=plotly.TraceConfig(
-          num_samples=fig_config_utils.LazyValue(
+          num_samples=fig_config_utils.LazyValue(  # pyrefly: ignore[bad-argument-type]
               lambda fig_config: fig_config.num_samples_ray
           )
       ),
@@ -61,7 +61,7 @@ class Ray(array_dataclass.DataclassArray):
   )
 
   @property
-  def end(self) -> FloatArray['*shape 3']:
+  def end(self) -> FloatArray['*shape 3']:  # pyrefly: ignore[not-a-type]
     """The extremity of the ray (`ray.pos + ray.dir`)."""
     return self.pos + self.dir
 
@@ -70,8 +70,8 @@ class Ray(array_dataclass.DataclassArray):
   def from_look_at(
       cls,
       *,
-      pos: Array['*d 3'],
-      target: Array['*d 3'],
+      pos: Array['*d 3'],  # pyrefly: ignore[not-a-type]
+      target: Array['*d 3'],  # pyrefly: ignore[not-a-type]
   ) -> Ray:
     """Factory to create a look at Ray.
 
@@ -89,7 +89,7 @@ class Ray(array_dataclass.DataclassArray):
         dir=target - pos,
     )
 
-  def __add__(self, translation: FloatArray['... 3']) -> Ray:
+  def __add__(self, translation: FloatArray['... 3']) -> Ray:  # pyrefly: ignore[not-a-type]
     """Translate the position."""
     if isinstance(translation, Ray):
       raise TypeError(
@@ -101,7 +101,7 @@ class Ray(array_dataclass.DataclassArray):
 
   __sub__ = np_utils.__sub__
 
-  def scale_dir(self, scale: FloatArray['...']) -> Ray:
+  def scale_dir(self, scale: FloatArray['...']) -> Ray:  # pyrefly: ignore[not-a-type]
     """Scale the dir."""
     if isinstance(scale, Ray):
       raise TypeError(
@@ -111,7 +111,7 @@ class Ray(array_dataclass.DataclassArray):
     scale = self.xnp.asarray(scale)
     return self.replace(dir=self.dir * scale)
 
-  def norm(self, keepdims: bool = False) -> FloatArray['*shape']:
+  def norm(self, keepdims: bool = False) -> FloatArray['*shape']:  # pyrefly: ignore[not-a-type]
     """Returns the norm of the dir."""
     return enp.compat.norm(self.dir, axis=-1, keepdims=keepdims)
 
@@ -127,7 +127,7 @@ class Ray(array_dataclass.DataclassArray):
       return self
     return self.map_field(lambda t: t.mean(axis=axis))
 
-  def look_at(self, target: Array['*shape 3']) -> Ray:
+  def look_at(self, target: Array['*shape 3']) -> Ray:  # pyrefly: ignore[not-a-type]
     """Change the direction to point to the target point."""
     # Could add a `keep_norm=True` ?
     target = dca.utils.np_utils.asarray(target, xnp=self.xnp)

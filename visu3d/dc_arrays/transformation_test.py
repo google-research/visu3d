@@ -1,4 +1,4 @@
-# Copyright 2025 The visu3d Authors.
+# Copyright 2026 The visu3d Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,16 +36,16 @@ class TransformExpectedValue:
   """Tests values."""
 
   # Expected rays values after transformation
-  expected_pos: FloatArray[..., 3]
-  expected_dir: FloatArray[..., 3]
+  expected_pos: FloatArray[..., 3]  # pyrefly: ignore[not-a-type]
+  expected_dir: FloatArray[..., 3]  # pyrefly: ignore[not-a-type]
 
   # Expected transformation values after composition with other tr
-  expected_r: FloatArray[..., 3, 3]
-  expected_t: FloatArray[..., 3]
+  expected_r: FloatArray[..., 3, 3]  # pyrefly: ignore[not-a-type]
+  expected_t: FloatArray[..., 3]  # pyrefly: ignore[not-a-type]
 
   # Transformation params
-  R: Optional[FloatArray[3, 3]] = None  # pylint: disable=invalid-name
-  t: Optional[FloatArray[3]] = None
+  R: Optional[FloatArray[3, 3]] = None  # pylint: disable=invalid-name  # pyrefly: ignore[not-a-type]
+  t: Optional[FloatArray[3]] = None  # pyrefly: ignore[not-a-type]
 
 
 # Transformation values
@@ -397,9 +397,9 @@ def _assert_scale(
     *,
     xnp: enp.NpModule,
     tr_shape: dca.typing.Shape,
-    expected_r: FloatArray[3, 3],
-    expected_scale_xyz: FloatArray[3],
-    expected_scale: Optional[FloatArray['']],
+    expected_r: FloatArray[3, 3],  # pyrefly: ignore[not-a-type]
+    expected_scale_xyz: FloatArray[3],  # pyrefly: ignore[not-a-type]
+    expected_scale: Optional[FloatArray['']],  # pyrefly: ignore[not-a-type]
 ):
   assert tr.xnp is xnp
   assert tr.shape == tr_shape

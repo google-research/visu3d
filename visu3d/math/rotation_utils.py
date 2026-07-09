@@ -39,7 +39,7 @@ RAD2DEG = 360.0 / enp.tau
 
 
 @enp.check_and_normalize_arrays(strict=False)
-def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
+def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:  # pyrefly: ignore[not-a-type]
   """Rotation matrix for rotation around X (in radians)."""
   # Can't use `angle.ndim` because of
   # https://github.com/tensorflow/tensorflow/issues/48612
@@ -58,7 +58,7 @@ def rot_x(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
 
 
 @enp.check_and_normalize_arrays(strict=False)
-def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
+def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:  # pyrefly: ignore[not-a-type]
   """Rotation matrix for rotation around Y (in radians)."""
   # Can't use `angle.ndim` because of
   # https://github.com/tensorflow/tensorflow/issues/48612
@@ -77,7 +77,7 @@ def rot_y(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
 
 
 @enp.check_and_normalize_arrays(strict=False)
-def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
+def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:  # pyrefly: ignore[not-a-type]
   """Rotation matrix for rotation around Z (in radians)."""
   # Can't use `angle.ndim` because of
   # https://github.com/tensorflow/tensorflow/issues/48612
@@ -97,13 +97,13 @@ def rot_z(angle: FloatArray[''], xnp: enp.NpModule = ...) -> FloatArray['3 3']:
 
 @enp.check_and_normalize_arrays(strict=False)
 def euler_to_rot(
-    x: Optional[FloatArray['']] = None,
-    y: Optional[FloatArray['']] = None,
-    z: Optional[FloatArray['']] = None,
+    x: Optional[FloatArray['']] = None,  # pyrefly: ignore[not-a-type]
+    y: Optional[FloatArray['']] = None,  # pyrefly: ignore[not-a-type]
+    z: Optional[FloatArray['']] = None,  # pyrefly: ignore[not-a-type]
     *,
     order: str = 'zyx',
     xnp: enp.NpModule = ...,
-) -> FloatArray['3 3']:
+) -> FloatArray['3 3']:  # pyrefly: ignore[not-a-type]
   """Creates a 3x3 matrix from the euler radian angles.
 
   By default, rotations are applied following the Tait-Bryan chained rotations
@@ -126,7 +126,7 @@ def euler_to_rot(
   Returns:
     tr: The transformation.
   """
-  order = tuple(order)
+  order = tuple(order)  # pyrefly: ignore[bad-assignment]
 
   if set(order) != set('xyz') or len(order) != 3:
     raise ValueError(
@@ -158,11 +158,11 @@ def euler_to_rot(
 
 @enp.check_and_normalize_arrays
 def rot_to_euler(
-    rot: FloatArray['3 3'],
+    rot: FloatArray['3 3'],  # pyrefly: ignore[not-a-type]
     *,
     eps: float = 1e-6,
     xnp: enp.NpModule = ...,
-) -> Tuple[FloatArray[''], FloatArray[''], FloatArray['']]:
+) -> Tuple[FloatArray[''], FloatArray[''], FloatArray['']]:  # pyrefly: ignore[not-a-type]
   """Extract euler angles from a 3x3 rotation matrix.
 
   Like `euler_to_rot`, it follow the z, y, x convension, BUT returns x, y, z.
@@ -206,10 +206,10 @@ def rot_to_euler(
 
 @enp.check_and_normalize_arrays
 def rot_to_rad(
-    rot: FloatArray['*B 3 3'],
+    rot: FloatArray['*B 3 3'],  # pyrefly: ignore[not-a-type]
     *,
     xnp: enp.NpModule = ...,
-) -> FloatArray['*B']:
+) -> FloatArray['*B']:  # pyrefly: ignore[not-a-type]
   """Compute the absolute angle of rotation in radians of a 3x3 rotation matrix.
 
   With a change of coordinate frame, any rotation matrix can be expressed as:
@@ -240,7 +240,7 @@ def rot_to_rad(
 
 @enp.check_and_normalize_arrays
 def is_orth(
-    rot: FloatArray['3 3'],
+    rot: FloatArray['3 3'],  # pyrefly: ignore[not-a-type]
     *,
     atol: float = 1e-6,
     xnp: enp.NpModule = ...,
@@ -271,7 +271,7 @@ def is_orth(
   return diff < atol
 
 
-def is_rot(rot: FloatArray['3 3'], *, atol: float = 1e-6) -> bool:
+def is_rot(rot: FloatArray['3 3'], *, atol: float = 1e-6) -> bool:  # pyrefly: ignore[not-a-type]
   """Checks if a matrix is a valid rotation matrix `SO(3)`.
 
   This is done by checking:

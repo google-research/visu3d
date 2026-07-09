@@ -38,5 +38,5 @@ def subsample(
   idx = rng.choice(array.size, size=num_samples, replace=False)
 
   array = array.flatten()
-  array = array[idx]
+  array = array[idx]  # pyrefly: ignore[bad-assignment]
   return array

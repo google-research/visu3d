@@ -20,12 +20,12 @@ from etils.array_types import Array, FloatArray  # pylint: disable=g-multiple-im
 
 @enp.check_and_normalize_arrays(strict=False)
 def interp_img(
-    img: Array['h w c'],
-    coords: FloatArray['*shape 2'],
+    img: Array['h w c'],  # pyrefly: ignore[not-a-type]
+    coords: FloatArray['*shape 2'],  # pyrefly: ignore[not-a-type]
     *,
     use_hw_coords: bool = False,
     xnp: enp.NpModule = ...,
-) -> FloatArray['*shape c']:
+) -> FloatArray['*shape c']:  # pyrefly: ignore[not-a-type]
   """Bilinear interpolation of coordinates from an image.
 
   The following assumptions are made:

@@ -32,11 +32,11 @@ _T = TypeVar('_T')
 
 
 def append_row(
-    x: FloatArray['*d daxis'],
+    x: FloatArray['*d daxis'],  # pyrefly: ignore[not-a-type]
     value: float,
     *,
     axis: int,  # Axis is required as `row` imply `axis=0` while we want `=-1`
-) -> FloatArray['*d daxis+1']:
+) -> FloatArray['*d daxis+1']:  # pyrefly: ignore[not-a-type]
   """Like `np.append`, but broadcast the value to `x` shape."""
   xnp = enp.get_np_module(x)
   value = xnp.asarray(value)
@@ -57,12 +57,12 @@ def append_row(
 
 
 def interp_points(
-    points: FloatArray['num_points d'],
+    points: FloatArray['num_points d'],  # pyrefly: ignore[not-a-type]
     *,
-    t: Union[int, FloatArray['t']],
+    t: Union[int, FloatArray['t']],  # pyrefly: ignore[not-a-type, unknown-name]
     axis: int = -1,
     **splprep_kwargs,
-) -> FloatArray['t d']:
+) -> FloatArray['t d']:  # pyrefly: ignore[not-a-type]
   """Spline interpolation between x-d Points.
 
   Args:
@@ -102,7 +102,7 @@ def interp_points(
   return points_fine
 
 
-def __sub__(self: _T, translation: FloatArray['... 3']) -> _T:  # pylint: disable=invalid-name
+def __sub__(self: _T, translation: FloatArray['... 3']) -> _T:  # pylint: disable=invalid-name  # pyrefly: ignore[not-a-type]
   """Add `my_obj - array` support, assuming `my_obj + array` exists."""
-  translation = self.xnp.asarray(translation)
+  translation = self.xnp.asarray(translation)  # pyrefly: ignore[missing-attribute]
   return self + (-translation)

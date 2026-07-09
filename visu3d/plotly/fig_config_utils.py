@@ -61,7 +61,7 @@ class FigConfig:
   def replace(self: _T, **kwargs) -> _T:
     # Filter `...` (forwarded from `v3d.make_fig`)
     kwargs = {k: v for k, v in kwargs.items() if v is not ...}
-    return dataclasses.replace(self, **kwargs)
+    return dataclasses.replace(self, **kwargs)  # pyrefly: ignore[bad-specialization]
 
 
 fig_config = FigConfig()
@@ -110,10 +110,10 @@ class TraceConfig:
       if name in kwargs:
         return kwargs[name]
       else:
-        return super(TraceConfig, self).__getattribute__(name)
+        return super(TraceConfig, self).__getattribute__(name)  # pyrefly: ignore[invalid-argument]
 
     init_kwargs = {
-        f.name: _get_attr(f.name) for f in dataclasses.fields(self) if f.init
+        f.name: _get_attr(f.name) for f in dataclasses.fields(self) if f.init  # pyrefly: ignore[bad-argument-type]
     }
     return type(self)(**init_kwargs)
 

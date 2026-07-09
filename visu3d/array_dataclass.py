@@ -38,7 +38,7 @@ class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
 
   """
 
-  __dca_non_init_fields__ = ('fig_config',)
+  __dca_non_init_fields__ = ('fig_config',)  # pyrefly: ignore[bad-assignment]
 
   # Note: Because `FigConfig` is immutable, it is safe to use a shared instance
   # to avoid unecessary copy.
@@ -66,4 +66,4 @@ class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
     fig_config_kwargs = {
         k: v for k, v in fig_config_kwargs.items() if v is not ...
     }
-    return self.replace(fig_config=self.fig_config.replace(**fig_config_kwargs))
+    return self.replace(fig_config=self.fig_config.replace(**fig_config_kwargs))  # pyrefly: ignore[missing-attribute]

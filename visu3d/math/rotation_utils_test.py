@@ -136,6 +136,28 @@ def test_euler_roundtrip(xnp: enp.NpModule, rx: float, ry: float, rz: float):
   np.testing.assert_allclose(rot, rot_v2, atol=1e-6, rtol=1e-7)
 
 
+@enp.testing.parametrize_xnp()
+@pytest.mark.parametrize('ry', [np.pi / 2, -np.pi / 2])
+@pytest.mark.parametrize(
+    'rx,rz',
+    [
+        (0.0, np.pi),
+        (np.pi, 0.0),
+        (1.7, -1.2),
+        (0.3, 0.7),
+        (0.0, np.pi / 2),
+    ],
+)
+def test_euler_roundtrip_at_gimbal_lock(xnp: enp.NpModule, rx, ry, rz):
+  rot = v3d.math.euler_to_rot(
+      x=xnp.asarray(rx), y=xnp.asarray(ry), z=xnp.asarray(rz)
+  )
+  _, ay, _ = v3d.math.rot_to_euler(rot)
+  # Pitch is determined by -R[2, 0], independently of yaw and roll.
+  np.testing.assert_allclose(ay, ry, atol=1e-6)
+  _assert_euler_round_trip(rot, xnp=xnp)
+
+
 def _assert_euler_round_trip(rot, xnp):
   ax, ay, az = v3d.math.rot_to_euler(rot)
   assert enp.lazy.get_xnp(ax) is xnp

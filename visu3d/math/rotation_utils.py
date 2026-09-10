@@ -179,7 +179,6 @@ def rot_to_euler(
   """
   r00 = rot[0, 0]
   # r01 = rot[0, 1]
-  r02 = rot[0, 2]
   r10 = rot[1, 0]
   r11 = rot[1, 1]
   r12 = rot[1, 2]
@@ -192,7 +191,7 @@ def rot_to_euler(
     theta_z = xnp.arctan2(r10, r00)
     theta_x = xnp.arctan2(r21, r22)
   else:  # r20 == +1 / -1
-    sign = +1 if r02 > 0 else -1
+    sign = +1 if r20 < 0 else -1
 
     theta_y = sign * enp.tau / 4
     theta_z = -sign * xnp.arctan2(-r12, r11)

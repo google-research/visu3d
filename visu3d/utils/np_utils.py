@@ -40,14 +40,14 @@ def append_row(
   """Like `np.append`, but broadcast the value to `x` shape."""
   xnp = enp.get_np_module(x)
   value = xnp.asarray(value)
-  if len(value.shape) == 0:  # pylint: disable=g-explicit-length-test
+  if len(value.shape) == 0:  # pylint: disable=g-explicit-length-test  # pyrefly: ignore[missing-attribute]
     shape = list(x.shape)
     shape[axis] = 1
     value = xnp.broadcast_to(value, shape)
-  elif len(value.shape) == 1:
+  elif len(value.shape) == 1:  # pyrefly: ignore[bad-argument-type]
     # TODO(epot): support actual row: append_row(x, [0, 0, 0, 1]). Might require
     # adding a `broadcast_to` which support arbitrary array.
-    assert x.shape[axis] == len(value)
+    assert x.shape[axis] == len(value)  # pyrefly: ignore[bad-argument-type]
     raise NotImplementedError()
   else:
     raise ValueError(

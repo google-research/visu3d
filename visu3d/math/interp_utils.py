@@ -62,6 +62,12 @@ def interp_img(
   x = coords[..., 0].reshape((-1,))  # w
   y = coords[..., 1].reshape((-1,))  # h
 
+  # Clip to image bounds before computing offsets and integer indices so
+  # distant finite queries stay stable. Keep pixel centers inside the bounds
+  # to preserve their existing coordinate-gradient convention.
+  x = xnp.clip(x, 0, w)
+  y = xnp.clip(y, 0, h)
+
   # For each query coordinates, extract the 4 corners coordinates
   # Pixel coordinates are centered, so keep both `_i` (integer index) and
   # `_f` (float centered coordinates).

@@ -124,7 +124,8 @@ class Transform(TransformBase):
     * Camera coordinates: See `v3d.CameraSpec` docstring.
 
     The transformation assume the `width` dimension of the camera is parallel
-    to the floor of the world.
+    to the floor of the world. When looking exactly along the world z axis,
+    the world y axis is used to resolve the otherwise unspecified camera roll.
 
     Args:
       pos: Origin position
@@ -561,6 +562,14 @@ def _get_r_look_at(
   # The width of the cam is parallel to the ground (prependicular to z), so
   # use cross-product.
   cam_w = xnp.cross(cam_forward, world_up)
+  # Looking along world up leaves roll unspecified. Use world y in that case.
+  alternate_up = xnp.asarray([0, 1.0, 0], dtype=cam_forward.dtype)
+  alternate_up = xnp.broadcast_to(alternate_up, cam_forward.shape)
+  cam_w = xnp.where(
+      xnp.all(cam_w == 0, axis=-1, keepdims=True),
+      xnp.cross(cam_forward, alternate_up),
+      cam_w,
+  )
   cam_w = enp.linalg.normalize(cam_w)
 
   # Similarly, the height is pointing downward.

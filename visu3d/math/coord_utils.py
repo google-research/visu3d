@@ -60,7 +60,9 @@ def carthesian_to_spherical(
   r = enp.compat.norm(point3d, axis=-1)
   theta = xnp.arctan2(point3d[..., 1], point3d[..., 0])  # (-tau/2, tau/2)
   theta = theta % enp.tau  # Normalize azimuth (-tau/2, tau/2) -> (0, tau)
-  phi = xnp.arccos(point3d[..., 2] / r)  # elevation (0, tau/2)
+  # Avoid losing small polar angles when z / r rounds to +/-1.
+  rho = enp.compat.norm(point3d[..., :2], axis=-1)
+  phi = xnp.arctan2(rho, point3d[..., 2])  # elevation (0, tau/2)
 
   return _SphericalCoords(r, theta, phi)
 

@@ -57,3 +57,42 @@ def test_spherical_coordinates(xnp: enp.NpModule, value, shape):
   assert pts_round_trip.shape == shape + (3,)
 
   np.testing.assert_allclose(pts, pts_round_trip, atol=1e-6)
+
+
+@enp.testing.parametrize_xnp()
+@pytest.mark.parametrize(
+    'point',
+    [
+        [1e-4, 0.0, 1.0],
+        [1e-4, 0.0, -1.0],
+        [-1e-4, 2e-4, 1.0],
+        [-1e-4, 2e-4, -1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, -1.0],
+        [1.0, 2.0, 0.0],
+    ],
+)
+def test_spherical_coordinates_near_poles(xnp: enp.NpModule, point):
+  pts = xnp.asarray(np.array(point, dtype=np.float32))
+  spherical = v3d.math.carthesian_to_spherical(pts)
+  expected_phi = np.arctan2(np.hypot(point[0], point[1]), point[2])
+
+  np.testing.assert_allclose(spherical.phi, expected_phi, rtol=1e-6, atol=1e-7)
+  reconstructed = v3d.math.spherical_to_carthesian(*spherical)
+  np.testing.assert_allclose(reconstructed, point, rtol=1e-6, atol=3e-7)
+
+
+@pytest.mark.parametrize('z', [1.0, -1.0])
+def test_spherical_polar_angle_gradient_near_poles(z):
+  jax = enp.lazy.jax
+  point = np.array([1e-4, 2e-4, z], dtype=np.float32)
+  grad_phi = jax.jit(
+      jax.grad(lambda p: v3d.math.carthesian_to_spherical(p).phi)
+  )(point)
+  x, y, z = point.astype(np.float64)
+  rho = np.hypot(x, y)
+  r_squared = rho**2 + z**2
+  expected = np.array([x * z / rho, y * z / rho, -rho]) / r_squared
+
+  assert np.isfinite(grad_phi).all()
+  np.testing.assert_allclose(grad_phi, expected, rtol=1e-6, atol=1e-7)

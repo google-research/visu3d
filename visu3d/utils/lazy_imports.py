@@ -22,7 +22,7 @@ from visu3d.utils import py_utils
 
 if typing.TYPE_CHECKING:
   # Plotly is an optional (but strongly recommended on colab) dependency
-  import IPython  # pytype: disable=import-error
+  import IPython  # pyrefly: ignore[missing-import]
   from plotly import graph_objects as plotly_go
   from plotly import basedatatypes as plotly_base
   import scipy

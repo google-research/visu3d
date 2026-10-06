@@ -52,8 +52,8 @@ class DataclassArray(dca.DataclassArray, fig_utils.Visualizable):
   def replace_fig_config(
       self: DcT,
       *,
-      name: str = ...,  # pytype: disable=annotation-type-mismatch
-      num_samples: int = ...,  # pytype: disable=annotation-type-mismatch
+      name: str = ...,  # pyrefly: ignore[bad-function-definition]
+      num_samples: int = ...,  # pyrefly: ignore[bad-function-definition]
       **kwargs: Any,
   ) -> DcT:
     """Returns a copy of self with figure params overwritten."""

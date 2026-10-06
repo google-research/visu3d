@@ -202,8 +202,8 @@ class Camera(array_dataclass.DataclassArray):
   def replace_fig_config(  # pylint: disable=useless-parent-delegation
       self: DcT,
       *,
-      name: str = ...,  # pytype: disable=annotation-type-mismatch
-      scale: float = ...,  # pytype: disable=annotation-type-mismatch
+      name: str = ...,  # pyrefly: ignore[bad-function-definition]
+      scale: float = ...,  # pyrefly: ignore[bad-function-definition]
       **kwargs: Any,
   ) -> DcT:
     """Returns a copy of self with figure params overwritten."""

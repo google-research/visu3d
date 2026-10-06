@@ -94,11 +94,11 @@ def make_fig(
     *data: VisualizableArg,
     # Those arguments match `v3d.fig_config` options
     # They are duplicated for discoverability / auto-complete
-    show_zero: bool = ...,  # pytype: disable=annotation-type-mismatch
-    num_samples_point3d: Optional[int] = ...,  # pytype: disable=annotation-type-mismatch
-    num_samples_point2d: Optional[int] = ...,  # pytype: disable=annotation-type-mismatch
-    num_samples_ray: Optional[int] = ...,  # pytype: disable=annotation-type-mismatch
-    cam_scale: float = ...,  # pytype: disable=annotation-type-mismatch
+    show_zero: bool = ...,  # pyrefly: ignore[bad-function-definition]
+    num_samples_point3d: Optional[int] = ...,  # pyrefly: ignore[bad-function-definition]
+    num_samples_point2d: Optional[int] = ...,  # pyrefly: ignore[bad-function-definition]
+    num_samples_ray: Optional[int] = ...,  # pyrefly: ignore[bad-function-definition]
+    cam_scale: float = ...,  # pyrefly: ignore[bad-function-definition]
     **fig_config_kwargs: Any,
 ) -> go.Figure:
   """Returns the figure from the given data.
@@ -208,7 +208,7 @@ def make_traces(
               seed=0,
           )
         val = val.as_np()
-      sub_traces = val.make_traces()  # pytype: disable=attribute-error
+      sub_traces = val.make_traces()  # pyrefly: ignore[missing-attribute]
       # Normalizing trace
       if isinstance(sub_traces, plotly_base.BaseTraceType):
         sub_traces = [sub_traces]

@@ -55,7 +55,7 @@ class TraceConfig(plotly.TraceConfig):
     scale: The scale of the camera.
   """
 
-  scale: float = fig_config_utils.LazyValue(  # pytype: disable=annotation-type-mismatch
+  scale: float = fig_config_utils.LazyValue(  # pyrefly: ignore[bad-assignment]
       lambda fig_config: fig_config.cam_scale
   )
 
@@ -237,8 +237,8 @@ class CameraSpec(array_dataclass.DataclassArray):  # (abc.ABC):
   def replace_fig_config(  # pylint: disable=useless-parent-delegation
       self: DcT,
       *,
-      name: str = ...,  # pytype: disable=annotation-type-mismatch
-      scale: float = ...,  # pytype: disable=annotation-type-mismatch
+      name: str = ...,  # pyrefly: ignore[bad-function-definition]
+      scale: float = ...,  # pyrefly: ignore[bad-function-definition]
       **kwargs: Any,
   ) -> DcT:
     """Returns a copy of self with figure params overwritten."""

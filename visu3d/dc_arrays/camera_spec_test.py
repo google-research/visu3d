@@ -180,7 +180,7 @@ def test_camera_points(
 
   # Round-trip with depth=None project to z=1
   px = px.replace(depth=None)
-  round_trip_points3d = spec.cam_from_px @ px  # pyrefly: ignore[unsupported-operation]
+  round_trip_points3d = spec.cam_from_px @ px
   assert isinstance(round_trip_points3d, v3d.Point3d)
   assert round_trip_points3d.shape == spec_shape + (5,)
   np.testing.assert_allclose(

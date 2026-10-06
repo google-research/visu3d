@@ -47,7 +47,7 @@ def test_to_xyz_dict(xnp: enp.NpModule):
           ],
           pattern='axis_{}',
           names='uvw',
-          axis=0,  # pytype: disable=wrong-arg-types
+          axis=0,
       ),
       {
           'axis_u': xnp.asarray([0, 1, 2]),

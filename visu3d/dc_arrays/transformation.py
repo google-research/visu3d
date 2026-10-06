@@ -238,7 +238,7 @@ class Transform(TransformBase):
       # Unfortunately, Jax don't have an easy API to conditionally
       # raise error within a `jax.jit` function
       # This won't have any effect when the function is traced.
-      from jax.experimental import checkify  # pytype: disable=import-error  # pylint: disable=g-import-not-at-top
+      from jax.experimental import checkify  # pylint: disable=g-import-not-at-top  # pyrefly: ignore[missing-import]
 
       checkify.check(global_count[0] == 3, msg=_err_msg())
 
@@ -467,7 +467,7 @@ def custom_transform(
   return decorated
 
 
-class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=invalid-function-definition
+class CustomTransform(TransformBase, Generic[DcT, _T]):
   """Custom transformation method wrapper.
 
   Attributes:
@@ -476,7 +476,7 @@ class CustomTransform(TransformBase, Generic[DcT, _T]):  # pytype: disable=inval
       `custom_tr @ x` is equivalent of calling `self.method(x)`
   """
 
-  self_: DcT = dca.field(  # pytype: disable=annotation-type-mismatch
+  self_: DcT = dca.field(  # pyrefly: ignore[bad-assignment]
       shape=(),
       dtype=dca.DataclassArray,
   )

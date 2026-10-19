@@ -59,7 +59,7 @@ class TraceNamer:
     # In the future, could have more complicated heuristics based on cases
     for trace in traces:
       id_suffix = f' {curr_id}' if curr_id else ''
-      if not trace.name:
+      if not trace.name:  # pyrefly: ignore[missing-attribute]
         trace.name = f'{name}{id_suffix}'
       # Set the group so all items are triggered together
       trace.legendgroup = f'{name}{id_suffix}'

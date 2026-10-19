@@ -457,7 +457,7 @@ def _show_legend(traces: List[plotly_base.BaseTraceType]) -> bool:
   """Returns `False` if only a single trace has a legend."""
   # Should also group legend per group ?
   # Default: `t.showlegend is None` -> show legend
-  return len([t for t in traces if t.showlegend is not False]) > 1  # pylint: disable=g-bool-id-comparison
+  return len([t for t in traces if t.showlegend is not False]) > 1  # pylint: disable=g-bool-id-comparison  # pyrefly: ignore[missing-attribute]
 
 
 def to_xyz_dict(
